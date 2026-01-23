@@ -7,9 +7,14 @@ import (
 )
 
 type Config struct {
-	Port         string
-	DBConnString string
-	JWTSecret    string
+	Port       string
+	JWTSecret  string
+	DBHost     string
+	DBPort     string
+	DBUser     string
+	DBPassword string
+	DBName     string
+	LogLevel   string
 }
 
 func Load() *Config {
@@ -20,9 +25,14 @@ func Load() *Config {
 	}
 
 	return &Config{
-		Port:         getEnv("PORT", "8080"),
-		DBConnString: getEnv("DB_CONN_STRING", "user:password@tcp(localhost:3306)/dbname"),
-		JWTSecret:    getEnv("JWT_SECRET", "SecretKey"),
+		Port:       getEnv("PORT", "8080"),
+		JWTSecret:  getEnv("JWT_SECRET", "SecretKey"),
+		DBHost:     getEnv("DB_HOST", "localhost"),
+		DBPort:     getEnv("DB_PORT", "5432"),
+		DBUser:     getEnv("DB_USER", "postgres"),
+		DBPassword: getEnv("DB_PASSWORD", "password"),
+		DBName:     getEnv("DB_NAME", "hopspotdb"),
+		LogLevel:   getEnv("LOG_LEVEL", "INFO"),
 	}
 }
 
