@@ -7,14 +7,23 @@ import (
 )
 
 type Config struct {
-	Port       string
-	JWTSecret  string
+	// Server
+	Port     string
+	LogLevel string
+
+	// JWT
+	JWTSecret string
+
+	// Database
 	DBHost     string
 	DBPort     string
 	DBUser     string
 	DBPassword string
 	DBName     string
-	LogLevel   string
+
+	// TODO: MinIo / S3 Configs
+
+	// TODO: Firebase Configs
 }
 
 func Load() *Config {
