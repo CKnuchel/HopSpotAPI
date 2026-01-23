@@ -1,9 +1,8 @@
 package main
 
-func init() {
-
-}
+import "hopSpotAPI/internal/config"
 
 func main() {
-
+	cfg := config.Load()
+	println("Server starting on port:", cfg.Port)
 }
