@@ -7,11 +7,9 @@ import (
 )
 
 type Config struct {
-	// Api Port
-	Port string
-
-	// Database Connection String
+	Port         string
 	DBConnString string
+	JWTSecret    string
 }
 
 func Load() *Config {
@@ -24,6 +22,7 @@ func Load() *Config {
 	return &Config{
 		Port:         getEnv("PORT", "8080"),
 		DBConnString: getEnv("DB_CONN_STRING", "user:password@tcp(localhost:3306)/dbname"),
+		JWTSecret:    getEnv("JWT_SECRET", "SecretKey"),
 	}
 }
 
