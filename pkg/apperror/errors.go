@@ -11,5 +11,7 @@ var (
 
 // Authentication-related errors
 var (
-	ErrInvalidToken = errors.New("invalid token")
+	ErrInvalidToken       = errors.New("invalid token")
+	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrAccountDeactivated = errors.New("account is deactivated")
 )

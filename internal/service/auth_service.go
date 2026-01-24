@@ -92,5 +92,35 @@ func (s authService) Register(ctx context.Context, req *requests.RegisterRequest
 }
 
 func (s authService) Login(ctx context.Context, req *requests.LoginRequest) (*responses.LoginResponse, error) {
-	panic("implement me")
+
+	// Find user by email
+	user, err := s.userRepo.FindByEmail(ctx, req.Email)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, apperror.ErrInvalidCredentials
+	}
+
+	// Check if the user is active
+	if !user.IsActive {
+		return nil, apperror.ErrAccountDeactivated
+	}
+
+	// Verify password
+	if utils.CheckPasswordHash(req.Password, user.PasswordHast) {
+		return nil, apperror.ErrInvalidCredentials
+	}
+
+	// Generating JWT token
+	token, err := utils.GenerateJWT(user, &s.config)
+	if err != nil {
+		return nil, err
+	}
+
+	// Preparing response
+	return &responses.LoginResponse{
+		User:  mapper.UserToResponse(user),
+		Token: token,
+	}, nil
 }
