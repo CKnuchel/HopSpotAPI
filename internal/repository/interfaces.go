@@ -38,6 +38,17 @@ type BenchRepository interface {
 	UpdateFields(ctx context.Context, id uint, fields map[string]interface{}) error
 }
 
+type PhotoRepository interface {
+	Create(ctx context.Context, photo *domain.Photo) error
+	FindByID(ctx context.Context, id uint) (*domain.Photo, error)
+	Delete(ctx context.Context, id uint) error
+
+	FindByBenchID(ctx context.Context, benchID uint) ([]domain.Photo, error)
+	CountByBenchID(ctx context.Context, benchID uint) (int64, error)
+	SetMainPhoto(ctx context.Context, photoID uint, benchID uint) error
+	GetMainPhoto(ctx context.Context, benchID uint) (*domain.Photo, error)
+}
+
 type UserFilter struct {
 	Page     int
 	Limit    int
