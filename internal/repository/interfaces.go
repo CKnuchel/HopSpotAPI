@@ -49,6 +49,15 @@ type PhotoRepository interface {
 	GetMainPhoto(ctx context.Context, benchID uint) (*domain.Photo, error)
 }
 
+type VisitRepository interface {
+	Create(ctx context.Context, visit *domain.Visit) error
+	FindByID(ctx context.Context, id uint) (*domain.Visit, error)
+	Delete(ctx context.Context, id uint) error
+
+	FindByUserID(ctx context.Context, userID uint, filter VisitFilter) ([]domain.Visit, int64, error)
+	CountByBenchID(ctx context.Context, benchID uint) (int64, error)
+}
+
 type UserFilter struct {
 	Page     int
 	Limit    int
@@ -76,4 +85,11 @@ type BenchFilter struct {
 
 	Lat *float64
 	Lon *float64
+}
+
+type VisitFilter struct {
+	Page      int
+	Limit     int
+	SortOrder string // asc, desc
+	BenchID   *uint
 }
