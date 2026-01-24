@@ -1,6 +1,8 @@
 package responses
 
-import "time"
+import (
+	"time"
+)
 
 type UserResponse struct {
 	ID          string    `json:"id"`
@@ -11,5 +13,6 @@ type UserResponse struct {
 }
 
 type LoginResponse struct {
-	Token string `json:"token"`
+	User  UserResponse `json:"user"`
+	Token string       `json:"token"`
 }

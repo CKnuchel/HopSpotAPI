@@ -2,10 +2,13 @@ package service
 
 import (
 	"context"
+	"hopSpotAPI/internal/config"
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/dto/responses"
+	"hopSpotAPI/internal/mapper"
 	"hopSpotAPI/internal/repository"
 	"hopSpotAPI/pkg/apperror"
+	"hopSpotAPI/pkg/utils"
 )
 
 // AuthService Interface defining authentication service methods
@@ -18,15 +21,15 @@ type AuthService interface {
 type authService struct {
 	userRepo       repository.UserRepository
 	invitationRepo repository.InvitationRepository
-	jwtSecret      string
+	config         config.Config
 }
 
 // NewAuthService Constructor
-func NewAuthService(userRepo repository.UserRepository, invitationRepo repository.InvitationRepository, jwtSecret string) AuthService {
+func NewAuthService(userRepo repository.UserRepository, invitationRepo repository.InvitationRepository, config config.Config) AuthService {
 	return &authService{
 		userRepo:       userRepo,
 		invitationRepo: invitationRepo,
-		jwtSecret:      jwtSecret,
+		config:         config,
 	}
 }
 
@@ -54,7 +57,38 @@ func (s authService) Register(ctx context.Context, req *requests.RegisterRequest
 	}
 
 	// Hashing password
-	panic("implement me") //TODO: Implement password hashing and co
+	hashedPassword, err := utils.HashPassword(req.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	// Mapping DTO -> User domain model
+	user := mapper.RegisterRequestToUser(req)
+	user.PasswordHast = hashedPassword
+	user.Role = "user" // TODO: Constants or Enums for roles
+	user.IsActive = true
+
+	// Creating user
+	if err := s.userRepo.Create(ctx, user); err != nil {
+		return nil, err
+	}
+
+	// Mark invitation as redeemed
+	if err := s.invitationRepo.MarkAsRedeemed(ctx, invitation.ID, user.ID); err != nil {
+		return nil, err
+	}
+
+	// Generating JWT token
+	token, err := utils.GenerateJWT(user, &s.config)
+	if err != nil {
+		return nil, err
+	}
+
+	// Preparing response
+	return &responses.LoginResponse{
+		User:  mapper.UserToResponse(user),
+		Token: token,
+	}, nil
 }
 
 func (s authService) Login(ctx context.Context, req *requests.LoginRequest) (*responses.LoginResponse, error) {
