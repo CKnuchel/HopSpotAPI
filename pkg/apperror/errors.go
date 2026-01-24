@@ -2,8 +2,14 @@ package apperror
 
 import "errors"
 
+// User-related errors
 var (
 	ErrEmailAlreadyExists            = errors.New("email already exists")
 	ErrInvalidInvitationCode         = errors.New("invalid invitation code")
 	ErrInvitationCodeAlreadyRedeemed = errors.New("invitation code already redeemed")
+)
+
+// Authentication-related errors
+var (
+	ErrInvalidToken = errors.New("invalid token")
 )

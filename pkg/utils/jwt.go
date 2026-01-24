@@ -3,6 +3,7 @@ package utils
 import (
 	"hopSpotAPI/internal/config"
 	"hopSpotAPI/internal/domain"
+	"hopSpotAPI/pkg/apperror"
 	"strconv"
 	"time"
 
@@ -40,6 +41,23 @@ func GenerateJWT(user *domain.User, cfg *config.Config) (string, error) {
 	return signedToken, nil
 }
 
-func ValidateJWT(tokenString string, jwtSecret string) (string, error) {
-	panic("TODO: implement ValidateJWT")
+func ValidateJWT(tokenString, secret string) (*JWTClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		// Check the signing method
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, apperror.ErrInvalidToken
+		}
+		return []byte(secret), nil
+	})
+
+	if err != nil {
+		return nil, apperror.ErrInvalidToken
+	}
+
+	claims, ok := token.Claims.(*JWTClaims)
+	if !ok || !token.Valid {
+		return nil, apperror.ErrInvalidToken
+	}
+
+	return claims, nil
 }
