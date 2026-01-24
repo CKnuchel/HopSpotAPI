@@ -2,6 +2,8 @@ package config
 
 import (
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -12,7 +14,10 @@ type Config struct {
 	LogLevel string
 
 	// JWT
-	JWTSecret string
+	JWTSecret   string
+	JWTExpire   time.Duration
+	JWTIssuer   string
+	JWTAudience string
 
 	// Database
 	DBHost     string
@@ -33,15 +38,23 @@ func Load() *Config {
 		panic("Error loading .env file")
 	}
 
+	jwtSeconds, err := strconv.Atoi(getEnv("JWT_EXPIRE_SECONDS", "3600"))
+	if err != nil {
+		jwtSeconds = 3600
+	}
+
 	return &Config{
-		Port:       getEnv("PORT", "8080"),
-		JWTSecret:  getEnv("JWT_SECRET", "SecretKey"),
-		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBPort:     getEnv("DB_PORT", "5432"),
-		DBUser:     getEnv("DB_USER", "postgres"),
-		DBPassword: getEnv("DB_PASSWORD", "password"),
-		DBName:     getEnv("DB_NAME", "hopspotdb"),
-		LogLevel:   getEnv("LOG_LEVEL", "INFO"),
+		Port:        getEnv("PORT", "8080"),
+		LogLevel:    getEnv("LOG_LEVEL", "INFO"),
+		DBHost:      getEnv("DB_HOST", "localhost"),
+		DBPort:      getEnv("DB_PORT", "5432"),
+		DBUser:      getEnv("DB_USER", "postgres"),
+		DBPassword:  getEnv("DB_PASSWORD", "password"),
+		DBName:      getEnv("DB_NAME", "dbname"),
+		JWTSecret:   getEnv("JWT_SECRET", "supersecretkey"),
+		JWTExpire:   time.Duration(jwtSeconds) * time.Second,
+		JWTAudience: getEnv("JWT_AUDIENCE", "yourapp.com"),
+		JWTIssuer:   getEnv("JWT_ISSUER,", "yourapp.com"),
 	}
 }
 
