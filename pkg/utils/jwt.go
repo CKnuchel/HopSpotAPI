@@ -19,7 +19,7 @@ type JWTClaims struct {
 func GenerateJWT(user *domain.User, cfg *config.Config) (string, error) {
 	claims := JWTClaims{
 		Email: user.Email,
-		Role:  user.Role,
+		Role:  string(user.Role),
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    cfg.JWTIssuer,
 			Subject:   strconv.Itoa(int(user.ID)),
