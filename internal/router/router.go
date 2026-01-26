@@ -48,6 +48,7 @@ func Setup(authHandler *handler.AuthHandler,
 				bench.GET("/:id", benchHandler.GetByID)
 				bench.POST("", benchHandler.Create)
 				bench.PATCH("/:id", benchHandler.Update)
+				bench.DELETE("/:id", benchHandler.Delete)
 			}
 		}
 	}

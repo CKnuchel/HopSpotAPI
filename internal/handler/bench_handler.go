@@ -113,4 +113,25 @@ func (h *BenchHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": result})
 }
 
-// DELETE /api/v1/benches/:id - TODO: Delete Bench
+// DELETE /api/v1/benches/:id
+func (h *BenchHandler) Delete(c *gin.Context) {
+	// JWT Claims
+	userId := c.MustGet("userId").(uint)
+	userRole := c.MustGet("userRole").(domain.Role)
+	isAdmin := userRole == domain.RoleAdmin
+
+	// Request data
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid bench ID"})
+		return
+	}
+
+	err = h.benchService.Delete(c.Request.Context(), uint(id), userId, isAdmin)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update bench"})
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
