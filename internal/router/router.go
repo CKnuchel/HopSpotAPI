@@ -10,6 +10,7 @@ import (
 func Setup(authHandler *handler.AuthHandler,
 	userHandler *handler.UserHandler,
 	benchHandler *handler.BenchHandler,
+	visitHandler *handler.VisitHandler,
 	authMiddleware *middleware.AuthMiddleware) *gin.Engine {
 	router := gin.Default()
 
@@ -49,6 +50,16 @@ func Setup(authHandler *handler.AuthHandler,
 				bench.POST("", benchHandler.Create)
 				bench.PATCH("/:id", benchHandler.Update)
 				bench.DELETE("/:id", benchHandler.Delete)
+
+				// Visit count by bench ID
+				bench.GET("/:id/visits/count", visitHandler.GetVisitCountByBenchID)
+			}
+
+			// Visit routes -- TODO: implement
+			visits := protected.Group("/visits")
+			{
+				visits.GET("", visitHandler.ListVisits)
+				visits.POST("", visitHandler.CreateVisit)
 			}
 		}
 	}
