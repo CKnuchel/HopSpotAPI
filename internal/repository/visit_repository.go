@@ -21,7 +21,7 @@ func (r *visitRepository) Create(ctx context.Context, visit *domain.Visit) error
 
 func (r *visitRepository) FindByID(ctx context.Context, id uint) (*domain.Visit, error) {
 	var visit domain.Visit
-	if err := r.db.WithContext(ctx).First(&visit, id).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Bench").Preload("User").First(&visit, id).Error; err != nil {
 		return nil, err
 	}
 	return &visit, nil
