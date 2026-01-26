@@ -64,6 +64,25 @@ func (h *BenchHandler) GetByID(c *gin.Context) {
 }
 
 // POST /api/v1/benches - TODO: Create Bench
+func (h *BenchHandler) Create(c *gin.Context) {
+	// JWT Claims
+	userId := c.MustGet("userId").(uint)
+
+	// Request data
+	var req requests.CreateBenchRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result, err := h.benchService.Create(c.Request.Context(), &req, userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create bench"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, result)
+}
 
 // PATCH /api/v1/benches/:id
 func (h *BenchHandler) Update(c *gin.Context) {
