@@ -22,11 +22,17 @@ func (r invitationRepository) Create(ctx context.Context, code *domain.Invitatio
 
 func (r invitationRepository) FindByID(ctx context.Context, id uint) (*domain.InvitationCode, error) {
 	var code domain.InvitationCode
-	if err := r.db.WithContext(ctx).First(&code, id).Error; err != nil {
+	err := r.db.WithContext(ctx).First(&code, id).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &code, nil
 }
+
 func (r invitationRepository) Update(ctx context.Context, code *domain.InvitationCode) error {
 	return r.db.WithContext(ctx).Save(code).Error
 }
@@ -37,7 +43,12 @@ func (r invitationRepository) Delete(ctx context.Context, id uint) error {
 
 func (r invitationRepository) FindByCode(ctx context.Context, code string) (*domain.InvitationCode, error) {
 	var invitationCode domain.InvitationCode
-	if err := r.db.WithContext(ctx).Where("code = ?", code).First(&invitationCode).Error; err != nil {
+	err := r.db.WithContext(ctx).Where("code = ?", code).First(&invitationCode).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &invitationCode, nil
@@ -81,6 +92,8 @@ func (r invitationRepository) FindAll(ctx context.Context, filter InvitationFilt
 }
 
 func (r invitationRepository) MarkAsRedeemed(ctx context.Context, codeID uint, userID uint) error {
-	return r.db.WithContext(ctx).Model(&domain.InvitationCode{}).Where("id = ?", codeID).
-		Updates(map[string]interface{}{"redeemed_by": userID, "redeemed_at": gorm.Expr("NOW()")}).Error
+	return r.db.WithContext(ctx).
+		Model(&domain.InvitationCode{}).
+		Where("id = ?", codeID).
+		Update("redeemed_by", userID).Error
 }

@@ -65,7 +65,7 @@ func (s authService) Register(ctx context.Context, req *requests.RegisterRequest
 
 	// Mapping DTO -> User domain model
 	user := mapper.RegisterRequestToUser(req)
-	user.PasswordHast = hashedPassword
+	user.PasswordHash = hashedPassword
 	user.Role = domain.RoleUser // Default role
 	user.IsActive = true
 
@@ -109,7 +109,7 @@ func (s authService) Login(ctx context.Context, req *requests.LoginRequest) (*re
 	}
 
 	// Verify password
-	if utils.CheckPasswordHash(req.Password, user.PasswordHast) {
+	if utils.CheckPasswordHash(req.Password, user.PasswordHash) {
 		return nil, apperror.ErrInvalidCredentials
 	}
 

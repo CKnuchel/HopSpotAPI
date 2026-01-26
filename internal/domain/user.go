@@ -5,7 +5,7 @@ import "gorm.io/gorm"
 type User struct {
 	*gorm.Model
 	Email        string  `gorm:"type:varchar(255);unique_index" json:"email"`
-	PasswordHast string  `gorm:"type:varchar(255)" json:"-"`
+	PasswordHash string  `gorm:"type:varchar(255)" json:"-"`
 	DisplayName  string  `gorm:"type:varchar(255)" json:"display_name"`
 	Role         Role    `gorm:"type:varchar(20);not null;default:'user'" json:"role"`
 	FcmToken     *string `gorm:"type:varchar(255)" json:"fcm_token"`
