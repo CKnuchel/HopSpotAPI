@@ -11,15 +11,15 @@ import (
 )
 
 type JWTClaims struct {
-	Email string `json:"email"`
-	Role  string `json:"role"`
+	Email string      `json:"email"`
+	Role  domain.Role `json:"role"`
 	jwt.RegisteredClaims
 }
 
 func GenerateJWT(user *domain.User, cfg *config.Config) (string, error) {
 	claims := JWTClaims{
 		Email: user.Email,
-		Role:  string(user.Role),
+		Role:  user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    cfg.JWTIssuer,
 			Subject:   strconv.Itoa(int(user.ID)),
