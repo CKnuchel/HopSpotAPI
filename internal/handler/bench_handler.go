@@ -63,7 +63,7 @@ func (h *BenchHandler) GetByID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": bench})
 }
 
-// POST /api/v1/benches - TODO: Create Bench
+// POST /api/v1/benches
 func (h *BenchHandler) Create(c *gin.Context) {
 	// JWT Claims
 	userId := c.MustGet("userId").(uint)
