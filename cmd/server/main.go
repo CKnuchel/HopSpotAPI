@@ -3,6 +3,12 @@ package main
 import (
 	"hopSpotAPI/internal/config"
 	"hopSpotAPI/internal/database"
+	"hopSpotAPI/internal/handler"
+	"hopSpotAPI/internal/middleware"
+	"hopSpotAPI/internal/repository"
+	"hopSpotAPI/internal/router"
+	"hopSpotAPI/internal/service"
+	"log"
 )
 
 func main() {
@@ -21,6 +27,25 @@ func main() {
 		panic("Database migration failed: " + err.Error())
 	}
 
-	_ = db // TODO: to avoid unused variable error
-	println("Server starting on port:", cfg.Port)
+	// Repositorys
+	userRepo := repository.NewUserRepository(db)
+	invitation := repository.NewInvitationRepository(db)
+
+	// Services
+	authService := service.NewAuthService(userRepo, invitation, *cfg)
+
+	// Handlers
+	authHandler := handler.NewAuthHandler(authService)
+
+	// Middlewares
+	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
+
+	// Router
+	r := router.Setup(authHandler, authMiddleware)
+
+	// Start
+	log.Printf("Server starting on port %s", cfg.Port)
+	if err := r.Run(":" + cfg.Port); err != nil {
+		log.Fatalf("Server failed: %v", err)
+	}
 }
