@@ -16,5 +16,5 @@ type Bench struct {
 	CreatedBy   uint    `gorm:"type:int;not null;index" json:"createdBy"`
 
 	// Relations - loaded with Preload
-	Creator User `gorm:"foreignKey:CreatedBy;references:ID" json:"creator,omitempty"`
+	Creator User `gorm:"foreignKey:CreatedBy;references:ID" json:"creator"`
 }
