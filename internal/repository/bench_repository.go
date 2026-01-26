@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"hopSpotAPI/internal/domain"
 
 	"gorm.io/gorm"
@@ -22,7 +23,14 @@ func (r benchRepository) Create(ctx context.Context, bench *domain.Bench) error 
 
 func (r benchRepository) FindByID(ctx context.Context, id uint) (*domain.Bench, error) {
 	var bench domain.Bench
-	if err := r.db.WithContext(ctx).First(&bench, id).Error; err != nil {
+	err := r.db.WithContext(ctx).
+		Preload("Creator").
+		First(&bench, id).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &bench, nil

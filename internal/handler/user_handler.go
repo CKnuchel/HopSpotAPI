@@ -2,6 +2,7 @@ package handler
 
 import (
 	"hopSpotAPI/internal/dto/requests"
+	"hopSpotAPI/internal/middleware"
 	"hopSpotAPI/internal/service"
 	"net/http"
 
@@ -18,7 +19,7 @@ func NewUserHandler(userService service.UserService) *UserHandler {
 
 // GET /api/v1/users/me
 func (h *UserHandler) GetProfile(c *gin.Context) {
-	userId := c.MustGet("userID")
+	userId := c.MustGet(middleware.ContextKeyUserID)
 
 	result, err := h.userService.GetProfile(c.Request.Context(), userId.(uint))
 	if err != nil {
@@ -31,7 +32,7 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 
 // PATCH /api/v1/users/me
 func (h *UserHandler) UpdateProfile(c *gin.Context) {
-	userId := c.MustGet("userID")
+	userId := c.MustGet(middleware.ContextKeyUserID)
 
 	var req requests.UpdateProfileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -50,7 +51,7 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 
 // POST /api/v1/users/me/change-password
 func (h *UserHandler) ChangePassword(c *gin.Context) {
-	userId := c.MustGet("userID")
+	userId := c.MustGet(middleware.ContextKeyUserID)
 
 	var req requests.ChangePasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

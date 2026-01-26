@@ -3,6 +3,7 @@ package handler
 import (
 	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/dto/requests"
+	"hopSpotAPI/internal/middleware"
 	"hopSpotAPI/internal/service"
 	"net/http"
 	"strconv"
@@ -66,7 +67,7 @@ func (h *BenchHandler) GetByID(c *gin.Context) {
 // POST /api/v1/benches
 func (h *BenchHandler) Create(c *gin.Context) {
 	// JWT Claims
-	userId := c.MustGet("userId").(uint)
+	userId := c.MustGet(middleware.ContextKeyUserID).(uint)
 
 	// Request data
 	var req requests.CreateBenchRequest
@@ -87,8 +88,8 @@ func (h *BenchHandler) Create(c *gin.Context) {
 // PATCH /api/v1/benches/:id
 func (h *BenchHandler) Update(c *gin.Context) {
 	// JWT Claims
-	userId := c.MustGet("userId").(uint)
-	userRole := c.MustGet("userRole").(domain.Role)
+	userId := c.MustGet(middleware.ContextKeyUserID).(uint)
+	userRole := c.MustGet(middleware.ContextKeyUserRole).(domain.Role)
 	isAdmin := userRole == domain.RoleAdmin
 
 	// Request data
@@ -116,8 +117,8 @@ func (h *BenchHandler) Update(c *gin.Context) {
 // DELETE /api/v1/benches/:id
 func (h *BenchHandler) Delete(c *gin.Context) {
 	// JWT Claims
-	userId := c.MustGet("userId").(uint)
-	userRole := c.MustGet("userRole").(domain.Role)
+	userId := c.MustGet(middleware.ContextKeyUserID).(uint)
+	userRole := c.MustGet(middleware.ContextKeyUserRole).(domain.Role)
 	isAdmin := userRole == domain.RoleAdmin
 
 	// Request data

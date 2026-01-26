@@ -49,9 +49,9 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 		}
 
 		// Storing user information in context
-		c.Set("userEmail", claims.Email)
-		c.Set("userRole", claims.Role)
-		c.Set("userID", uint(userID))
+		c.Set(ContextKeyUserEmail, claims.Email)
+		c.Set(ContextKeyUserRole, claims.Role)
+		c.Set(ContextKeyUserID, uint(userID))
 
 		c.Next()
 	}
