@@ -45,6 +45,7 @@ func Setup(authHandler *handler.AuthHandler,
 			bench := protected.Group("/benches")
 			{
 				bench.GET("", benchHandler.List)
+				bench.GET("/:id", benchHandler.GetByID)
 			}
 		}
 	}

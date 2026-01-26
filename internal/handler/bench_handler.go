@@ -4,6 +4,7 @@ import (
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/service"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,7 +44,23 @@ func (h *BenchHandler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": benches})
 }
 
-// GET /api/v1/benches/:id - TODO: Get Bench by ID
+// GET /api/v1/benches/:id
+func (h *BenchHandler) GetByID(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid bench ID"})
+		return
+	}
+
+	// Call the service to get the bench by ID
+	bench, err := h.benchService.GetByID(c.Request.Context(), uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve bench"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": bench})
+}
 
 // POST /api/v1/benches - TODO: Create Bench
 
