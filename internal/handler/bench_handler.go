@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/service"
 	"net/http"
@@ -64,6 +65,33 @@ func (h *BenchHandler) GetByID(c *gin.Context) {
 
 // POST /api/v1/benches - TODO: Create Bench
 
-// PATCH /api/v1/benches/:id - TODO: Update Bench
+// PATCH /api/v1/benches/:id
+func (h *BenchHandler) Update(c *gin.Context) {
+	// JWT Claims
+	userId := c.MustGet("userId").(uint)
+	userRole := c.MustGet("userRole").(domain.Role)
+	isAdmin := userRole == domain.RoleAdmin
+
+	// Request data
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid bench ID"})
+		return
+	}
+
+	var req requests.UpdateBenchRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result, err := h.benchService.Update(c.Request.Context(), uint(id), &req, userId, isAdmin)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update bench"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": result})
+}
 
 // DELETE /api/v1/benches/:id - TODO: Delete Bench
