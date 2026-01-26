@@ -7,7 +7,7 @@ type User struct {
 	Email        string  `gorm:"type:varchar(255);unique_index" json:"email"`
 	PasswordHast string  `gorm:"type:varchar(255)" json:"-"`
 	DisplayName  string  `gorm:"type:varchar(255)" json:"display_name"`
-	Role         string  `gorm:"type:varchar(50)" json:"role"`
+	Role         Role    `gorm:"type:varchar(20);not null;default:'user'" json:"role"`
 	FcmToken     *string `gorm:"type:varchar(255)" json:"fcm_token"`
 	IsActive     bool    `gorm:"type:boolean" json:"is_active"`
 }
