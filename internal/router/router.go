@@ -9,6 +9,7 @@ import (
 
 func Setup(authHandler *handler.AuthHandler,
 	userHandler *handler.UserHandler,
+	benchHandler *handler.BenchHandler,
 	authMiddleware *middleware.AuthMiddleware) *gin.Engine {
 	router := gin.Default()
 
@@ -40,6 +41,11 @@ func Setup(authHandler *handler.AuthHandler,
 				user.POST("/me/change-password", userHandler.ChangePassword)
 			}
 
+			// Bench routes
+			bench := protected.Group("/benches")
+			{
+				bench.GET("", benchHandler.List)
+			}
 		}
 	}
 

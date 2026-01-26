@@ -30,20 +30,23 @@ func main() {
 	// Repositorys
 	userRepo := repository.NewUserRepository(db)
 	invitation := repository.NewInvitationRepository(db)
+	benchRepo := repository.NewBenchRepository(db)
 
 	// Services
 	authService := service.NewAuthService(userRepo, invitation, *cfg)
 	userService := service.NewUserService(userRepo, *cfg)
+	benchService := service.NewBenchService(benchRepo)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService)
 	userHandler := handler.NewUserHandler(userService)
+	benchHandler := handler.NewBenchHandler(benchService)
 
 	// Middlewares
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
 
 	// Router
-	r := router.Setup(authHandler, userHandler, authMiddleware)
+	r := router.Setup(authHandler, userHandler, benchHandler, authMiddleware)
 
 	// Start
 	log.Printf("Server starting on port %s", cfg.Port)
