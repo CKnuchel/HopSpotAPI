@@ -7,7 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Setup(authHandler *handler.AuthHandler, authMiddleware *middleware.AuthMiddleware) *gin.Engine {
+func Setup(authHandler *handler.AuthHandler,
+	userHandler *handler.UserHandler,
+	authMiddleware *middleware.AuthMiddleware) *gin.Engine {
 	router := gin.Default()
 
 	v1 := router.Group("/api/v1")
@@ -24,7 +26,20 @@ func Setup(authHandler *handler.AuthHandler, authMiddleware *middleware.AuthMidd
 		protected := v1.Group("/")
 		protected.Use(authMiddleware.Authenticate())
 		{
-			protected.POST("/auth/refresh-fcm-token", authHandler.RefreshFCMToken)
+			// Auth routes
+			protectedAuth := protected.Group("/auth")
+			{
+				protectedAuth.POST("refresh-fcm-token", authHandler.RefreshFCMToken)
+			}
+
+			// User routes
+			user := protected.Group("/users")
+			{
+				user.GET("/me", userHandler.GetProfile)
+				user.PATCH("/me", userHandler.UpdateProfile)
+				user.POST("/me/change-password", userHandler.ChangePassword)
+			}
+
 		}
 	}
 

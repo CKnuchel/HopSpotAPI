@@ -33,15 +33,17 @@ func main() {
 
 	// Services
 	authService := service.NewAuthService(userRepo, invitation, *cfg)
+	userService := service.NewUserService(userRepo, *cfg)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService)
+	userHandler := handler.NewUserHandler(userService)
 
 	// Middlewares
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
 
 	// Router
-	r := router.Setup(authHandler, authMiddleware)
+	r := router.Setup(authHandler, userHandler, authMiddleware)
 
 	// Start
 	log.Printf("Server starting on port %s", cfg.Port)
