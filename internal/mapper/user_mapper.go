@@ -21,7 +21,7 @@ func UserToResponse(user *domain.User) responses.UserResponse {
 		ID:          strconv.Itoa(int(user.ID)),
 		Email:       user.Email,
 		DisplayName: user.DisplayName,
-		Role:        user.Role,
+		Role:        string(user.Role),
 		CreatedAt:   user.CreatedAt,
 	}
 }
