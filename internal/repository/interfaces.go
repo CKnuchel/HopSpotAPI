@@ -83,8 +83,9 @@ type BenchFilter struct {
 	MinRating   *int
 	Search      string
 
-	Lat *float64
-	Lon *float64
+	Lat    *float64
+	Lon    *float64
+	Radius *int // in Metern
 }
 
 type VisitFilter struct {
