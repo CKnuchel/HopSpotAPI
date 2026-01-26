@@ -42,3 +42,11 @@ func (h *BenchHandler) List(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": benches})
 }
+
+// GET /api/v1/benches/:id - TODO: Get Bench by ID
+
+// POST /api/v1/benches - TODO: Create Bench
+
+// PATCH /api/v1/benches/:id - TODO: Update Bench
+
+// DELETE /api/v1/benches/:id - TODO: Delete Bench
