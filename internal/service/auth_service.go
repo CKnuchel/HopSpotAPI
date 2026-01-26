@@ -109,7 +109,7 @@ func (s authService) Login(ctx context.Context, req *requests.LoginRequest) (*re
 	}
 
 	// Verify password
-	if utils.CheckPasswordHash(req.Password, user.PasswordHash) {
+	if !utils.CheckPasswordHash(req.Password, user.PasswordHash) {
 		return nil, apperror.ErrInvalidCredentials
 	}
 
