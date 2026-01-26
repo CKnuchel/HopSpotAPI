@@ -24,7 +24,7 @@ func Setup(authHandler *handler.AuthHandler, authMiddleware *middleware.AuthMidd
 		protected := v1.Group("/")
 		protected.Use(authMiddleware.Authenticate())
 		{
-			// Place for protected routes
+			protected.POST("/auth/refresh-fcm-token", authHandler.RefreshFCMToken)
 		}
 	}
 

@@ -4,6 +4,7 @@ import (
 	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/pkg/utils"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -40,10 +41,17 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 			return
 		}
 
+		// Parsing user ID
+		userID, err := strconv.ParseUint(claims.RegisteredClaims.Subject, 10, 64)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid user id"})
+			return
+		}
+
 		// Storing user information in context
 		c.Set("userEmail", claims.Email)
 		c.Set("userRole", claims.Role)
-		c.Set("userID", claims.RegisteredClaims.Subject)
+		c.Set("userID", uint(userID))
 
 		c.Next()
 	}

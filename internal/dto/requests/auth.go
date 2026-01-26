@@ -11,3 +11,7 @@ type LoginRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 }
+
+type RefreshFCMTokenRequest struct {
+	FCMToken string `json:"fcm_token" binding:"required"`
+}

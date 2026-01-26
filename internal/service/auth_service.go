@@ -16,6 +16,7 @@ import (
 type AuthService interface {
 	Register(ctx context.Context, req *requests.RegisterRequest) (*responses.LoginResponse, error)
 	Login(ctx context.Context, req *requests.LoginRequest) (*responses.LoginResponse, error)
+	RefreshFCMToken(ctx context.Context, userId uint, fcmToken string) error
 }
 
 // Implementation
@@ -124,4 +125,23 @@ func (s authService) Login(ctx context.Context, req *requests.LoginRequest) (*re
 		User:  mapper.UserToResponse(user),
 		Token: token,
 	}, nil
+}
+
+func (s authService) RefreshFCMToken(ctx context.Context, userId uint, fcmToken string) error {
+	// Find user by ID
+	user, err := s.userRepo.FindByID(ctx, userId)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return apperror.ErrUserNotFound
+	}
+
+	// Update FCM token
+	user.FcmToken = &fcmToken
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -49,3 +49,28 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, result)
 }
+
+func (h *AuthHandler) RefreshFCMToken(c *gin.Context) {
+	// Get UserId from context (set by auth middleware)
+	userId, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	// Bind request body
+	var req requests.RefreshFCMTokenRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	// Call service to refresh FCM token
+	err := h.authService.RefreshFCMToken(c.Request.Context(), userId.(uint), req.FCMToken)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "FCM token updated successfully"})
+}
