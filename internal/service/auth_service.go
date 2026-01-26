@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"hopSpotAPI/internal/config"
+	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/dto/responses"
 	"hopSpotAPI/internal/mapper"
@@ -65,7 +66,7 @@ func (s authService) Register(ctx context.Context, req *requests.RegisterRequest
 	// Mapping DTO -> User domain model
 	user := mapper.RegisterRequestToUser(req)
 	user.PasswordHast = hashedPassword
-	user.Role = "user" // TODO: Constants or Enums for roles
+	user.Role = domain.RoleUser // Default role
 	user.IsActive = true
 
 	// Creating user
