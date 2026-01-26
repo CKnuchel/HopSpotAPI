@@ -128,18 +128,8 @@ func (s authService) Login(ctx context.Context, req *requests.LoginRequest) (*re
 }
 
 func (s authService) RefreshFCMToken(ctx context.Context, userId uint, fcmToken string) error {
-	// Find user by ID
-	user, err := s.userRepo.FindByID(ctx, userId)
-	if err != nil {
-		return err
-	}
-	if user == nil {
-		return apperror.ErrUserNotFound
-	}
-
 	// Update FCM token
-	user.FcmToken = &fcmToken
-	if err := s.userRepo.Update(ctx, user); err != nil {
+	if err := s.userRepo.UpdateFCMToken(ctx, userId, fcmToken); err != nil {
 		return err
 	}
 
