@@ -22,7 +22,10 @@ func (r invitationRepository) Create(ctx context.Context, code *domain.Invitatio
 
 func (r invitationRepository) FindByID(ctx context.Context, id uint) (*domain.InvitationCode, error) {
 	var code domain.InvitationCode
-	err := r.db.WithContext(ctx).First(&code, id).Error
+	err := r.db.WithContext(ctx).
+		Preload("Creator").
+		Preload("Redeemer").
+		First(&code, id).Error
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
