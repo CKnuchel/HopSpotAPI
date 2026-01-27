@@ -33,3 +33,11 @@ func UsersToResponses(users []domain.User) []responses.UserResponse {
 	}
 	return responsesList
 }
+
+func UsersToResponse(users []domain.User) []responses.UserResponse {
+	responsesList := make([]responses.UserResponse, len(users))
+	for i, user := range users {
+		responsesList[i] = UserToResponse(&user)
+	}
+	return responsesList
+}
