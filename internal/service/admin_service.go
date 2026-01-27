@@ -122,9 +122,41 @@ func (a *adminService) DeleteUser(ctx context.Context, id uint, adminID uint) er
 	return a.userRepo.Delete(ctx, id)
 }
 
-// ListInvitationCodes implements [AdminService].
 func (a *adminService) ListInvitationCodes(ctx context.Context, req *requests.ListInvitationCodesRequest) (*responses.PaginatedInvitationCodesResponse, error) {
-	panic("unimplemented")
+	// Defaults
+	if req.Page <= 0 {
+		req.Page = 1
+	}
+	if req.Limit <= 0 {
+		req.Limit = 50
+	}
+
+	filter := repository.InvitationFilter{
+		Page:       req.Page,
+		Limit:      req.Limit,
+		IsRedeemed: req.IsRedeemed,
+	}
+
+	invitationCodes, total, err := a.invitationCodeRepo.FindAll(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	// Pagination calculation
+	totalPages := int(total) / req.Limit
+	if int(total)%req.Limit > 0 {
+		totalPages++
+	}
+
+	return &responses.PaginatedInvitationCodesResponse{
+		Codes: mapper.InvitationCodesToResponse(invitationCodes),
+		Pagination: responses.PaginationResponse{
+			Page:       req.Page,
+			Limit:      req.Limit,
+			Total:      total,
+			TotalPages: totalPages,
+		},
+	}, nil
 }
 
 // CreateInvitationCode implements [AdminService].
