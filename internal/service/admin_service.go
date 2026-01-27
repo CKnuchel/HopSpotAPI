@@ -8,6 +8,7 @@ import (
 	"hopSpotAPI/internal/mapper"
 	"hopSpotAPI/internal/repository"
 	"hopSpotAPI/pkg/apperror"
+	"hopSpotAPI/pkg/utils"
 )
 
 type AdminService interface {
@@ -161,5 +162,24 @@ func (a *adminService) ListInvitationCodes(ctx context.Context, req *requests.Li
 
 // CreateInvitationCode implements [AdminService].
 func (a *adminService) CreateInvitationCode(ctx context.Context, req *requests.CreateInvitationCodeRequest, adminID uint) (*responses.InvitationCodeResponse, error) {
-	panic("unimplemented")
+	// Generate unique code
+	code, err := utils.GenerateInvitationCode(6)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create invitation code entity
+	invitationCode := &domain.InvitationCode{
+		Code:      code,
+		Comment:   req.Comment,
+		CreatedBy: adminID,
+	}
+
+	// Save to repository
+	if err := a.invitationCodeRepo.Create(ctx, invitationCode); err != nil {
+		return nil, err
+	}
+
+	response := mapper.InvitationCodeToResponse(invitationCode)
+	return &response, nil
 }
