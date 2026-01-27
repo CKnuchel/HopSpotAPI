@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
+	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/dto/responses"
 	"hopSpotAPI/internal/mapper"
 	"hopSpotAPI/internal/repository"
+	"hopSpotAPI/pkg/apperror"
 )
 
 type AdminService interface {
@@ -31,7 +33,6 @@ func NewAdminService(userRepo repository.UserRepository, invitationCodeRepo repo
 	}
 }
 
-// ListUsers implements [AdminService].
 func (a *adminService) ListUsers(ctx context.Context, req *requests.ListUsersRequest) (*responses.PaginatedUsersResponse, error) {
 	// Defaults
 	if req.Page <= 0 {
@@ -76,14 +77,49 @@ func (a *adminService) ListUsers(ctx context.Context, req *requests.ListUsersReq
 	}, nil
 }
 
-// UpdateUser implements [AdminService].
 func (a *adminService) UpdateUser(ctx context.Context, id uint, req *requests.AdminUpdateUserRequest) (*responses.UserResponse, error) {
-	panic("unimplemented")
+	// Get existing user
+	user, err := a.userRepo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, apperror.ErrUserNotFound
+	}
+
+	// Update fields
+	if req.Role != nil {
+		user.Role = domain.Role(*req.Role)
+	}
+
+	if req.IsActive != nil {
+		user.IsActive = *req.IsActive
+	}
+
+	// Update user
+	if err := a.userRepo.Update(ctx, user); err != nil {
+		return nil, err
+	}
+
+	response := mapper.UserToResponse(user)
+	return &response, nil
 }
 
-// DeleteUser implements [AdminService].
 func (a *adminService) DeleteUser(ctx context.Context, id uint, adminID uint) error {
-	panic("unimplemented")
+	// Admin cannot delete themselves
+	if id == adminID {
+		return apperror.ErrCannotDeleteSelf
+	}
+
+	user, err := a.userRepo.FindByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return apperror.ErrUserNotFound
+	}
+
+	return a.userRepo.Delete(ctx, id)
 }
 
 // ListInvitationCodes implements [AdminService].

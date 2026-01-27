@@ -1,5 +1,9 @@
 package requests
 
+import (
+	"hopSpotAPI/internal/domain"
+)
+
 type ListUsersRequest struct {
 	Page     int    `form:"page,default=1" binding:"min=1"`
 	Limit    int    `form:"limit,default=50" binding:"min=1,max=100"`
@@ -9,8 +13,8 @@ type ListUsersRequest struct {
 }
 
 type AdminUpdateUserRequest struct {
-	Role     *string `json:"role" binding:"omitempty,oneof=user admin"`
-	IsActive *bool   `json:"is_active"`
+	Role     *domain.Role `json:"role" binding:"omitempty,oneof=user admin"`
+	IsActive *bool        `json:"is_active"`
 }
 
 type ListInvitationCodesRequest struct {

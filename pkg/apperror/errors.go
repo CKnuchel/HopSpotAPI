@@ -8,6 +8,7 @@ var (
 	ErrUserNotFound                  = errors.New("user not found")
 	ErrInvalidInvitationCode         = errors.New("invalid invitation code")
 	ErrInvitationCodeAlreadyRedeemed = errors.New("invitation code already redeemed")
+	ErrCannotDeleteSelf              = errors.New("admin cannot delete themselves")
 )
 
 // Authentication-related errors
