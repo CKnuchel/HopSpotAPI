@@ -21,7 +21,7 @@ type UpdateBenchRequest struct {
 type ListBenchesRequest struct {
 	Page        int      `form:"page,default=1" binding:"min=1"`
 	Limit       int      `form:"limit,default=50" binding:"min=1,max=100"`
-	SortBy      string   `form:"sort_by,default=created_at" binding:"omitempty,oneof=name rating created_at distance"`
+	SortBy      string   `form:"sort_by,default=created_at" binding:"omitempty,oneof=name rating created_at distance"` // Supported sort values: distance
 	SortOrder   string   `form:"sort_order,default=desc" binding:"omitempty,oneof=asc desc"`
 	HasToilet   *bool    `form:"has_toilet"`
 	HasTrashBin *bool    `form:"has_trash_bin"`
@@ -29,5 +29,5 @@ type ListBenchesRequest struct {
 	Search      string   `form:"search"`
 	Lat         *float64 `form:"lat"`
 	Lon         *float64 `form:"lon"`
-	Radius      *int     `form:"radius"` // in Metern
+	Radius      *int     `form:"radius"` // in meters
 }

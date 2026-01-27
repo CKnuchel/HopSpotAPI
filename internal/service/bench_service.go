@@ -7,6 +7,9 @@ import (
 	"hopSpotAPI/internal/mapper"
 	"hopSpotAPI/internal/repository"
 	"hopSpotAPI/pkg/apperror"
+	"hopSpotAPI/pkg/utils"
+	"math"
+	"sort"
 )
 
 type BenchService interface {
@@ -58,8 +61,8 @@ func (b *benchService) GetByID(ctx context.Context, id uint) (*responses.BenchRe
 	return &response, nil
 }
 
-// List implements BenchService.
-func (b *benchService) List(ctx context.Context, req *requests.ListBenchesRequest) (*responses.PaginatedBenchesResponse, error) {
+func (s *benchService) List(ctx context.Context, req *requests.ListBenchesRequest) (*responses.PaginatedBenchesResponse, error) {
+	// Define Filter
 	filter := repository.BenchFilter{
 		Page:        req.Page,
 		Limit:       req.Limit,
@@ -74,25 +77,52 @@ func (b *benchService) List(ctx context.Context, req *requests.ListBenchesReques
 		Radius:      req.Radius,
 	}
 
-	// Find
-	benches, total, err := b.benchRepo.FindAll(ctx, filter)
+	// Load Benches from Repo
+	benches, _, err := s.benchRepo.FindAll(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
 
-	// Pagination berechnen
-	totalPages := int(total) / req.Limit
-	if int(total)%req.Limit > 0 {
-		totalPages++
+	// If coordinates are given: calculate distance + filter by radius
+	var benchResponses []responses.BenchListResponse
+
+	for _, bench := range benches {
+		resp := mapper.BenchToListResponse(&bench)
+
+		if req.Lat != nil && req.Lon != nil {
+			distance := utils.DistanceMeters(*req.Lat, *req.Lon, bench.Latitude, bench.Longitude)
+
+			// Filter by Radius
+			if req.Radius != nil && distance > float64(*req.Radius) {
+				continue // Skip Benches outside the radius
+			}
+
+			resp.Distance = &distance
+		}
+
+		benchResponses = append(benchResponses, resp)
 	}
 
+	// Order by Distance if requested
+	if req.SortBy == "distance" && req.Lat != nil && req.Lon != nil {
+		sort.Slice(benchResponses, func(i, j int) bool {
+			if req.SortOrder == "desc" {
+				return *benchResponses[i].Distance > *benchResponses[j].Distance
+			}
+			return *benchResponses[i].Distance < *benchResponses[j].Distance
+		})
+	}
+
+	// Pagination
+	filteredTotal := int64(len(benchResponses))
+
 	return &responses.PaginatedBenchesResponse{
-		Benches: mapper.BenchesToListResponse(benches),
+		Benches: benchResponses,
 		Pagination: responses.PaginationResponse{
 			Page:       req.Page,
 			Limit:      req.Limit,
-			Total:      total,
-			TotalPages: totalPages,
+			Total:      filteredTotal,
+			TotalPages: int(math.Ceil(float64(filteredTotal) / float64(req.Limit))),
 		},
 	}, nil
 }
