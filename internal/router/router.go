@@ -11,6 +11,7 @@ func Setup(authHandler *handler.AuthHandler,
 	userHandler *handler.UserHandler,
 	benchHandler *handler.BenchHandler,
 	visitHandler *handler.VisitHandler,
+	adminHandler *handler.AdminHandler,
 	authMiddleware *middleware.AuthMiddleware) *gin.Engine {
 	router := gin.Default()
 
@@ -55,11 +56,23 @@ func Setup(authHandler *handler.AuthHandler,
 				bench.GET("/:id/visits/count", visitHandler.GetVisitCountByBenchID)
 			}
 
-			// Visit routes -- TODO: implement
+			// Visit routes
 			visits := protected.Group("/visits")
 			{
 				visits.GET("", visitHandler.ListVisits)
 				visits.POST("", visitHandler.CreateVisit)
+			}
+
+			// Admin routes
+			admin := protected.Group("/admin")
+			admin.Use(authMiddleware.Authenticate())
+			admin.Use(authMiddleware.RequireAdmin())
+			{
+				admin.GET("/users", adminHandler.ListUsers)
+				admin.PATCH("/users/:id", adminHandler.UpdateUser)
+				admin.DELETE("/users/:id", adminHandler.DeleteUser)
+				admin.GET("/invitation-codes", adminHandler.ListInvitationCodes)
+				admin.POST("/invitation-codes", adminHandler.CreateInvitationCode)
 			}
 		}
 	}

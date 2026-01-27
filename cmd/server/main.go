@@ -32,24 +32,27 @@ func main() {
 	invitation := repository.NewInvitationRepository(db)
 	benchRepo := repository.NewBenchRepository(db)
 	visitRepo := repository.NewVisitRepository(db)
+	invitationRepo := repository.NewInvitationRepository(db)
 
 	// Services
 	authService := service.NewAuthService(userRepo, invitation, *cfg)
 	userService := service.NewUserService(userRepo, *cfg)
 	benchService := service.NewBenchService(benchRepo)
 	visitService := service.NewVisitService(visitRepo)
+	adminService := service.NewAdminService(userRepo, invitationRepo)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService)
 	userHandler := handler.NewUserHandler(userService)
 	benchHandler := handler.NewBenchHandler(benchService)
 	visitHandler := handler.NewVisitHandler(visitService)
+	adminHandler := handler.NewAdminHandler(adminService)
 
 	// Middlewares
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
 
 	// Router
-	r := router.Setup(authHandler, userHandler, benchHandler, visitHandler, authMiddleware)
+	r := router.Setup(authHandler, userHandler, benchHandler, visitHandler, adminHandler, authMiddleware)
 
 	// Start
 	log.Printf("Server starting on port %s", cfg.Port)
