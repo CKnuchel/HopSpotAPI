@@ -33,6 +33,10 @@ func (r *photoRepository) FindByID(ctx context.Context, id uint) (*domain.Photo,
 	return &photo, nil
 }
 
+func (r *photoRepository) Update(ctx context.Context, photo *domain.Photo) error {
+	return r.db.WithContext(ctx).Save(photo).Error
+}
+
 func (r *photoRepository) Delete(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).Delete(&domain.Photo{}, id).Error
 }

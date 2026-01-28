@@ -41,6 +41,7 @@ type BenchRepository interface {
 type PhotoRepository interface {
 	Create(ctx context.Context, photo *domain.Photo) error
 	FindByID(ctx context.Context, id uint) (*domain.Photo, error)
+	Update(ctx context.Context, photo *domain.Photo) error
 	Delete(ctx context.Context, id uint) error
 
 	FindByBenchID(ctx context.Context, benchID uint) ([]domain.Photo, error)
