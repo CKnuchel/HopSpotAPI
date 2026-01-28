@@ -11,12 +11,15 @@ import (
 	_ "hopSpotAPI/docs"
 )
 
-func Setup(authHandler *handler.AuthHandler,
+func Setup(
+	authHandler *handler.AuthHandler,
 	userHandler *handler.UserHandler,
 	benchHandler *handler.BenchHandler,
 	visitHandler *handler.VisitHandler,
 	adminHandler *handler.AdminHandler,
-	authMiddleware *middleware.AuthMiddleware) *gin.Engine {
+	photoHandler *handler.PhotoHandler,
+	authMiddleware *middleware.AuthMiddleware,
+) *gin.Engine {
 	router := gin.Default()
 
 	// Swagger UI
@@ -24,7 +27,6 @@ func Setup(authHandler *handler.AuthHandler,
 
 	v1 := router.Group("/api/v1")
 	{
-
 		// Public routes
 		auth := v1.Group("/auth")
 		{
@@ -61,6 +63,10 @@ func Setup(authHandler *handler.AuthHandler,
 
 				// Visit count by bench ID
 				bench.GET("/:id/visits/count", visitHandler.GetVisitCountByBenchID)
+
+				// Photo routes unter /benches/:id
+				bench.POST("/:id/photos", photoHandler.Upload)
+				bench.GET("/:id/photos", photoHandler.GetByBenchID)
 			}
 
 			// Visit routes
@@ -70,9 +76,16 @@ func Setup(authHandler *handler.AuthHandler,
 				visits.POST("", visitHandler.CreateVisit)
 			}
 
+			// Photo routes
+			photos := protected.Group("/photos")
+			{
+				photos.DELETE("/:id", photoHandler.Delete)
+				photos.PATCH("/:id/main", photoHandler.SetMainPhoto)
+				photos.GET("/:id/url", photoHandler.GetPresignedURL)
+			}
+
 			// Admin routes
 			admin := protected.Group("/admin")
-			admin.Use(authMiddleware.Authenticate())
 			admin.Use(authMiddleware.RequireAdmin())
 			{
 				admin.GET("/users", adminHandler.ListUsers)
