@@ -23,6 +23,7 @@ import (
 	"hopSpotAPI/internal/repository"
 	"hopSpotAPI/internal/router"
 	"hopSpotAPI/internal/service"
+	"hopSpotAPI/pkg/storage"
 	"net/http"
 )
 
@@ -42,12 +43,24 @@ func main() {
 		panic("Database migration failed: " + err.Error())
 	}
 
+	// MinIo client setup
+	minioClient, err := storage.NewMinioClient(*cfg)
+	if err != nil {
+		panic("Failed to create MinIO client: " + err.Error())
+	}
+
+	// Ensure the bucket exists
+	if err := minioClient.EnsureBucket(nil); err != nil {
+		panic("Failed to ensure MinIO bucket exists: " + err.Error())
+	}
+
 	// Repositorys
 	userRepo := repository.NewUserRepository(db)
 	invitation := repository.NewInvitationRepository(db)
 	benchRepo := repository.NewBenchRepository(db)
 	visitRepo := repository.NewVisitRepository(db)
 	invitationRepo := repository.NewInvitationRepository(db)
+	photoRepo := repository.NewPhotoRepository(db)
 
 	// Services
 	authService := service.NewAuthService(userRepo, invitation, *cfg)
@@ -55,6 +68,7 @@ func main() {
 	benchService := service.NewBenchService(benchRepo)
 	visitService := service.NewVisitService(visitRepo)
 	adminService := service.NewAdminService(userRepo, invitationRepo)
+	photoService := service.NewPhotoService(photoRepo, benchRepo, minioClient)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService)
@@ -62,12 +76,14 @@ func main() {
 	benchHandler := handler.NewBenchHandler(benchService)
 	visitHandler := handler.NewVisitHandler(visitService)
 	adminHandler := handler.NewAdminHandler(adminService)
+	photoHandler := handler.NewPhotoHandler(photoService)
 
 	// Middlewares
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
 
 	// Router
-	r := router.Setup(authHandler, userHandler, benchHandler, visitHandler, adminHandler, authMiddleware)
+	r := router.Setup(authHandler, userHandler, benchHandler,
+		visitHandler, adminHandler, photoHandler, authMiddleware)
 
 	// Server mit Graceful Shutdown
 	srv := &http.Server{
