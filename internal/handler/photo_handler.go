@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/middleware"
 	"hopSpotAPI/internal/service"
 	"net/http"
@@ -67,26 +68,131 @@ func (h *PhotoHandler) Upload(c *gin.Context) {
 }
 
 // DELETE /api/v1/photos/:id
-// Löscht ein Foto (nur Uploader oder Admin)
+// godoc
+//
+//	@Summary		Delete a photo
+//	@Description	Deletes a photo by its ID
+//	@Tags			Photos
+//	@Param			id	path	int	true	"Photo ID"
+//
+//	@Success		204
+//	@Failure		400
+//	@Failure		401
+//	@Failure		403
+//	@Failure		404
+//	@Failure		500
+//	@Router			/api/v1/photos/{id} [delete]
 func (h *PhotoHandler) Delete(c *gin.Context) {
-	panic("TODO: implement")
+	// JWT Claims
+	userID := c.MustGet(middleware.ContextKeyUserID).(uint)
+	userRole := c.MustGet(middleware.ContextKeyUserRole).(domain.Role)
+	isAdmin := userRole == domain.RoleAdmin
+
+	photoID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid photo ID"})
+		return
+	}
+
+	err = h.photoService.Delete(c.Request.Context(), uint(photoID), userID, isAdmin)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete photo"})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }
 
 // PATCH /api/v1/photos/:id/main
-// Setzt ein Foto als Hauptbild (nur Bench-Ersteller oder Admin)
+// godoc
+//
+//	@Summary		Set main photo
+//	@Description	Sets a photo as the main photo for its bench
+//	@Tags			Photos
+//	@Param			id	path	int	true	"Photo ID"
+//
+//	@Success		204
+//	@Failure		400
+//	@Failure		401
+//	@Failure		403
+//	@Failure		404
+//	@Failure		500
+//	@Router			/api/v1/photos/{id}/main [patch]
 func (h *PhotoHandler) SetMainPhoto(c *gin.Context) {
-	panic("TODO: implement")
+	// JWT Claims
+	userID := c.MustGet(middleware.ContextKeyUserID).(uint)
+	userRole := c.MustGet(middleware.ContextKeyUserRole).(domain.Role)
+	isAdmin := userRole == domain.RoleAdmin
+
+	photoID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid photo ID"})
+		return
+	}
+	err = h.photoService.SetMainPhoto(c.Request.Context(), uint(photoID), userID, isAdmin)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to set main photo"})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }
 
 // GET /api/v1/benches/:id/photos
-// Gibt alle Fotos einer Bank zurück
+// godoc
+//
+//	@Summary		Get photos by bench ID
+//	@Description	Retrieves all photos for a specific bench
+//	@Tags			Photos
+//	@Param			id	path	int	true	"Bench ID"
+//
+//	@Success		200	{array}		responses.PhotoResponse
+//	@Failure		400
+//	@Failure		500
+//	@Router			/api/v1/benches/{id}/photos [get]
 func (h *PhotoHandler) GetByBenchID(c *gin.Context) {
-	panic("TODO: implement")
+	benchID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid bench ID"})
+		return
+	}
+	resp, err := h.photoService.GetByBenchID(c.Request.Context(), uint(benchID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get photos"})
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
 // GET /api/v1/photos/:id/url
-// Gibt eine temporäre URL für ein Foto zurück
-// Query-Param: size (original, medium, thumbnail)
+// godoc
+//
+//	@Summary		Get presigned URL for photo
+//	@Description	Retrieves a presigned URL for accessing a photo
+//	@Tags			Photos
+//	@Param			id		path	int		true	"Photo ID"
+//	@Param			size	query	string	false	"Size of the photo (e.g., original, medium, thumbnail)"
+//
+//	@Success		200	{object}	map[string]string
+//	@Failure		400
+//	@Failure		404
+//	@Failure		500
+//	@Router			/api/v1/photos/{id}/url [get]
 func (h *PhotoHandler) GetPresignedURL(c *gin.Context) {
-	panic("TODO: implement")
+	photoID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid photo ID"})
+		return
+	}
+
+	size := c.Query("size")
+
+	url, err := h.photoService.GetPresignedURL(c.Request.Context(), uint(photoID), size)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get presigned URL"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"url": url})
 }
