@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"hopSpotAPI/internal/config"
 	"io"
 	"time"
 
@@ -15,10 +16,10 @@ type MinioClient struct {
 	bucketName string
 }
 
-func NewMinioClient(endpoint, accessKey, secretKey, bucketName string, useSSL bool) (*MinioClient, error) {
-	client, err := minio.New(endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
-		Secure: useSSL,
+func NewMinioClient(cfg config.Config) (*MinioClient, error) {
+	client, err := minio.New(cfg.MinioEndpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(cfg.MinioAccessKey, cfg.MinioSecretKey, ""),
+		Secure: cfg.MinioUseSSL,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create minio client: %w", err)
@@ -26,7 +27,7 @@ func NewMinioClient(endpoint, accessKey, secretKey, bucketName string, useSSL bo
 
 	return &MinioClient{
 		client:     client,
-		bucketName: bucketName,
+		bucketName: cfg.MinioBucketName,
 	}, nil
 }
 
