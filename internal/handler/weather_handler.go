@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"hopSpotAPI/internal/service"
+	"hopSpotAPI/pkg/utils"
 )
 
 type WeatherHandler struct {
@@ -49,6 +50,11 @@ func (wh *WeatherHandler) GetCurrentWeather(c *gin.Context) {
 	longitude, err := strconv.ParseFloat(lon, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid longitude"})
+		return
+	}
+
+	if err := utils.ValidateCoordinates(latitude, longitude); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 

@@ -84,6 +84,12 @@ func (s *benchService) List(ctx context.Context, req *requests.ListBenchesReques
 		Radius:      req.Radius,
 	}
 
+	if req.Lat != nil && req.Lon != nil {
+		if err := utils.ValidateCoordinates(*req.Lat, *req.Lon); err != nil {
+			return nil, err
+		}
+	}
+
 	// Load Benches from Repo
 	benches, _, err := s.benchRepo.FindAll(ctx, filter)
 	if err != nil {
