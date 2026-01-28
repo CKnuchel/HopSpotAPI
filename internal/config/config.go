@@ -33,7 +33,8 @@ type Config struct {
 	MinioUseSSL     bool
 	MinioBucketName string
 
-	// TODO: Firebase Configs
+	// Firebase
+	FirebaseAuthKey string
 }
 
 func Load() *Config {
@@ -71,6 +72,9 @@ func Load() *Config {
 		MinioSecretKey:  getEnv("MINIO_SECRET_KEY", ""),
 		MinioUseSSL:     getEnv("MINIO_USE_SSL", "false") == "true",
 		MinioBucketName: getEnv("MINIO_BUCKET_NAME", "hopspot-photos"),
+
+		// Firebase
+		FirebaseAuthKey: getEnv("FIREBASE_AUTH_KEY", ""),
 	}
 }
 
