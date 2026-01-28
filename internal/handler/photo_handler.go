@@ -146,7 +146,7 @@ func (h *PhotoHandler) SetMainPhoto(c *gin.Context) {
 //	@Tags			Photos
 //	@Param			id	path	int	true	"Bench ID"
 //
-//	@Success		200	{array}		responses.PhotoResponse
+//	@Success		200	{array}	responses.PhotoResponse
 //	@Failure		400
 //	@Failure		500
 //	@Router			/api/v1/benches/{id}/photos [get]
@@ -171,10 +171,10 @@ func (h *PhotoHandler) GetByBenchID(c *gin.Context) {
 //	@Summary		Get presigned URL for photo
 //	@Description	Retrieves a presigned URL for accessing a photo
 //	@Tags			Photos
-//	@Param			id		path	int		true	"Photo ID"
-//	@Param			size	query	string	false	"Size of the photo (e.g., original, medium, thumbnail)"
+//	@Param			id		path		int		true	"Photo ID"
+//	@Param			size	query		string	false	"Size of the photo (e.g., original, medium, thumbnail)"
 //
-//	@Success		200	{object}	map[string]string
+//	@Success		200		{object}	map[string]string
 //	@Failure		400
 //	@Failure		404
 //	@Failure		500

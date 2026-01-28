@@ -20,14 +20,15 @@ func NewAuthHandler(authService service.AuthService) *AuthHandler {
 // Register godoc
 //
 //	@Summary		Register a new user
-//	@Description	Registers a new user with the provided details
+//	@Description	Registers a new user and returns access and refresh tokens
 //	@Tags			Auth
 //	@Accept			json
 //	@Produce		json
 //	@Param			registerRequest	body		requests.RegisterRequest	true	"Register Request"
-//	@Success		201				{object}	map[string]interface{}
+//	@Success		201				{object}	responses.LoginResponse
 //	@Failure		400				{object}	map[string]string
-//	@Router			/auth/register [post]
+//	@Failure		409				{object}	map[string]string
+//	@Router			/api/v1/auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req requests.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -48,14 +49,16 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // Login godoc
 //
 //	@Summary		Login a user
-//	@Description	Authenticates a user and returns a JWT token
+//	@Description	Authenticates a user and returns access and refresh tokens
 //	@Tags			Auth
 //	@Accept			json
 //	@Produce		json
 //	@Param			loginRequest	body		requests.LoginRequest	true	"Login Request"
-//	@Success		200				{object}	map[string]interface{}
+//	@Success		200				{object}	responses.LoginResponse
 //	@Failure		400				{object}	map[string]string
-//	@Router			/auth/login [post]
+//	@Failure		401				{object}	map[string]string
+//	@Failure		403				{object}	map[string]string
+//	@Router			/api/v1/auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req requests.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

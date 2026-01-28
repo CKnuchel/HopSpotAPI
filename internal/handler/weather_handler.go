@@ -19,17 +19,18 @@ func NewWeatherHandler(weatherService service.WeatherService) *WeatherHandler {
 }
 
 // GetCurrentWeather godoc
-// @Summary      Aktuelles Wetter abrufen
-// @Description  Gibt das aktuelle Wetter für die angegebenen Koordinaten zurück
-// @Tags         Weather
-// @Produce      json
-// @Param        lat  query     number  true  "Breitengrad"
-// @Param        lon  query     number  true  "Längengrad"
-// @Success      200  {object}  responses.WeatherResponse
-// @Failure      400
-// @Failure      500
-// @Security     BearerAuth
-// @Router       /weather [get]
+//
+//	@Summary		Aktuelles Wetter abrufen
+//	@Description	Gibt das aktuelle Wetter für die angegebenen Koordinaten zurück
+//	@Tags			Weather
+//	@Produce		json
+//	@Param			lat	query		number	true	"Breitengrad"
+//	@Param			lon	query		number	true	"Längengrad"
+//	@Success		200	{object}	responses.WeatherResponse
+//	@Failure		400
+//	@Failure		500
+//	@Security		BearerAuth
+//	@Router			/weather [get]
 func (wh *WeatherHandler) GetCurrentWeather(c *gin.Context) {
 	lat := c.Query("lat")
 	lon := c.Query("lon")
