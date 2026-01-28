@@ -8,7 +8,7 @@ import (
 	"hopSpotAPI/internal/repository"
 	"hopSpotAPI/internal/router"
 	"hopSpotAPI/internal/service"
-	"log"
+	"net/http"
 )
 
 func main() {
@@ -54,9 +54,12 @@ func main() {
 	// Router
 	r := router.Setup(authHandler, userHandler, benchHandler, visitHandler, adminHandler, authMiddleware)
 
-	// Start
-	log.Printf("Server starting on port %s", cfg.Port)
-	if err := r.Run(":" + cfg.Port); err != nil {
-		log.Fatalf("Server failed: %v", err)
+	// Server mit Graceful Shutdown
+	srv := &http.Server{
+		Addr:    ":" + cfg.Port,
+		Handler: r,
 	}
+
+	go startServer(srv)
+	waitForShutdown(srv, db)
 }
