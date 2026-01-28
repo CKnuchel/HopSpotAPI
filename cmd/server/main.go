@@ -25,6 +25,7 @@ import (
 	"hopSpotAPI/internal/router"
 	"hopSpotAPI/internal/service"
 	"hopSpotAPI/pkg/storage"
+	"hopSpotAPI/pkg/weather"
 	"net/http"
 )
 
@@ -55,6 +56,9 @@ func main() {
 		panic("Failed to ensure MinIO bucket exists: " + err.Error())
 	}
 
+	// Weather Client
+	weatherClient := weather.NewWeatherClient()
+
 	// Repositorys
 	userRepo := repository.NewUserRepository(db)
 	benchRepo := repository.NewBenchRepository(db)
@@ -69,6 +73,7 @@ func main() {
 	visitService := service.NewVisitService(visitRepo)
 	adminService := service.NewAdminService(userRepo, invitationRepo)
 	photoService := service.NewPhotoService(photoRepo, benchRepo, minioClient)
+	weatherService := service.NewWeatherService(weatherClient)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService)
@@ -77,13 +82,15 @@ func main() {
 	visitHandler := handler.NewVisitHandler(visitService)
 	adminHandler := handler.NewAdminHandler(adminService)
 	photoHandler := handler.NewPhotoHandler(photoService)
+	weatherHandler := handler.NewWeatherHandler(weatherService)
 
 	// Middlewares
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
 
 	// Router
 	r := router.Setup(authHandler, userHandler, benchHandler,
-		visitHandler, adminHandler, photoHandler, authMiddleware)
+		visitHandler, adminHandler, photoHandler, weatherHandler,
+		authMiddleware)
 
 	// Server mit Graceful Shutdown
 	srv := &http.Server{

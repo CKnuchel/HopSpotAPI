@@ -18,6 +18,7 @@ func Setup(
 	visitHandler *handler.VisitHandler,
 	adminHandler *handler.AdminHandler,
 	photoHandler *handler.PhotoHandler,
+	weatherHandler *handler.WeatherHandler,
 	authMiddleware *middleware.AuthMiddleware,
 ) *gin.Engine {
 	router := gin.Default()
@@ -93,6 +94,12 @@ func Setup(
 				admin.DELETE("/users/:id", adminHandler.DeleteUser)
 				admin.GET("/invitation-codes", adminHandler.ListInvitationCodes)
 				admin.POST("/invitation-codes", adminHandler.CreateInvitationCode)
+			}
+
+			// Weather routes
+			weather := protected.Group("/weather")
+			{
+				weather.GET("", weatherHandler.GetCurrentWeather)
 			}
 		}
 	}
