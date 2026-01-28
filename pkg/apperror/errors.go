@@ -19,6 +19,11 @@ var (
 	ErrForbidden          = errors.New("forbidden")
 )
 
+// Refresh Token Errors
+var (
+	ErrInvalidRefreshToken = errors.New("invalid or expired refresh token")
+)
+
 // Bench-related errors
 var (
 	ErrBenchNotFound = errors.New("bench not found")

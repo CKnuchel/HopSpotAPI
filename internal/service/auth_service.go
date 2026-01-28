@@ -10,33 +10,39 @@ import (
 	"hopSpotAPI/internal/repository"
 	"hopSpotAPI/pkg/apperror"
 	"hopSpotAPI/pkg/utils"
+	"time"
 )
 
-// AuthService Interface defining authentication service methods
 type AuthService interface {
 	Register(ctx context.Context, req *requests.RegisterRequest) (*responses.LoginResponse, error)
 	Login(ctx context.Context, req *requests.LoginRequest) (*responses.LoginResponse, error)
+	Refresh(ctx context.Context, req *requests.RefreshTokenRequest) (*responses.LoginResponse, error)
+	Logout(ctx context.Context, req *requests.LogoutRequest) error
 	RefreshFCMToken(ctx context.Context, userId uint, fcmToken string) error
 }
 
-// Implementation
 type authService struct {
-	userRepo       repository.UserRepository
-	invitationRepo repository.InvitationRepository
-	config         config.Config
+	userRepo         repository.UserRepository
+	invitationRepo   repository.InvitationRepository
+	refreshTokenRepo repository.RefreshTokenRepository
+	config           config.Config
 }
 
-// NewAuthService Constructor
-func NewAuthService(userRepo repository.UserRepository, invitationRepo repository.InvitationRepository, config config.Config) AuthService {
+func NewAuthService(
+	userRepo repository.UserRepository,
+	invitationRepo repository.InvitationRepository,
+	refreshTokenRepo repository.RefreshTokenRepository,
+	config config.Config,
+) AuthService {
 	return &authService{
-		userRepo:       userRepo,
-		invitationRepo: invitationRepo,
-		config:         config,
+		userRepo:         userRepo,
+		invitationRepo:   invitationRepo,
+		refreshTokenRepo: refreshTokenRepo,
+		config:           config,
 	}
 }
 
-func (s authService) Register(ctx context.Context, req *requests.RegisterRequest) (*responses.LoginResponse, error) {
-
+func (s *authService) Register(ctx context.Context, req *requests.RegisterRequest) (*responses.LoginResponse, error) {
 	// Check if email already exists
 	existingUser, err := s.userRepo.FindByEmail(ctx, req.Email)
 	if err != nil {
@@ -67,7 +73,7 @@ func (s authService) Register(ctx context.Context, req *requests.RegisterRequest
 	// Mapping DTO -> User domain model
 	user := mapper.RegisterRequestToUser(req)
 	user.PasswordHash = hashedPassword
-	user.Role = domain.RoleUser // Default role
+	user.Role = domain.RoleUser
 	user.IsActive = true
 
 	// Creating user
@@ -80,21 +86,11 @@ func (s authService) Register(ctx context.Context, req *requests.RegisterRequest
 		return nil, err
 	}
 
-	// Generating JWT token
-	token, err := utils.GenerateJWT(user, &s.config)
-	if err != nil {
-		return nil, err
-	}
-
-	// Preparing response
-	return &responses.LoginResponse{
-		User:  mapper.UserToResponse(user),
-		Token: token,
-	}, nil
+	// Generate tokens
+	return s.generateTokens(ctx, user)
 }
 
-func (s authService) Login(ctx context.Context, req *requests.LoginRequest) (*responses.LoginResponse, error) {
-
+func (s *authService) Login(ctx context.Context, req *requests.LoginRequest) (*responses.LoginResponse, error) {
 	// Find user by email
 	user, err := s.userRepo.FindByEmail(ctx, req.Email)
 	if err != nil {
@@ -114,24 +110,97 @@ func (s authService) Login(ctx context.Context, req *requests.LoginRequest) (*re
 		return nil, apperror.ErrInvalidCredentials
 	}
 
-	// Generating JWT token
-	token, err := utils.GenerateJWT(user, &s.config)
+	// Revoke all existing refresh tokens (single device policy)
+	if err := s.refreshTokenRepo.RevokeByUserID(ctx, user.ID); err != nil {
+		return nil, err
+	}
+
+	// Generate tokens
+	return s.generateTokens(ctx, user)
+}
+
+func (s *authService) Refresh(ctx context.Context, req *requests.RefreshTokenRequest) (*responses.LoginResponse, error) {
+	// Hash the provided token
+	tokenHash := utils.HashToken(req.RefreshToken)
+
+	// Find token in DB
+	refreshToken, err := s.refreshTokenRepo.FindByTokenHash(ctx, tokenHash)
+	if err != nil {
+		return nil, err
+	}
+	if refreshToken == nil {
+		return nil, apperror.ErrInvalidRefreshToken
+	}
+
+	// Validate token
+	if !refreshToken.IsValid() {
+		return nil, apperror.ErrInvalidRefreshToken
+	}
+
+	// Check if user is still active
+	if !refreshToken.User.IsActive {
+		return nil, apperror.ErrAccountDeactivated
+	}
+
+	// Revoke current token (rotation)
+	if err := s.refreshTokenRepo.RevokeByID(ctx, refreshToken.ID); err != nil {
+		return nil, err
+	}
+
+	// Generate new tokens
+	return s.generateTokens(ctx, &refreshToken.User)
+}
+
+func (s *authService) Logout(ctx context.Context, req *requests.LogoutRequest) error {
+	// Hash the provided token
+	tokenHash := utils.HashToken(req.RefreshToken)
+
+	// Find token in DB
+	refreshToken, err := s.refreshTokenRepo.FindByTokenHash(ctx, tokenHash)
+	if err != nil {
+		return err
+	}
+	if refreshToken == nil {
+		return nil // Token doesn't exist, already logged out
+	}
+
+	// Revoke the token
+	return s.refreshTokenRepo.RevokeByID(ctx, refreshToken.ID)
+}
+
+func (s *authService) RefreshFCMToken(ctx context.Context, userId uint, fcmToken string) error {
+	return s.userRepo.UpdateFCMToken(ctx, userId, fcmToken)
+}
+
+// generateTokens creates both access and refresh tokens
+func (s *authService) generateTokens(ctx context.Context, user *domain.User) (*responses.LoginResponse, error) {
+	// Generate Access Token (JWT)
+	accessToken, err := utils.GenerateJWT(user, &s.config)
 	if err != nil {
 		return nil, err
 	}
 
-	// Preparing response
-	return &responses.LoginResponse{
-		User:  mapper.UserToResponse(user),
-		Token: token,
-	}, nil
-}
-
-func (s authService) RefreshFCMToken(ctx context.Context, userId uint, fcmToken string) error {
-	// Update FCM token
-	if err := s.userRepo.UpdateFCMToken(ctx, userId, fcmToken); err != nil {
-		return err
+	// Generate Refresh Token
+	refreshTokenString, err := utils.GenerateRefreshToken()
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	// Hash and store refresh token
+	refreshToken := &domain.RefreshToken{
+		UserID:    user.ID,
+		TokenHash: utils.HashToken(refreshTokenString),
+		ExpiresAt: time.Now().Add(s.config.RefreshTokenExpire),
+		IsRevoked: false,
+	}
+
+	if err := s.refreshTokenRepo.Create(ctx, refreshToken); err != nil {
+		return nil, err
+	}
+
+	return &responses.LoginResponse{
+		User:         mapper.UserToResponse(user),
+		Token:        accessToken,
+		RefreshToken: refreshTokenString,
+	}, nil
 }
