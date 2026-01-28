@@ -16,6 +16,7 @@ package main
 //	@description				JWT Token in the format: Bearer {token}
 
 import (
+	"context"
 	"hopSpotAPI/internal/config"
 	"hopSpotAPI/internal/database"
 	"hopSpotAPI/internal/handler"
@@ -50,20 +51,19 @@ func main() {
 	}
 
 	// Ensure the bucket exists
-	if err := minioClient.EnsureBucket(nil); err != nil {
+	if err := minioClient.EnsureBucket(context.Background()); err != nil {
 		panic("Failed to ensure MinIO bucket exists: " + err.Error())
 	}
 
 	// Repositorys
 	userRepo := repository.NewUserRepository(db)
-	invitation := repository.NewInvitationRepository(db)
 	benchRepo := repository.NewBenchRepository(db)
 	visitRepo := repository.NewVisitRepository(db)
 	invitationRepo := repository.NewInvitationRepository(db)
 	photoRepo := repository.NewPhotoRepository(db)
 
 	// Services
-	authService := service.NewAuthService(userRepo, invitation, *cfg)
+	authService := service.NewAuthService(userRepo, invitationRepo, *cfg)
 	userService := service.NewUserService(userRepo, *cfg)
 	benchService := service.NewBenchService(benchRepo)
 	visitService := service.NewVisitService(visitRepo)
