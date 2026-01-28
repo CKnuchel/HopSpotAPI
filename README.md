@@ -440,9 +440,8 @@ curl http://localhost:8080/health
 
 ## 📝 Roadmap
 
-- [ ] First registered user becomes admin automatically
-- [ ] Refresh token implementation
-- [ ] Redis caching for weather data
+- [x] Refresh token implementation
+- [x] Redis caching for weather data
 - [ ] Rate limiting
 - [ ] Structured logging
 - [ ] Unit and integration tests

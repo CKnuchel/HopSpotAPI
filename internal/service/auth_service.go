@@ -70,10 +70,21 @@ func (s *authService) Register(ctx context.Context, req *requests.RegisterReques
 		return nil, err
 	}
 
+	userCount, err := s.userRepo.Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Determine role: first user becomes admin
+	role := domain.RoleUser
+	if userCount == 0 {
+		role = domain.RoleAdmin
+	}
+
 	// Mapping DTO -> User domain model
 	user := mapper.RegisterRequestToUser(req)
 	user.PasswordHash = hashedPassword
-	user.Role = domain.RoleUser
+	user.Role = role
 	user.IsActive = true
 
 	// Creating user

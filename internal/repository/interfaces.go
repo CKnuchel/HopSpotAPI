@@ -10,6 +10,7 @@ type UserRepository interface {
 	FindByID(ctx context.Context, id uint) (*domain.User, error)
 	Update(ctx context.Context, user *domain.User) error
 	Delete(ctx context.Context, id uint) error
+	Count(ctx context.Context) (int64, error)
 
 	FindByEmail(ctx context.Context, email string) (*domain.User, error)
 	FindAll(ctx context.Context, filter UserFilter) ([]domain.User, int64, error)
