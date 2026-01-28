@@ -5,6 +5,10 @@ import (
 	"hopSpotAPI/internal/middleware"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "hopSpotAPI/docs"
 )
 
 func Setup(authHandler *handler.AuthHandler,
@@ -14,6 +18,9 @@ func Setup(authHandler *handler.AuthHandler,
 	adminHandler *handler.AdminHandler,
 	authMiddleware *middleware.AuthMiddleware) *gin.Engine {
 	router := gin.Default()
+
+	// Swagger UI
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	v1 := router.Group("/api/v1")
 	{

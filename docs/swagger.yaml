@@ -1,0 +1,838 @@
+basePath: /api/v1
+definitions:
+  domain.Role:
+    enum:
+    - user
+    - admin
+    type: string
+    x-enum-varnames:
+    - RoleUser
+    - RoleAdmin
+  requests.AdminUpdateUserRequest:
+    properties:
+      is_active:
+        type: boolean
+      role:
+        allOf:
+        - $ref: '#/definitions/domain.Role'
+        enum:
+        - user
+        - admin
+    type: object
+  requests.ChangePasswordRequest:
+    properties:
+      new_password:
+        maxLength: 100
+        minLength: 8
+        type: string
+      old_password:
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
+  requests.CreateBenchRequest:
+    properties:
+      description:
+        maxLength: 5000
+        type: string
+      has_toilet:
+        type: boolean
+      has_trash_bin:
+        type: boolean
+      latitude:
+        maximum: 90
+        minimum: -90
+        type: number
+      longitude:
+        maximum: 180
+        minimum: -180
+        type: number
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+      rating:
+        maximum: 5
+        minimum: 1
+        type: integer
+    required:
+    - latitude
+    - longitude
+    - name
+    type: object
+  requests.CreateInvitationCodeRequest:
+    properties:
+      comment:
+        maxLength: 255
+        type: string
+    type: object
+  requests.CreateVisitRequest:
+    properties:
+      bench_id:
+        type: integer
+      comment:
+        maxLength: 500
+        type: string
+      visited_at:
+        default: now
+        type: string
+    required:
+    - bench_id
+    type: object
+  requests.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  requests.RefreshFCMTokenRequest:
+    properties:
+      fcm_token:
+        type: string
+    required:
+    - fcm_token
+    type: object
+  requests.RegisterRequest:
+    properties:
+      display_name:
+        maxLength: 100
+        minLength: 1
+        type: string
+      email:
+        maxLength: 255
+        type: string
+      invitation_code:
+        type: string
+      password:
+        maxLength: 100
+        minLength: 8
+        type: string
+    required:
+    - display_name
+    - email
+    - invitation_code
+    - password
+    type: object
+  requests.UpdateBenchRequest:
+    properties:
+      description:
+        maxLength: 5000
+        type: string
+      has_toilet:
+        type: boolean
+      has_trash_bin:
+        type: boolean
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+      rating:
+        maximum: 5
+        minimum: 1
+        type: integer
+    type: object
+  requests.UpdateProfileRequest:
+    properties:
+      display_name:
+        maxLength: 100
+        minLength: 1
+        type: string
+    type: object
+  responses.BenchListResponse:
+    properties:
+      distance:
+        description: Falls Koordinaten mitgegeben
+        type: number
+      has_toilet:
+        type: boolean
+      has_trash_bin:
+        type: boolean
+      id:
+        type: integer
+      latitude:
+        type: number
+      longitude:
+        type: number
+      main_photo_url:
+        type: string
+      name:
+        type: string
+      rating:
+        type: integer
+    type: object
+  responses.BenchResponse:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        $ref: '#/definitions/responses.UserResponse'
+      description:
+        type: string
+      has_toilet:
+        type: boolean
+      has_trash_bin:
+        type: boolean
+      id:
+        type: integer
+      latitude:
+        type: number
+      longitude:
+        type: number
+      name:
+        type: string
+      rating:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  responses.InvitationCodeResponse:
+    properties:
+      code:
+        type: string
+      comment:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        $ref: '#/definitions/responses.UserResponse'
+      id:
+        type: integer
+      redeemed_at:
+        type: string
+      redeemed_by:
+        $ref: '#/definitions/responses.UserResponse'
+    type: object
+  responses.PaginatedBenchesResponse:
+    properties:
+      benches:
+        items:
+          $ref: '#/definitions/responses.BenchListResponse'
+        type: array
+      pagination:
+        $ref: '#/definitions/responses.PaginationResponse'
+    type: object
+  responses.PaginatedInvitationCodesResponse:
+    properties:
+      codes:
+        items:
+          $ref: '#/definitions/responses.InvitationCodeResponse'
+        type: array
+      pagination:
+        $ref: '#/definitions/responses.PaginationResponse'
+    type: object
+  responses.PaginatedUsersResponse:
+    properties:
+      pagination:
+        $ref: '#/definitions/responses.PaginationResponse'
+      users:
+        items:
+          $ref: '#/definitions/responses.UserResponse'
+        type: array
+    type: object
+  responses.PaginatedVisitsResponse:
+    properties:
+      pagination:
+        $ref: '#/definitions/responses.PaginationResponse'
+      visits:
+        items:
+          $ref: '#/definitions/responses.VisitResponse'
+        type: array
+    type: object
+  responses.PaginationResponse:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  responses.UserResponse:
+    properties:
+      created_at:
+        type: string
+      display_name:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+    type: object
+  responses.VisitBenchResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  responses.VisitCountResponse:
+    properties:
+      bench_id:
+        type: integer
+      count:
+        type: integer
+    type: object
+  responses.VisitResponse:
+    properties:
+      bench:
+        $ref: '#/definitions/responses.VisitBenchResponse'
+      comment:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      visited_at:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: christoph.knuchel@gmail.com
+    name: Christoph Knuchel
+  description: REST API for the HopSpot bench management app
+  title: HopSpot API
+  version: "1.0"
+paths:
+  /api/v1/admin/invitation-codes:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of invitation codes
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 50
+        description: Number of codes per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.PaginatedInvitationCodesResponse'
+        "400":
+          description: Bad Request
+      summary: List invitation codes
+      tags:
+      - Admin
+    post:
+      consumes:
+      - application/json
+      description: Create a new invitation code
+      parameters:
+      - description: Invitation code payload
+        in: body
+        name: invitation_code
+        required: true
+        schema:
+          $ref: '#/definitions/requests.CreateInvitationCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/responses.InvitationCodeResponse'
+        "400":
+          description: Bad Request
+      summary: Create an invitation code
+      tags:
+      - Admin
+  /api/v1/admin/users:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of users with optional filters
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 50
+        description: Number of users per page
+        in: query
+        name: limit
+        type: integer
+      - description: Search term for username or email
+        in: query
+        name: search
+        type: string
+      - description: Filter by active status
+        in: query
+        name: is_active
+        type: boolean
+      - description: Filter by admin status
+        in: query
+        name: is_admin
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.PaginatedUsersResponse'
+        "400":
+          description: Bad Request
+      summary: List users
+      tags:
+      - Admin
+  /api/v1/admin/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+      summary: Delete a user
+      tags:
+      - Admin
+    patch:
+      consumes:
+      - application/json
+      description: Update user details by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User update payload
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/requests.AdminUpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.UserResponse'
+        "400":
+          description: Bad Request
+      summary: Update a user
+      tags:
+      - Admin
+  /api/v1/benches:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of benches with optional filters
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 50
+        description: Number of benches per page
+        in: query
+        name: limit
+        type: integer
+      - default: '"desc"'
+        description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort_order
+        type: string
+      - description: Search term for bench name or location
+        in: query
+        name: search
+        type: string
+      - description: Filter by presence of toilet
+        in: query
+        name: has_toilet
+        type: boolean
+      - description: Filter by presence of trash bin
+        in: query
+        name: has_trash_bin
+        type: boolean
+      - description: Filter by minimum rating
+        in: query
+        name: min_rating
+        type: integer
+      - description: Latitude for proximity search
+        in: query
+        name: lat
+        type: number
+      - description: Longitude for proximity search
+        in: query
+        name: lon
+        type: number
+      - description: Radius in meters for proximity search
+        in: query
+        name: radius
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.PaginatedBenchesResponse'
+        "400":
+          description: Bad Request
+      summary: List benches
+      tags:
+      - Benches
+    post:
+      consumes:
+      - application/json
+      description: Create a new bench with the provided details
+      parameters:
+      - description: Bench payload
+        in: body
+        name: bench
+        required: true
+        schema:
+          $ref: '#/definitions/requests.CreateBenchRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/responses.BenchResponse'
+        "400":
+          description: Bad Request
+      summary: Create a new bench
+      tags:
+      - Benches
+  /api/v1/benches/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a bench by ID
+      parameters:
+      - description: Bench ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+      summary: Delete a bench
+      tags:
+      - Benches
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single bench by its ID
+      parameters:
+      - description: Bench ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.BenchResponse'
+        "400":
+          description: Bad Request
+      summary: Get bench by ID
+      tags:
+      - Benches
+    patch:
+      consumes:
+      - application/json
+      description: Update bench details by ID
+      parameters:
+      - description: Bench ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Bench update payload
+        in: body
+        name: bench
+        required: true
+        schema:
+          $ref: '#/definitions/requests.UpdateBenchRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.BenchResponse'
+        "400":
+          description: Bad Request
+      summary: Update a bench
+      tags:
+      - Benches
+  /api/v1/benches/{id}/visits/count:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the total number of visits for a specific bench
+      parameters:
+      - description: Bench ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.VisitCountResponse'
+        "400":
+          description: Bad Request
+      summary: Get visit count by bench ID
+      tags:
+      - Visits
+  /api/v1/users/me:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the profile of the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.UserResponse'
+        "400":
+          description: Bad Request
+      summary: Get user profile
+      tags:
+      - Users
+    patch:
+      consumes:
+      - application/json
+      description: Update the profile of the currently authenticated user
+      parameters:
+      - description: Profile payload
+        in: body
+        name: profile
+        required: true
+        schema:
+          $ref: '#/definitions/requests.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.UserResponse'
+        "400":
+          description: Bad Request
+      summary: Update user profile
+      tags:
+      - Users
+  /api/v1/users/me/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Change the password of the currently authenticated user
+      parameters:
+      - description: Change password payload
+        in: body
+        name: password
+        required: true
+        schema:
+          $ref: '#/definitions/requests.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+      summary: Change user password
+      tags:
+      - Users
+  /api/v1/visits:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of visits for the authenticated user
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.PaginatedVisitsResponse'
+        "400":
+          description: Bad Request
+      summary: List visits
+      tags:
+      - Visits
+    post:
+      consumes:
+      - application/json
+      description: Record a new visit to a bench
+      parameters:
+      - description: Visit payload
+        in: body
+        name: visit
+        required: true
+        schema:
+          $ref: '#/definitions/requests.CreateVisitRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/responses.VisitResponse'
+        "400":
+          description: Bad Request
+      summary: Create a new visit
+      tags:
+      - Visits
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns a JWT token
+      parameters:
+      - description: Login Request
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/requests.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login a user
+      tags:
+      - Auth
+  /auth/refresh-fcm-token:
+    post:
+      consumes:
+      - application/json
+      description: Updates the FCM token for the authenticated user
+      parameters:
+      - description: Refresh FCM Token Request
+        in: body
+        name: refreshFCMTokenRequest
+        required: true
+        schema:
+          $ref: '#/definitions/requests.RefreshFCMTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Refresh FCM Token
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user with the provided details
+      parameters:
+      - description: Register Request
+        in: body
+        name: registerRequest
+        required: true
+        schema:
+          $ref: '#/definitions/requests.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - Auth
+securityDefinitions:
+  BearerAuth:
+    description: 'JWT Token in the format: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

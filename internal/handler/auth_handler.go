@@ -17,6 +17,16 @@ func NewAuthHandler(authService service.AuthService) *AuthHandler {
 }
 
 // POST /api/v1/auth/register
+// Register godoc
+// @Summary      Register a new user
+// @Description  Registers a new user with the provided details
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        registerRequest  body      requests.RegisterRequest  true  "Register Request"
+// @Success      201  {object}  map[string]interface{}
+// @Failure      400  {object}  map[string]string
+// @Router       /auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req requests.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -34,6 +44,16 @@ func (h *AuthHandler) Register(c *gin.Context) {
 }
 
 // POST /api/v1/auth/login
+// Login godoc
+// @Summary      Login a user
+// @Description  Authenticates a user and returns a JWT token
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        loginRequest  body      requests.LoginRequest  true  "Login Request"
+// @Success      200  {object}  map[string]interface{}
+// @Failure      400  {object}  map[string]string
+// @Router       /auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req requests.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -50,6 +70,18 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// POST /api/v1/auth/refresh-fcm-token
+// RefreshFCMToken godoc
+// @Summary      Refresh FCM Token
+// @Description  Updates the FCM token for the authenticated user
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        refreshFCMTokenRequest  body      requests.RefreshFCMTokenRequest  true  "Refresh FCM Token Request"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
+// @Router       /auth/refresh-fcm-token [post]
 func (h *AuthHandler) RefreshFCMToken(c *gin.Context) {
 	// Get UserId from context (set by auth middleware)
 	userId, exists := c.Get("userID")
