@@ -1,19 +1,19 @@
 package main
 
-// @title           HopSpot API
-// @version         1.0
-// @description     REST API for the HopSpot bench management app
+//	@title			HopSpot API
+//	@version		1.0
+//	@description	REST API for the HopSpot bench management app
 
-// @contact.name    Christoph Knuchel
-// @contact.email   christoph.knuchel@gmail.com
+//	@contact.name	Christoph Knuchel
+//	@contact.email	christoph.knuchel@gmail.com
 
-// @host            localhost:8080
-// @BasePath        /api/v1
+//	@host		localhost:8080
+//	@BasePath	/api/v1
 
-// @securityDefinitions.apikey BearerAuth
-// @in header
-// @name Authorization
-// @description JWT Token in the format: Bearer {token}
+//	@securityDefinitions.apikey	BearerAuth
+//	@in							header
+//	@name						Authorization
+//	@description				JWT Token in the format: Bearer {token}
 
 import (
 	"hopSpotAPI/internal/config"

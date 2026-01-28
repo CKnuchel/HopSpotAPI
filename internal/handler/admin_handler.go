@@ -20,19 +20,20 @@ func NewAdminHandler(adminService service.AdminService) *AdminHandler {
 
 // GET /api/v1/admin/users
 // ListUsers godoc
-// @Summary List users
-// @Description Get a paginated list of users with optional filters
-// @Tags Admin
-// @Accept json
-// @Produce json
-// @Param page query int false "Page number" default(1)
-// @Param limit query int false "Number of users per page" default(50)
-// @Param search query string false "Search term for username or email"
-// @Param is_active query bool false "Filter by active status"
-// @Param is_admin query bool false "Filter by admin status"
-// @Success 200 {object} responses.PaginatedUsersResponse
-// @Failure 400
-// @Router /api/v1/admin/users [get]
+//
+//	@Summary		List users
+//	@Description	Get a paginated list of users with optional filters
+//	@Tags			Admin
+//	@Accept			json
+//	@Produce		json
+//	@Param			page		query		int		false	"Page number"				default(1)
+//	@Param			limit		query		int		false	"Number of users per page"	default(50)
+//	@Param			search		query		string	false	"Search term for username or email"
+//	@Param			is_active	query		bool	false	"Filter by active status"
+//	@Param			is_admin	query		bool	false	"Filter by admin status"
+//	@Success		200			{object}	responses.PaginatedUsersResponse
+//	@Failure		400
+//	@Router			/api/v1/admin/users [get]
 func (h *AdminHandler) ListUsers(c *gin.Context) {
 	var req requests.ListUsersRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
@@ -59,16 +60,17 @@ func (h *AdminHandler) ListUsers(c *gin.Context) {
 
 // PATCH /api/v1/admin/users/:id
 // UpdateUser godoc
-// @Summary Update a user
-// @Description Update user details by ID
-// @Tags Admin
-// @Accept json
-// @Produce json
-// @Param id path int true "User ID"
-// @Param user body requests.AdminUpdateUserRequest true "User update payload"
-// @Success 200 {object} responses.UserResponse
-// @Failure 400
-// @Router /api/v1/admin/users/{id} [patch]
+//
+//	@Summary		Update a user
+//	@Description	Update user details by ID
+//	@Tags			Admin
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		int								true	"User ID"
+//	@Param			user	body		requests.AdminUpdateUserRequest	true	"User update payload"
+//	@Success		200		{object}	responses.UserResponse
+//	@Failure		400
+//	@Router			/api/v1/admin/users/{id} [patch]
 func (h *AdminHandler) UpdateUser(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -93,15 +95,16 @@ func (h *AdminHandler) UpdateUser(c *gin.Context) {
 
 // DELETE /api/v1/admin/users/:id
 // DeleteUser godoc
-// @Summary Delete a user
-// @Description Delete a user by ID
-// @Tags Admin
-// @Accept json
-// @Produce json
-// @Param id path int true "User ID"
-// @Success 204 "No Content"
-// @Failure 400
-// @Router /api/v1/admin/users/{id} [delete]
+//
+//	@Summary		Delete a user
+//	@Description	Delete a user by ID
+//	@Tags			Admin
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	int	true	"User ID"
+//	@Success		204	"No Content"
+//	@Failure		400
+//	@Router			/api/v1/admin/users/{id} [delete]
 func (h *AdminHandler) DeleteUser(c *gin.Context) {
 	adminID := c.MustGet(middleware.ContextKeyUserID).(uint)
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
@@ -121,16 +124,17 @@ func (h *AdminHandler) DeleteUser(c *gin.Context) {
 
 // GET /api/v1/admin/invitation-codes
 // ListInvitationCodes godoc
-// @Summary List invitation codes
-// @Description Get a paginated list of invitation codes
-// @Tags Admin
-// @Accept json
-// @Produce json
-// @Param page query int false "Page number" default(1)
-// @Param limit query int false "Number of codes per page" default(50)
-// @Success 200 {object} responses.PaginatedInvitationCodesResponse
-// @Failure 400
-// @Router /api/v1/admin/invitation-codes [get]
+//
+//	@Summary		List invitation codes
+//	@Description	Get a paginated list of invitation codes
+//	@Tags			Admin
+//	@Accept			json
+//	@Produce		json
+//	@Param			page	query		int	false	"Page number"				default(1)
+//	@Param			limit	query		int	false	"Number of codes per page"	default(50)
+//	@Success		200		{object}	responses.PaginatedInvitationCodesResponse
+//	@Failure		400
+//	@Router			/api/v1/admin/invitation-codes [get]
 func (h *AdminHandler) ListInvitationCodes(c *gin.Context) {
 	var req = requests.ListInvitationCodesRequest{}
 
@@ -158,15 +162,16 @@ func (h *AdminHandler) ListInvitationCodes(c *gin.Context) {
 
 // POST /api/v1/admin/invitation-codes
 // CreateInvitationCode godoc
-// @Summary Create an invitation code
-// @Description Create a new invitation code
-// @Tags Admin
-// @Accept json
-// @Produce json
-// @Param invitation_code body requests.CreateInvitationCodeRequest true "Invitation code payload"
-// @Success 201 {object} responses.InvitationCodeResponse
-// @Failure 400
-// @Router /api/v1/admin/invitation-codes [post]
+//
+//	@Summary		Create an invitation code
+//	@Description	Create a new invitation code
+//	@Tags			Admin
+//	@Accept			json
+//	@Produce		json
+//	@Param			invitation_code	body		requests.CreateInvitationCodeRequest	true	"Invitation code payload"
+//	@Success		201				{object}	responses.InvitationCodeResponse
+//	@Failure		400
+//	@Router			/api/v1/admin/invitation-codes [post]
 func (h *AdminHandler) CreateInvitationCode(c *gin.Context) {
 	adminID := c.MustGet(middleware.ContextKeyUserID).(uint)
 

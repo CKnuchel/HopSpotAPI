@@ -21,15 +21,16 @@ func NewVisitHandler(visitService service.VisitService) *VisitHandler {
 
 // GET /api/v1/benches/:id/visits/count
 // GetVisitCountByBenchID godoc
-// @Summary Get visit count by bench ID
-// @Description Retrieve the total number of visits for a specific bench
-// @Tags Visits
-// @Accept json
-// @Produce json
-// @Param id path int true "Bench ID"
-// @Success 200 {object} responses.VisitCountResponse
-// @Failure 400
-// @Router /api/v1/benches/{id}/visits/count [get]
+//
+//	@Summary		Get visit count by bench ID
+//	@Description	Retrieve the total number of visits for a specific bench
+//	@Tags			Visits
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int	true	"Bench ID"
+//	@Success		200	{object}	responses.VisitCountResponse
+//	@Failure		400
+//	@Router			/api/v1/benches/{id}/visits/count [get]
 func (h *VisitHandler) GetVisitCountByBenchID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -48,16 +49,17 @@ func (h *VisitHandler) GetVisitCountByBenchID(c *gin.Context) {
 
 // GET /api/v1/visits
 // ListVisits godoc
-// @Summary List visits
-// @Description Get a paginated list of visits for the authenticated user
-// @Tags Visits
-// @Accept json
-// @Produce json
-// @Param page query int false "Page number"
-// @Param limit query int false "Number of items per page"
-// @Success 200 {object} responses.PaginatedVisitsResponse
-// @Failure 400
-// @Router /api/v1/visits [get]
+//
+//	@Summary		List visits
+//	@Description	Get a paginated list of visits for the authenticated user
+//	@Tags			Visits
+//	@Accept			json
+//	@Produce		json
+//	@Param			page	query		int	false	"Page number"
+//	@Param			limit	query		int	false	"Number of items per page"
+//	@Success		200		{object}	responses.PaginatedVisitsResponse
+//	@Failure		400
+//	@Router			/api/v1/visits [get]
 func (h *VisitHandler) ListVisits(c *gin.Context) {
 	userID := c.MustGet(middleware.ContextKeyUserID).(uint)
 
@@ -86,15 +88,16 @@ func (h *VisitHandler) ListVisits(c *gin.Context) {
 
 // POST /api/v1/visits
 // CreateVisit godoc
-// @Summary Create a new visit
-// @Description Record a new visit to a bench
-// @Tags Visits
-// @Accept json
-// @Produce json
-// @Param visit body requests.CreateVisitRequest true "Visit payload"
-// @Success 201 {object} responses.VisitResponse
-// @Failure 400
-// @Router /api/v1/visits [post]
+//
+//	@Summary		Create a new visit
+//	@Description	Record a new visit to a bench
+//	@Tags			Visits
+//	@Accept			json
+//	@Produce		json
+//	@Param			visit	body		requests.CreateVisitRequest	true	"Visit payload"
+//	@Success		201		{object}	responses.VisitResponse
+//	@Failure		400
+//	@Router			/api/v1/visits [post]
 func (h *VisitHandler) CreateVisit(c *gin.Context) {
 	userID := c.MustGet(middleware.ContextKeyUserID).(uint)
 
