@@ -25,8 +25,11 @@ func NewPhotoHandler(photoService service.PhotoService) *PhotoHandler {
 //	@Tags			Photos
 //	@Accept			multipart/form-data
 //	@Produce		json
-//	@Param			id		path		int				true	"Bench ID"
-//	@Param			photos	formData	file			true	"Photo file to upload"
+//	@Param			id		path		int		true	"Bench ID"
+//
+//	@Param			photo	formData	file	true	"Photo file"
+//	@Param			is_main	formData	bool	false	"Als Hauptbild setzen"
+//
 //	@Success		201		{object}	responses.PhotoResponse
 //	@Failure		400
 //	@Failure		401
