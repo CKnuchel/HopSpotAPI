@@ -14,10 +14,11 @@ type Config struct {
 	LogLevel string
 
 	// JWT
-	JWTSecret   string
-	JWTExpire   time.Duration
-	JWTIssuer   string
-	JWTAudience string
+	JWTSecret          string
+	JWTExpire          time.Duration
+	JWTIssuer          string
+	JWTAudience        string
+	RefreshTokenExpire time.Duration
 
 	// Database
 	DBHost     string
@@ -49,6 +50,12 @@ func Load() *Config {
 		jwtSeconds = 3600
 	}
 
+	// Refresh Token
+	refreshDays, err := strconv.Atoi(getEnv("REFRESH_TOKEN_EXPIRE_DAYS", "90"))
+	if err != nil {
+		refreshDays = 90
+	}
+
 	return &Config{
 		Port:     getEnv("PORT", "8080"),
 		LogLevel: getEnv("LOG_LEVEL", "INFO"),
@@ -61,10 +68,11 @@ func Load() *Config {
 		DBName:     getEnv("DB_NAME", "dbname"),
 
 		// JWT
-		JWTSecret:   getEnv("JWT_SECRET", "supersecretkey"),
-		JWTExpire:   time.Duration(jwtSeconds) * time.Second,
-		JWTAudience: getEnv("JWT_AUDIENCE", "yourapp.com"),
-		JWTIssuer:   getEnv("JWT_ISSUER,", "yourapp.com"),
+		JWTSecret:          getEnv("JWT_SECRET", "supersecretkey"),
+		JWTExpire:          time.Duration(jwtSeconds) * time.Second,
+		JWTAudience:        getEnv("JWT_AUDIENCE", "yourapp.com"),
+		JWTIssuer:          getEnv("JWT_ISSUER,", "yourapp.com"),
+		RefreshTokenExpire: time.Duration(refreshDays) * 24 * time.Hour,
 
 		// MinIO
 		MinioEndpoint:   getEnv("MINIO_ENDPOINT", "localhost:9000"),
