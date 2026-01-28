@@ -23,3 +23,11 @@ var (
 var (
 	ErrBenchNotFound = errors.New("bench not found")
 )
+
+// Photo Errors
+var (
+	ErrPhotoNotFound    = errors.New("photo not found")
+	ErrMaxPhotosReached = errors.New("maximum photos per bench reached")
+	ErrFileTooLarge     = errors.New("file size exceeds limit")
+	ErrInvalidFileType  = errors.New("invalid file type")
+)
