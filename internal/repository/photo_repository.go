@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"hopSpotAPI/internal/domain"
 
 	"gorm.io/gorm"
@@ -21,7 +22,12 @@ func (r *photoRepository) Create(ctx context.Context, photo *domain.Photo) error
 
 func (r *photoRepository) FindByID(ctx context.Context, id uint) (*domain.Photo, error) {
 	var photo domain.Photo
-	if err := r.db.WithContext(ctx).First(&photo, id).Error; err != nil {
+	err := r.db.WithContext(ctx).First(&photo, id).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &photo, nil
@@ -64,7 +70,12 @@ func (r *photoRepository) SetMainPhoto(ctx context.Context, photoID uint, benchI
 
 func (r *photoRepository) GetMainPhoto(ctx context.Context, benchID uint) (*domain.Photo, error) {
 	var photo domain.Photo
-	if err := r.db.WithContext(ctx).Where("bench_id = ? AND is_main = ?", benchID, true).First(&photo).Error; err != nil {
+	err := r.db.WithContext(ctx).Where("bench_id = ? AND is_main = ?", benchID, true).First(&photo).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil // No main photo found
+		}
 		return nil, err
 	}
 	return &photo, nil
