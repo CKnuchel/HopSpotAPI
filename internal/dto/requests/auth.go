@@ -15,3 +15,11 @@ type LoginRequest struct {
 type RefreshFCMTokenRequest struct {
 	FCMToken string `json:"fcm_token" binding:"required"`
 }
+
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}
+
+type LogoutRequest struct {
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}
