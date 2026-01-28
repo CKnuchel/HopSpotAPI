@@ -26,7 +26,12 @@ type Config struct {
 	DBPassword string
 	DBName     string
 
-	// TODO: MinIo / S3 Configs
+	// MinIO
+	MinioEndpoint   string
+	MinioAccessKey  string
+	MinioSecretKey  string
+	MinioUseSSL     bool
+	MinioBucketName string
 
 	// TODO: Firebase Configs
 }
@@ -44,17 +49,28 @@ func Load() *Config {
 	}
 
 	return &Config{
-		Port:        getEnv("PORT", "8080"),
-		LogLevel:    getEnv("LOG_LEVEL", "INFO"),
-		DBHost:      getEnv("DB_HOST", "localhost"),
-		DBPort:      getEnv("DB_PORT", "5432"),
-		DBUser:      getEnv("DB_USER", "postgres"),
-		DBPassword:  getEnv("DB_PASSWORD", "password"),
-		DBName:      getEnv("DB_NAME", "dbname"),
+		Port:     getEnv("PORT", "8080"),
+		LogLevel: getEnv("LOG_LEVEL", "INFO"),
+
+		// Database
+		DBHost:     getEnv("DB_HOST", "localhost"),
+		DBPort:     getEnv("DB_PORT", "5432"),
+		DBUser:     getEnv("DB_USER", "postgres"),
+		DBPassword: getEnv("DB_PASSWORD", "password"),
+		DBName:     getEnv("DB_NAME", "dbname"),
+
+		// JWT
 		JWTSecret:   getEnv("JWT_SECRET", "supersecretkey"),
 		JWTExpire:   time.Duration(jwtSeconds) * time.Second,
 		JWTAudience: getEnv("JWT_AUDIENCE", "yourapp.com"),
 		JWTIssuer:   getEnv("JWT_ISSUER,", "yourapp.com"),
+
+		// MinIO
+		MinioEndpoint:   getEnv("MINIO_ENDPOINT", "localhost:9000"),
+		MinioAccessKey:  getEnv("MINIO_ACCESS_KEY", ""),
+		MinioSecretKey:  getEnv("MINIO_SECRET_KEY", ""),
+		MinioUseSSL:     getEnv("MINIO_USE_SSL", "false") == "true",
+		MinioBucketName: getEnv("MINIO_BUCKET_NAME", "hopspot-photos"),
 	}
 }
 
