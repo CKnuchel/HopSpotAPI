@@ -17,6 +17,14 @@ type UserRepository interface {
 	GetAllFCMTokens(ctx context.Context, excludeUserID uint) ([]string, error)
 }
 
+type RefreshTokenRepository interface {
+	Create(ctx context.Context, token *domain.RefreshToken) error
+	FindByTokenHash(ctx context.Context, tokenHash string) (*domain.RefreshToken, error)
+	RevokeByUserID(ctx context.Context, userID uint) error
+	RevokeByID(ctx context.Context, id uint) error
+	DeleteExpired(ctx context.Context) error
+}
+
 type InvitationRepository interface {
 	Create(ctx context.Context, code *domain.InvitationCode) error
 	FindByID(ctx context.Context, id uint) (*domain.InvitationCode, error)
