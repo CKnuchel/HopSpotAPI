@@ -109,3 +109,60 @@ func (h *AuthHandler) RefreshFCMToken(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "FCM token updated successfully"})
 }
+
+// POST /api/v1/auth/refresh
+// Refresh godoc
+//
+//	@Summary		Refresh tokens
+//	@Description	Generates new access and refresh tokens using a valid refresh token
+//	@Tags			Auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			refreshRequest	body		requests.RefreshTokenRequest	true	"Refresh Token Request"
+//	@Success		200				{object}	responses.LoginResponse
+//	@Failure		400				{object}	map[string]string
+//	@Failure		401				{object}	map[string]string
+//	@Router			/auth/refresh [post]
+func (h *AuthHandler) Refresh(c *gin.Context) {
+	var req requests.RefreshTokenRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	result, err := h.authService.Refresh(c.Request.Context(), &req)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+// POST /api/v1/auth/logout
+// Logout godoc
+//
+//	@Summary		Logout user
+//	@Description	Invalidates the refresh token
+//	@Tags			Auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			logoutRequest	body	requests.LogoutRequest	true	"Logout Request"
+//	@Success		204				"No Content"
+//	@Failure		400				{object}	map[string]string
+//	@Router			/auth/logout [post]
+func (h *AuthHandler) Logout(c *gin.Context) {
+	var req requests.LogoutRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	err := h.authService.Logout(c.Request.Context(), &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}

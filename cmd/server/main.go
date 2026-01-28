@@ -24,6 +24,7 @@ import (
 	"hopSpotAPI/internal/repository"
 	"hopSpotAPI/internal/router"
 	"hopSpotAPI/internal/service"
+	"hopSpotAPI/pkg/notification"
 	"hopSpotAPI/pkg/storage"
 	"hopSpotAPI/pkg/weather"
 	"net/http"
@@ -59,17 +60,25 @@ func main() {
 	// Weather Client
 	weatherClient := weather.NewWeatherClient()
 
+	// Nofification Service Setup
+	fcmClient, err := notification.NewFCMClient(*cfg)
+	if err != nil {
+		panic("Failed to create FCM client: " + err.Error())
+	}
+
 	// Repositorys
 	userRepo := repository.NewUserRepository(db)
 	benchRepo := repository.NewBenchRepository(db)
 	visitRepo := repository.NewVisitRepository(db)
 	invitationRepo := repository.NewInvitationRepository(db)
 	photoRepo := repository.NewPhotoRepository(db)
+	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 
 	// Services
-	authService := service.NewAuthService(userRepo, invitationRepo, *cfg)
+	authService := service.NewAuthService(userRepo, invitationRepo, refreshTokenRepo, *cfg)
 	userService := service.NewUserService(userRepo, *cfg)
-	benchService := service.NewBenchService(benchRepo)
+	notificationService := service.NewNotificationService(fcmClient, userRepo)
+	benchService := service.NewBenchService(benchRepo, notificationService)
 	visitService := service.NewVisitService(visitRepo)
 	adminService := service.NewAdminService(userRepo, invitationRepo)
 	photoService := service.NewPhotoService(photoRepo, benchRepo, minioClient)
