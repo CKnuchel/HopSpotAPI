@@ -35,14 +35,6 @@ func NewAdminService(userRepo repository.UserRepository, invitationCodeRepo repo
 }
 
 func (a *adminService) ListUsers(ctx context.Context, req *requests.ListUsersRequest) (*responses.PaginatedUsersResponse, error) {
-	// Defaults
-	if req.Page <= 0 {
-		req.Page = 1
-	}
-	if req.Limit <= 0 {
-		req.Limit = 50
-	}
-
 	// Load users from repository
 	filter := repository.UserFilter{
 		Page:     req.Page,
@@ -124,14 +116,6 @@ func (a *adminService) DeleteUser(ctx context.Context, id uint, adminID uint) er
 }
 
 func (a *adminService) ListInvitationCodes(ctx context.Context, req *requests.ListInvitationCodesRequest) (*responses.PaginatedInvitationCodesResponse, error) {
-	// Defaults
-	if req.Page <= 0 {
-		req.Page = 1
-	}
-	if req.Limit <= 0 {
-		req.Limit = 50
-	}
-
 	filter := repository.InvitationFilter{
 		Page:       req.Page,
 		Limit:      req.Limit,
