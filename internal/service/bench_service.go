@@ -21,11 +21,15 @@ type BenchService interface {
 }
 
 type benchService struct {
-	benchRepo repository.BenchRepository
+	benchRepo           repository.BenchRepository
+	notificationService NotificationService
 }
 
-func NewBenchService(benchRepo repository.BenchRepository) BenchService {
-	return &benchService{benchRepo: benchRepo}
+func NewBenchService(benchRepo repository.BenchRepository, notificationService NotificationService) BenchService {
+	return &benchService{
+		benchRepo:           benchRepo,
+		notificationService: notificationService,
+	}
 }
 
 // Create implements BenchService.
@@ -42,6 +46,9 @@ func (s *benchService) Create(ctx context.Context, req *requests.CreateBenchRequ
 	if err != nil {
 		return nil, err
 	}
+
+	// Notify about new Bench (async)
+	go s.notificationService.NotifyNewBench(ctx, bench, userID)
 
 	response := mapper.BenchToResponse(bench)
 	return &response, nil
