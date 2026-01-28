@@ -113,3 +113,8 @@ func ValidateImageType(contentType string) bool {
 	contentType = strings.ToLower(contentType)
 	return slices.Contains(allowed, contentType)
 }
+
+// GeneratePhotoPath Generates the storage path for a photo
+func GeneratePhotoPath(benchID uint, photoID uint, size string) string {
+	return fmt.Sprintf("benches/%d/photos/%d_%s.jpg", benchID, photoID, size)
+}
