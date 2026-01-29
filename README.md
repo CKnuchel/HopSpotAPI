@@ -2,6 +2,8 @@
 
 A RESTful backend API for the HopSpot bench-sharing mobile app. Discover, rate, and track your visits to park benches with your friends.
 
+[![CI](https://github.com/CKnuchel/HopSpotAPI/actions/workflows/ci.yml/badge.svg)](https://github.com/CKnuchel/HopSpotAPI/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/CKnuchel/HopSpotAPI/branch/main/graph/badge.svg)](https://codecov.io/gh/CKnuchel/HopSpotAPI)
 [![Go Version](https://img.shields.io/badge/Go-1.25-00ADD8?style=flat&logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=flat&logo=postgresql)](https://www.postgresql.org/)
@@ -117,6 +119,17 @@ docker compose up -d
 curl http://localhost:8080/health
 # Response: {"status":"healthy"}
 ```
+
+6. **Get your first invitation code**
+
+On first startup (empty database), an initial invitation code is generated and logged:
+
+```bash
+docker compose logs api | grep "invitation code"
+# Look for: INF Initial invitation code generated code=XXXXXX
+```
+
+Use this code to register your first (admin) user.
 
 ### Configuration
 
@@ -387,20 +400,52 @@ go install github.com/swaggo/swag/cmd/swag@latest
 swag init -g cmd/server/main.go -o docs
 ```
 
+### Testing
+
+```bash
+# Run all tests
+go test ./...
+
+# Run tests with verbose output
+go test -v ./...
+
+# Run tests with coverage
+go test -v -race -coverprofile=coverage.out ./...
+
+# View coverage report in browser
+go tool cover -html=coverage.out
+
+# Run specific service tests
+go test -v ./internal/service/... -run TestAuthService
+```
+
+### Linting
+
+```bash
+# Install golangci-lint
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+# Run linter
+golangci-lint run
+
+# Run with auto-fix
+golangci-lint run --fix
+```
+
 ### Project Commands
 
 ```bash
-# Run tests
-go test ./...
-
 # Build binary
 go build -o hopspot-api ./cmd/server
 
 # Format code
 go fmt ./...
 
-# Lint code (requires golangci-lint)
-golangci-lint run
+# Download dependencies
+go mod download
+
+# Tidy dependencies
+go mod tidy
 ```
 
 ## 🚢 Deployment
@@ -445,7 +490,8 @@ curl http://localhost:8080/health
 - [x] Rate limiting
 - [x] Structured logging
 - [x] Configuration Validation
-- [ ] Unit and integration tests
+- [x] Unit and integration tests
+- [ ] E2E tests with test database
 
 ## 📄 License
 
