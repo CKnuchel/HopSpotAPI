@@ -105,11 +105,13 @@ func main() {
 
 	// Middlewares
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
+	globalRateLimiter := middleware.NewRateLimitMiddleware(redisClient, cfg.RateLimitGlobal)
+	loginRateLimiter := middleware.NewRateLimitMiddleware(redisClient, cfg.RateLimitLogin)
 
 	// Router
 	r := router.Setup(authHandler, userHandler, benchHandler,
 		visitHandler, adminHandler, photoHandler, weatherHandler,
-		authMiddleware)
+		authMiddleware, globalRateLimiter, loginRateLimiter)
 
 	// Server mit Graceful Shutdown
 	srv := &http.Server{
