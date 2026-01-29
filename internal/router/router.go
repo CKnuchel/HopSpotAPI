@@ -20,8 +20,13 @@ func Setup(
 	photoHandler *handler.PhotoHandler,
 	weatherHandler *handler.WeatherHandler,
 	authMiddleware *middleware.AuthMiddleware,
+	globalRateLimiter *middleware.RateLimitMiddleware,
+	loginRateLimiter *middleware.RateLimitMiddleware,
 ) *gin.Engine {
 	router := gin.Default()
+
+	// Global Rate Limiting (all Requests)
+	router.Use(globalRateLimiter.Limit())
 
 	// Swagger UI
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -31,8 +36,8 @@ func Setup(
 		// Public routes
 		auth := v1.Group("/auth")
 		{
-			auth.POST("/register", authHandler.Register)
-			auth.POST("/login", authHandler.Login)
+			auth.POST("/register", loginRateLimiter.LimitLogin(), authHandler.Register)
+			auth.POST("/login", loginRateLimiter.LimitLogin(), authHandler.Login)
 			auth.POST("/refresh", authHandler.Refresh)
 			auth.POST("/logout", authHandler.Logout)
 		}
