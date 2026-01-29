@@ -37,6 +37,9 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - REDIS_DB=${REDIS_DB:-0}
       - WEATHER_CACHE_TTL_MINUTES=${WEATHER_CACHE_TTL_MINUTES:-15}
+      # Rate Limiting
+      - RATE_LIMIT_GLOBAL=${RATE_LIMIT_GLOBAL:-200} # 200 requests per hour
+      - RATE_LIMIT_LOGIN=${RATE_LIMIT_LOGIN:-10} # 10 requests per hour
     depends_on:
       postgres:
         condition: service_healthy
