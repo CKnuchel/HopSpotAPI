@@ -50,7 +50,7 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 
 		// Storing user information in context
 		c.Set(ContextKeyUserEmail, claims.Email)
-		c.Set(ContextKeyUserRole, domain.Role(claims.Role))
+		c.Set(ContextKeyUserRole, claims.Role)
 		c.Set(ContextKeyUserID, uint(userID))
 
 		c.Next()
@@ -60,7 +60,8 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 func (m *AuthMiddleware) RequireAdmin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role, exists := c.Get("userRole")
-		if !exists || role.(domain.Role) != domain.RoleAdmin {
+		roleValue, ok := role.(domain.Role)
+		if !exists || !ok || roleValue != domain.RoleAdmin {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Admin access required"})
 			return
 		}

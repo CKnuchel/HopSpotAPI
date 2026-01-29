@@ -39,7 +39,11 @@ func NewPhotoHandler(photoService service.PhotoService) *PhotoHandler {
 //	@Router			/api/v1/benches/{id}/photos [post]
 func (h *PhotoHandler) Upload(c *gin.Context) {
 	// JWT Claims
-	userID := c.MustGet(middleware.ContextKeyUserID).(uint)
+	userID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		return
+	}
 
 	// Bench ID from URL
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)

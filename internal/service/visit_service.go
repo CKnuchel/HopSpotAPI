@@ -71,5 +71,4 @@ func (v *visitService) Create(ctx context.Context, req *requests.CreateVisitRequ
 
 	response := mapper.VisitToResponse(visit)
 	return &response, nil
-
 }

@@ -7,6 +7,7 @@ import (
 	"hopSpotAPI/internal/mapper"
 	"hopSpotAPI/internal/repository"
 	"hopSpotAPI/pkg/apperror"
+	"hopSpotAPI/pkg/logger"
 	"hopSpotAPI/pkg/utils"
 	"math"
 	"sort"
@@ -48,7 +49,11 @@ func (s *benchService) Create(ctx context.Context, req *requests.CreateBenchRequ
 	}
 
 	// Notify about new Bench (async)
-	go s.notificationService.NotifyNewBench(ctx, bench, userID)
+	go func() {
+		if err := s.notificationService.NotifyNewBench(ctx, bench, userID); err != nil {
+			logger.Warn().Err(err).Uint("benchID", bench.ID).Msg("failed to send new bench notification")
+		}
+	}()
 
 	response := mapper.BenchToResponse(bench)
 	return &response, nil
@@ -97,7 +102,7 @@ func (s *benchService) List(ctx context.Context, req *requests.ListBenchesReques
 	}
 
 	// If coordinates are given: calculate distance + filter by radius
-	var benchResponses []responses.BenchListResponse
+	benchResponses := make([]responses.BenchListResponse, 0, len(benches))
 
 	for _, bench := range benches {
 		resp := mapper.BenchToListResponse(&bench)

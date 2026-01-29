@@ -107,7 +107,11 @@ func (h *AdminHandler) UpdateUser(c *gin.Context) {
 //	@Failure		400
 //	@Router			/api/v1/admin/users/{id} [delete]
 func (h *AdminHandler) DeleteUser(c *gin.Context) {
-	adminID := c.MustGet(middleware.ContextKeyUserID).(uint)
+	adminID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		return
+	}
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
@@ -181,7 +185,11 @@ func (h *AdminHandler) ListInvitationCodes(c *gin.Context) {
 //	@Failure		400
 //	@Router			/api/v1/admin/invitation-codes [post]
 func (h *AdminHandler) CreateInvitationCode(c *gin.Context) {
-	adminID := c.MustGet(middleware.ContextKeyUserID).(uint)
+	adminID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		return
+	}
 
 	var req requests.CreateInvitationCodeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

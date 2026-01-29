@@ -82,7 +82,7 @@ func (a *adminService) UpdateUser(ctx context.Context, id uint, req *requests.Ad
 
 	// Update fields
 	if req.Role != nil {
-		user.Role = domain.Role(*req.Role)
+		user.Role = *req.Role
 	}
 
 	if req.IsActive != nil {

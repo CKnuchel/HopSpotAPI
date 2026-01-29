@@ -104,7 +104,12 @@ func (h *AuthHandler) RefreshFCMToken(c *gin.Context) {
 	}
 
 	// Call service to refresh FCM token
-	err := h.authService.RefreshFCMToken(c.Request.Context(), userId.(uint), req.FCMToken)
+	userID, ok := userId.(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		return
+	}
+	err := h.authService.RefreshFCMToken(c.Request.Context(), userID, req.FCMToken)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

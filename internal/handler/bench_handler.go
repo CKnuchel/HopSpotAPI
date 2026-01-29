@@ -112,7 +112,11 @@ func (h *BenchHandler) GetByID(c *gin.Context) {
 //	@Router			/api/v1/benches [post]
 func (h *BenchHandler) Create(c *gin.Context) {
 	// JWT Claims
-	userId := c.MustGet(middleware.ContextKeyUserID).(uint)
+	userID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		return
+	}
 
 	// Request data
 	var req requests.CreateBenchRequest
@@ -121,7 +125,7 @@ func (h *BenchHandler) Create(c *gin.Context) {
 		return
 	}
 
-	result, err := h.benchService.Create(c.Request.Context(), &req, userId)
+	result, err := h.benchService.Create(c.Request.Context(), &req, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create bench"})
 		return
@@ -145,8 +149,16 @@ func (h *BenchHandler) Create(c *gin.Context) {
 //	@Router			/api/v1/benches/{id} [patch]
 func (h *BenchHandler) Update(c *gin.Context) {
 	// JWT Claims
-	userId := c.MustGet(middleware.ContextKeyUserID).(uint)
-	userRole := c.MustGet(middleware.ContextKeyUserRole).(domain.Role)
+	userID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		return
+	}
+	userRole, ok := c.MustGet(middleware.ContextKeyUserRole).(domain.Role)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid role context"})
+		return
+	}
 	isAdmin := userRole == domain.RoleAdmin
 
 	// Request data
@@ -162,7 +174,7 @@ func (h *BenchHandler) Update(c *gin.Context) {
 		return
 	}
 
-	result, err := h.benchService.Update(c.Request.Context(), uint(id), &req, userId, isAdmin)
+	result, err := h.benchService.Update(c.Request.Context(), uint(id), &req, userID, isAdmin)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update bench"})
 		return
@@ -185,8 +197,16 @@ func (h *BenchHandler) Update(c *gin.Context) {
 //	@Router			/api/v1/benches/{id} [delete]
 func (h *BenchHandler) Delete(c *gin.Context) {
 	// JWT Claims
-	userId := c.MustGet(middleware.ContextKeyUserID).(uint)
-	userRole := c.MustGet(middleware.ContextKeyUserRole).(domain.Role)
+	userID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		return
+	}
+	userRole, ok := c.MustGet(middleware.ContextKeyUserRole).(domain.Role)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid role context"})
+		return
+	}
 	isAdmin := userRole == domain.RoleAdmin
 
 	// Request data
@@ -196,7 +216,7 @@ func (h *BenchHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	err = h.benchService.Delete(c.Request.Context(), uint(id), userId, isAdmin)
+	err = h.benchService.Delete(c.Request.Context(), uint(id), userID, isAdmin)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update bench"})
 		return

@@ -4,15 +4,17 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"mime/multipart"
+	"time"
+
 	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/dto/responses"
 	"hopSpotAPI/internal/mapper"
 	"hopSpotAPI/internal/repository"
 	"hopSpotAPI/pkg/apperror"
+	"hopSpotAPI/pkg/logger"
 	"hopSpotAPI/pkg/storage"
 	"hopSpotAPI/pkg/utils"
-	"mime/multipart"
-	"time"
 )
 
 const (
@@ -105,20 +107,32 @@ func (s *photoService) Upload(ctx context.Context, benchID uint, userID uint, fi
 	// Uploading the images to MinIO
 	if err := s.minioClient.Upload(ctx, pathOriginal, bytes.NewReader(processed.Original), int64(len(processed.Original)), "image/jpeg"); err != nil {
 		// Cleanup: delete the photo record if upload fails
-		s.photoRepo.Delete(ctx, photo.ID)
+		if cleanupErr := s.photoRepo.Delete(ctx, photo.ID); cleanupErr != nil {
+			logger.Warn().Err(cleanupErr).Uint("photoID", photo.ID).Msg("cleanup: failed to delete photo record")
+		}
 		return nil, fmt.Errorf("failed to upload original: %w", err)
 	}
 
 	if err := s.minioClient.Upload(ctx, pathMedium, bytes.NewReader(processed.Medium), int64(len(processed.Medium)), "image/jpeg"); err != nil {
-		s.photoRepo.Delete(ctx, photo.ID)
-		s.minioClient.Delete(ctx, pathOriginal)
+		if cleanupErr := s.photoRepo.Delete(ctx, photo.ID); cleanupErr != nil {
+			logger.Warn().Err(cleanupErr).Uint("photoID", photo.ID).Msg("cleanup: failed to delete photo record")
+		}
+		if cleanupErr := s.minioClient.Delete(ctx, pathOriginal); cleanupErr != nil {
+			logger.Warn().Err(cleanupErr).Str("path", pathOriginal).Msg("cleanup: failed to delete original from storage")
+		}
 		return nil, fmt.Errorf("failed to upload medium: %w", err)
 	}
 
 	if err := s.minioClient.Upload(ctx, pathThumbnail, bytes.NewReader(processed.Thumbnail), int64(len(processed.Thumbnail)), "image/jpeg"); err != nil {
-		s.photoRepo.Delete(ctx, photo.ID)
-		s.minioClient.Delete(ctx, pathOriginal)
-		s.minioClient.Delete(ctx, pathMedium)
+		if cleanupErr := s.photoRepo.Delete(ctx, photo.ID); cleanupErr != nil {
+			logger.Warn().Err(cleanupErr).Uint("photoID", photo.ID).Msg("cleanup: failed to delete photo record")
+		}
+		if cleanupErr := s.minioClient.Delete(ctx, pathOriginal); cleanupErr != nil {
+			logger.Warn().Err(cleanupErr).Str("path", pathOriginal).Msg("cleanup: failed to delete original from storage")
+		}
+		if cleanupErr := s.minioClient.Delete(ctx, pathMedium); cleanupErr != nil {
+			logger.Warn().Err(cleanupErr).Str("path", pathMedium).Msg("cleanup: failed to delete medium from storage")
+		}
 		return nil, fmt.Errorf("failed to upload thumbnail: %w", err)
 	}
 
@@ -133,7 +147,9 @@ func (s *photoService) Upload(ctx context.Context, benchID uint, userID uint, fi
 
 	// If it's the first photo, set it as main
 	if isMain || count == 0 {
-		s.photoRepo.SetMainPhoto(ctx, photo.ID, benchID)
+		if err := s.photoRepo.SetMainPhoto(ctx, photo.ID, benchID); err != nil {
+			logger.Warn().Err(err).Uint("photoID", photo.ID).Msg("failed to set main photo")
+		}
 		photo.IsMain = true
 	}
 
@@ -158,13 +174,19 @@ func (s *photoService) Delete(ctx context.Context, photoID uint, userID uint, is
 
 	// Delete from storage
 	if photo.FilePathOriginal != "" {
-		s.minioClient.Delete(ctx, photo.FilePathOriginal)
+		if err := s.minioClient.Delete(ctx, photo.FilePathOriginal); err != nil {
+			logger.Warn().Err(err).Str("path", photo.FilePathOriginal).Msg("failed to delete original from storage")
+		}
 	}
 	if photo.FilePathMedium != "" {
-		s.minioClient.Delete(ctx, photo.FilePathMedium)
+		if err := s.minioClient.Delete(ctx, photo.FilePathMedium); err != nil {
+			logger.Warn().Err(err).Str("path", photo.FilePathMedium).Msg("failed to delete medium from storage")
+		}
 	}
 	if photo.FilePathThumbnail != "" {
-		s.minioClient.Delete(ctx, photo.FilePathThumbnail)
+		if err := s.minioClient.Delete(ctx, photo.FilePathThumbnail); err != nil {
+			logger.Warn().Err(err).Str("path", photo.FilePathThumbnail).Msg("failed to delete thumbnail from storage")
+		}
 	}
 
 	// Delete from database
@@ -176,7 +198,9 @@ func (s *photoService) Delete(ctx context.Context, photoID uint, userID uint, is
 	if photo.IsMain {
 		photos, err := s.photoRepo.FindByBenchID(ctx, photo.BenchID)
 		if err == nil && len(photos) > 0 {
-			s.photoRepo.SetMainPhoto(ctx, photos[0].ID, photo.BenchID)
+			if err := s.photoRepo.SetMainPhoto(ctx, photos[0].ID, photo.BenchID); err != nil {
+				logger.Warn().Err(err).Uint("photoID", photos[0].ID).Msg("failed to set new main photo")
+			}
 		}
 	}
 

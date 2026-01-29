@@ -58,7 +58,6 @@ func (r *photoRepository) CountByBenchID(ctx context.Context, benchID uint) (int
 }
 
 func (r *photoRepository) SetMainPhoto(ctx context.Context, photoID uint, benchID uint) error {
-
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// Unset previous main photo
 		if err := tx.Model(&domain.Photo{}).Where("bench_id = ? AND is_main = ?", benchID, true).Update("is_main", false).Error; err != nil {
