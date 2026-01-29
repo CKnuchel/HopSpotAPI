@@ -19,6 +19,7 @@ import (
 	"context"
 	"hopSpotAPI/internal/config"
 	"hopSpotAPI/internal/database"
+	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/handler"
 	"hopSpotAPI/internal/middleware"
 	"hopSpotAPI/internal/repository"
@@ -29,6 +30,7 @@ import (
 	"hopSpotAPI/pkg/storage"
 	"hopSpotAPI/pkg/weather"
 	"log"
+	"math/rand"
 	"net/http"
 )
 
@@ -95,6 +97,27 @@ func main() {
 	photoRepo := repository.NewPhotoRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 
+	// Bootstrap: Create initial invitation code if no users exist
+	userCount, err := userRepo.Count(context.Background())
+	if err != nil {
+		log.Printf("Warning: Could not check user count: %v", err)
+	} else if userCount == 0 {
+		code := generateBootstrapCode()
+		invitationCode := &domain.InvitationCode{
+			Code:    code,
+			Comment: "Bootstrap - First Admin",
+		}
+		if err := invitationRepo.Create(context.Background(), invitationCode); err != nil {
+			log.Printf("Warning: Could not create bootstrap code: %v", err)
+		} else {
+			log.Println("═══════════════════════════════════════════════════════")
+			log.Println("  🎉 FIRST TIME SETUP")
+			log.Println("  Use this invitation code to register the first admin:")
+			log.Printf("  👉  %s", code)
+			log.Println("═══════════════════════════════════════════════════════")
+		}
+	}
+
 	// Services
 	authService := service.NewAuthService(userRepo, invitationRepo, refreshTokenRepo, *cfg)
 	userService := service.NewUserService(userRepo, *cfg)
@@ -132,4 +155,13 @@ func main() {
 
 	go startServer(srv)
 	waitForShutdown(srv, db, redisClient)
+}
+
+func generateBootstrapCode() string {
+	const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, 6)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(b)
 }

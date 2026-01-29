@@ -11,6 +11,7 @@ services:
     environment:
       - PORT=8080
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - GIN_MODE=${GIN_MODE:-release}  # debug, release, test
       # Database
       - DB_HOST=postgres
       - DB_PORT=5432

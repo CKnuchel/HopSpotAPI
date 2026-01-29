@@ -156,7 +156,7 @@ func (a *adminService) CreateInvitationCode(ctx context.Context, req *requests.C
 	invitationCode := &domain.InvitationCode{
 		Code:      code,
 		Comment:   req.Comment,
-		CreatedBy: adminID,
+		CreatedBy: &adminID,
 	}
 
 	// Save to repository

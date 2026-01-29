@@ -18,7 +18,7 @@ func InvitationCodeToResponse(code *domain.InvitationCode) responses.InvitationC
 		ID:        code.ID,
 		Code:      code.Code,
 		Comment:   code.Comment,
-		CreatedBy: UserToResponse(&code.Creator),
+		CreatedBy: UserToResponse(code.Creator),
 		CreatedAt: code.CreatedAt,
 	}
 
