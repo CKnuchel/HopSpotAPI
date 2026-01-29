@@ -1,11 +1,12 @@
 package handler
 
 import (
-	"hopSpotAPI/internal/dto/requests"
-	"hopSpotAPI/internal/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+ "hopSpotAPI/internal/dto/requests"
+	"hopSpotAPI/internal/service"
 )
 
 type AuthHandler struct {
