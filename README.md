@@ -442,7 +442,7 @@ curl http://localhost:8080/health
 
 - [x] Refresh token implementation
 - [x] Redis caching for weather data
-- [ ] Rate limiting
+- [x] Rate limiting
 - [ ] Structured logging
 - [ ] Unit and integration tests
 
