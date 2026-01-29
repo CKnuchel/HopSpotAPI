@@ -1746,8 +1746,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "REST API for the HopSpot bench management app",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
 }
 
 func init() {
