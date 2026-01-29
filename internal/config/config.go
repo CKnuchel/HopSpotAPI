@@ -103,8 +103,8 @@ func Load() *Config {
 		FirebaseAuthKey: getEnv("FIREBASE_AUTH_KEY", ""),
 
 		// Redis
-		RedisHost:       getEnv("REDIS_HOST", ""),
-		RedisPort:       getEnv("REDIS_PORT", ""),
+		RedisHost:       getEnv("REDIS_HOST", "localhost"),
+		RedisPort:       getEnv("REDIS_PORT", "6379"),
 		RedisPassword:   getEnv("REDIS_PASSWORD", ""),
 		RedisDB:         redisDB,
 		WeatherCacheTTL: time.Duration(weatherTTL) * time.Minute,
