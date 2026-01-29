@@ -6,3 +6,7 @@ coverage.html
 
 # Makefile (no need to copy it)
 Makefile
+
+# Misc
+*.png
+.golangci.yml
