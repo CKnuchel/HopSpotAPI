@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"hopSpotAPI/internal/dto/responses"
 	"hopSpotAPI/pkg/cache"
+	"hopSpotAPI/pkg/logger"
 	"hopSpotAPI/pkg/weather"
-	"log"
 	"time"
 )
 
@@ -36,15 +36,16 @@ func (s *weatherService) GetCurrentWeather(ctx context.Context, lat float64, lon
 		var cachedResponse responses.WeatherResponse
 		found, err := s.redisClient.Get(ctx, cacheKey, &cachedResponse)
 		if err != nil {
-			// Log but don't fail - just skip cache
-			log.Printf("Redis get error: %v", err)
+			logger.Warn().Err(err).Str("key", cacheKey).Msg("Redis get error")
 		}
 		if found {
+			logger.Debug().Str("key", cacheKey).Msg("Weather cache hit")
 			return &cachedResponse, nil
 		}
 	}
 
 	// Cache miss or no Redis → fetch from API
+	logger.Debug().Str("key", cacheKey).Msg("Weather cache miss - fetching from API")
 	weatherData, err := s.weatherClient.GetCurrentWeather(ctx, lat, lon)
 	if err != nil {
 		return nil, err
@@ -53,8 +54,7 @@ func (s *weatherService) GetCurrentWeather(ctx context.Context, lat float64, lon
 	// Store in cache (if Redis available)
 	if s.redisClient != nil {
 		if err := s.redisClient.Set(ctx, cacheKey, weatherData, s.cacheTTL); err != nil {
-			// Log but don't fail - data was fetched successfully
-			log.Printf("Redis set error: %v", err)
+			logger.Warn().Err(err).Str("key", cacheKey).Msg("Redis set error")
 		}
 	}
 

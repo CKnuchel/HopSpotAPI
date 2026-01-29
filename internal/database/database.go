@@ -3,11 +3,11 @@ package database
 import (
 	"fmt"
 	"hopSpotAPI/internal/config"
-	"log"
+	"hopSpotAPI/pkg/logger"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	gormlogger "gorm.io/gorm/logger"
 )
 
 func Connect(cfg *config.Config) (*gorm.DB, error) {
@@ -21,13 +21,13 @@ func Connect(cfg *config.Config) (*gorm.DB, error) {
 	)
 
 	// Logger-Level
-	logLevel := logger.Silent
+	logLevel := gormlogger.Silent
 	if cfg.LogLevel == "DEBUG" {
-		logLevel = logger.Info // Shows detailed logs in DEBUG mode
+		logLevel = gormlogger.Info
 	}
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logLevel),
+		Logger: gormlogger.Default.LogMode(logLevel),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
@@ -42,6 +42,6 @@ func Connect(cfg *config.Config) (*gorm.DB, error) {
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 
-	log.Println("Database connected successfully")
+	logger.Info().Msg("Database connected successfully")
 	return db, nil
 }

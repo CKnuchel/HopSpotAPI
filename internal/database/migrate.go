@@ -3,13 +3,13 @@ package database
 import (
 	"fmt"
 	"hopSpotAPI/internal/domain"
-	"log"
+	"hopSpotAPI/pkg/logger"
 
 	"gorm.io/gorm"
 )
 
 func Migrate(db *gorm.DB) error {
-	log.Println("Migrating database...")
+	logger.Info().Msg("Migrating database...")
 
 	err := db.AutoMigrate(
 		&domain.User{},
@@ -25,6 +25,6 @@ func Migrate(db *gorm.DB) error {
 		return fmt.Errorf("migration failed: %w", err)
 	}
 
-	log.Println("Migrations completed successfully")
+	logger.Info().Msg("Migrations completed successfully")
 	return nil
 }

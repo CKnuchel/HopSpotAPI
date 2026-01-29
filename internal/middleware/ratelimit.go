@@ -3,7 +3,7 @@ package middleware
 import (
 	"fmt"
 	"hopSpotAPI/pkg/cache"
-	"log"
+	"hopSpotAPI/pkg/logger"
 	"net/http"
 	"time"
 
@@ -37,7 +37,7 @@ func (m *RateLimitMiddleware) Limit() gin.HandlerFunc {
 		count, err := m.redisClient.Increment(c.Request.Context(), key, time.Hour)
 		if err != nil {
 			// Redis error - log and allow request (graceful degradation)
-			log.Printf("Rate limit check failed: %v", err)
+			logger.Warn().Err(err).Str("ip", ipAddr).Msg("Rate limit check failed")
 			c.Next()
 			return
 		}
@@ -67,7 +67,7 @@ func (m *RateLimitMiddleware) LimitLogin() gin.HandlerFunc {
 
 		count, err := m.redisClient.Increment(c.Request.Context(), key, time.Hour)
 		if err != nil {
-			log.Printf("Login rate limit check failed: %v", err)
+			logger.Warn().Err(err).Str("ip", ipAddr).Msg("Login rate limit check failed")
 			c.Next()
 			return
 		}

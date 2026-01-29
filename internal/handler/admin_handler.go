@@ -4,6 +4,7 @@ import (
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/middleware"
 	"hopSpotAPI/internal/service"
+	"hopSpotAPI/pkg/logger"
 	"net/http"
 	"strconv"
 
@@ -115,9 +116,16 @@ func (h *AdminHandler) DeleteUser(c *gin.Context) {
 
 	err = h.adminService.DeleteUser(c.Request.Context(), uint(id), adminID)
 	if err != nil {
+		logger.Error().Err(err).Uint("user_id", uint(id)).Msg("Failed to delete user")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
 		return
 	}
+
+	// Audit Log
+	logger.Info().
+		Uint("admin_id", adminID).
+		Uint("deleted_user_id", uint(id)).
+		Msg("User deleted by admin")
 
 	c.Status(http.StatusNoContent)
 }
