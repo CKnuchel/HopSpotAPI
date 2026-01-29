@@ -1,0 +1,54 @@
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - gocritic
+    - gofmt
+    - goimports
+    - misspell
+    - unconvert
+    - unparam
+    - nakedret
+    - prealloc
+    - exportloopref
+    - whitespace
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+  govet:
+    shadow: true
+  gofmt:
+    simplify: true
+  goimports:
+    local-prefixes: hopSpotAPI
+  misspell:
+    locale: US
+  nakedret:
+    max-func-lines: 30
+  prealloc:
+    simple: true
+    for-loops: true
+
+issues:
+  exclude-rules:
+    # Exclude test files from some linters
+    - path: _test\.go
+      linters:
+        - errcheck
+        - unparam
+    # Exclude mocks from linting
+    - path: mocks/
+      linters:
+        - all
+  max-issues-per-linter: 50
+  max-same-issues: 10
