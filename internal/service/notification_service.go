@@ -27,6 +27,11 @@ func NewNotificationService(fcmClient *notification.FCMClient, userRepo reposito
 
 // NotifyNewBench implements NotificationService.
 func (s *notificationService) NotifyNewBench(ctx context.Context, bench *domain.Bench, creatorID uint) error {
+	// Skip if FCM not configured
+	if s.fcmClient == nil {
+		return nil
+	}
+
 	tokens, err := s.userRepo.GetAllFCMTokens(ctx, creatorID)
 	if err != nil {
 		return fmt.Errorf("failed to read FCM tokens: %w", err)

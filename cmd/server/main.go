@@ -65,10 +65,18 @@ func main() {
 	// Weather Client
 	weatherClient := weather.NewWeatherClient()
 
-	// Nofification Service Setup
-	fcmClient, err := notification.NewFCMClient(*cfg)
-	if err != nil {
-		panic("Failed to create FCM client: " + err.Error())
+	// Notification Service Setup (optional - graceful degradation)
+	var fcmClient *notification.FCMClient
+	if cfg.FirebaseAuthKey != "" {
+		var err error
+		fcmClient, err = notification.NewFCMClient(*cfg)
+		if err != nil {
+			log.Printf("FCM client not available: %v - push notifications disabled", err)
+		} else {
+			log.Println("FCM connected - push notifications enabled")
+		}
+	} else {
+		log.Println("Firebase not configured - push notifications disabled")
 	}
 
 	// Redis Client Setup
