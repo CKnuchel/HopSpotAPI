@@ -3,9 +3,10 @@ package repository
 import (
 	"context"
 	"errors"
-	"hopSpotAPI/internal/domain"
 
 	"gorm.io/gorm"
+
+	"hopSpotAPI/internal/domain"
 )
 
 type benchRepository struct {

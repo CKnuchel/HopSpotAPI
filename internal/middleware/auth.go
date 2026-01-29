@@ -1,13 +1,14 @@
 package middleware
 
 import (
-	"hopSpotAPI/internal/domain"
-	"hopSpotAPI/pkg/utils"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+
+	"hopSpotAPI/internal/domain"
+	"hopSpotAPI/pkg/utils"
 )
 
 type AuthMiddleware struct {

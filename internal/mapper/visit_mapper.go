@@ -1,10 +1,11 @@
 package mapper
 
 import (
+	"time"
+
 	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/dto/responses"
-	"time"
 )
 
 func CreateVisitRequestToDomain(req *requests.CreateVisitRequest, userID uint) *domain.Visit {

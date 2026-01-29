@@ -2,12 +2,13 @@ package database
 
 import (
 	"fmt"
-	"hopSpotAPI/internal/config"
-	"hopSpotAPI/pkg/logger"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
+
+	"hopSpotAPI/internal/config"
+	"hopSpotAPI/pkg/logger"
 )
 
 func Connect(cfg *config.Config) (*gorm.DB, error) {

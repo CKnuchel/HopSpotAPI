@@ -88,8 +88,16 @@ func (h *PhotoHandler) Upload(c *gin.Context) {
 //	@Router			/api/v1/photos/{id} [delete]
 func (h *PhotoHandler) Delete(c *gin.Context) {
 	// JWT Claims
-	userID := c.MustGet(middleware.ContextKeyUserID).(uint)
-	userRole := c.MustGet(middleware.ContextKeyUserRole).(domain.Role)
+	userID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		return
+	}
+	userRole, ok := c.MustGet(middleware.ContextKeyUserRole).(domain.Role)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid role context"})
+		return
+	}
 	isAdmin := userRole == domain.RoleAdmin
 
 	photoID, err := strconv.ParseUint(c.Param("id"), 10, 32)
@@ -124,8 +132,16 @@ func (h *PhotoHandler) Delete(c *gin.Context) {
 //	@Router			/api/v1/photos/{id}/main [patch]
 func (h *PhotoHandler) SetMainPhoto(c *gin.Context) {
 	// JWT Claims
-	userID := c.MustGet(middleware.ContextKeyUserID).(uint)
-	userRole := c.MustGet(middleware.ContextKeyUserRole).(domain.Role)
+	userID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		return
+	}
+	userRole, ok := c.MustGet(middleware.ContextKeyUserRole).(domain.Role)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid role context"})
+		return
+	}
 	isAdmin := userRole == domain.RoleAdmin
 
 	photoID, err := strconv.ParseUint(c.Param("id"), 10, 32)

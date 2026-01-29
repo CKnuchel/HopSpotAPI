@@ -1,13 +1,14 @@
 package utils
 
 import (
-	"hopSpotAPI/internal/config"
-	"hopSpotAPI/internal/domain"
-	"hopSpotAPI/pkg/apperror"
 	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+
+	"hopSpotAPI/internal/config"
+	"hopSpotAPI/internal/domain"
+	"hopSpotAPI/pkg/apperror"
 )
 
 type JWTClaims struct {

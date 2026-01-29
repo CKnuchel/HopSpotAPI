@@ -61,7 +61,11 @@ func (h *VisitHandler) GetVisitCountByBenchID(c *gin.Context) {
 //	@Failure		400
 //	@Router			/api/v1/visits [get]
 func (h *VisitHandler) ListVisits(c *gin.Context) {
-	userID := c.MustGet(middleware.ContextKeyUserID).(uint)
+	userID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		return
+	}
 
 	var req = requests.ListVisitsRequest{}
 	if err := c.ShouldBindQuery(&req); err != nil {
@@ -99,7 +103,11 @@ func (h *VisitHandler) ListVisits(c *gin.Context) {
 //	@Failure		400
 //	@Router			/api/v1/visits [post]
 func (h *VisitHandler) CreateVisit(c *gin.Context) {
-	userID := c.MustGet(middleware.ContextKeyUserID).(uint)
+	userID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		return
+	}
 
 	var req requests.CreateVisitRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

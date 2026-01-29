@@ -2,12 +2,13 @@ package middleware
 
 import (
 	"fmt"
-	"hopSpotAPI/pkg/cache"
-	"hopSpotAPI/pkg/logger"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+
+	"hopSpotAPI/pkg/cache"
+	"hopSpotAPI/pkg/logger"
 )
 
 type RateLimitMiddleware struct {

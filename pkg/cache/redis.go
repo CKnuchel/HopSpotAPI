@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"hopSpotAPI/internal/config"
 	"time"
 
 	"github.com/redis/go-redis/v9"
+
+	"hopSpotAPI/internal/config"
 )
 
 type RedisClient struct {

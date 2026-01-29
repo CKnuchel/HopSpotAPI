@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+
 	"hopSpotAPI/internal/domain"
 )
 

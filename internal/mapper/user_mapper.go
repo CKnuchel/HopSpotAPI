@@ -1,10 +1,11 @@
 package mapper
 
 import (
+	"strconv"
+
 	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/dto/responses"
-	"strconv"
 )
 
 func RegisterRequestToUser(req *requests.RegisterRequest) *domain.User {

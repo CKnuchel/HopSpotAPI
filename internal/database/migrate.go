@@ -2,10 +2,11 @@ package database
 
 import (
 	"fmt"
-	"hopSpotAPI/internal/domain"
-	"hopSpotAPI/pkg/logger"
 
 	"gorm.io/gorm"
+
+	"hopSpotAPI/internal/domain"
+	"hopSpotAPI/pkg/logger"
 )
 
 func Migrate(db *gorm.DB) error {

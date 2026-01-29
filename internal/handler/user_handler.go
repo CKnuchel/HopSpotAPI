@@ -31,7 +31,12 @@ func NewUserHandler(userService service.UserService) *UserHandler {
 func (h *UserHandler) GetProfile(c *gin.Context) {
 	userId := c.MustGet(middleware.ContextKeyUserID)
 
-	result, err := h.userService.GetProfile(c.Request.Context(), userId.(uint))
+	userID, ok := userId.(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		return
+	}
+	result, err := h.userService.GetProfile(c.Request.Context(), userID)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -61,9 +66,14 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	result, err := h.userService.UpdateProfile(c.Request.Context(), userId.(uint), &req)
+	userID, ok := userId.(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		return
+	}
+	result, err := h.userService.UpdateProfile(c.Request.Context(), userID, &req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -91,7 +101,12 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	err := h.userService.ChangePassword(c.Request.Context(), userId.(uint), &req)
+	userID, ok := userId.(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		return
+	}
+	err := h.userService.ChangePassword(c.Request.Context(), userID, &req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
