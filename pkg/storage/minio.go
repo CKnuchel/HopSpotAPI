@@ -3,12 +3,13 @@ package storage
 import (
 	"context"
 	"fmt"
-	"hopSpotAPI/internal/config"
 	"io"
 	"time"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+
+	"hopSpotAPI/internal/config"
 )
 
 type MinioClient struct {

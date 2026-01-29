@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"hopSpotAPI/internal/dto/responses"
 	"io"
 	"net/http"
 	"time"
+
+	"hopSpotAPI/internal/dto/responses"
 )
 
 const DefaultBaseURL = "https://api.open-meteo.com/v1/forecast"

@@ -55,7 +55,7 @@ type Config struct {
 
 func Load() *Config {
 	// Load .env file if it exists (Without error because Docker env vars have precedence)
-	_ = godotenv.Load() // .env file is optional in production
+	_ = godotenv.Load() //nolint:errcheck // .env file is optional in production
 
 	jwtSeconds, err := strconv.Atoi(getEnv("JWT_EXPIRE_SECONDS", "3600"))
 	if err != nil {

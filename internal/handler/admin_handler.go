@@ -1,14 +1,15 @@
 package handler
 
 import (
-	"hopSpotAPI/internal/dto/requests"
-	"hopSpotAPI/internal/middleware"
-	"hopSpotAPI/internal/service"
-	"hopSpotAPI/pkg/logger"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+
+	"hopSpotAPI/internal/dto/requests"
+	"hopSpotAPI/internal/middleware"
+	"hopSpotAPI/internal/service"
+	"hopSpotAPI/pkg/logger"
 )
 
 type AdminHandler struct {

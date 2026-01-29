@@ -3,10 +3,11 @@ package repository
 import (
 	"context"
 	"errors"
-	"hopSpotAPI/internal/domain"
 	"time"
 
 	"gorm.io/gorm"
+
+	"hopSpotAPI/internal/domain"
 )
 
 type refreshTokenRepository struct {

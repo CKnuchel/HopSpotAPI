@@ -2,9 +2,10 @@ package repository
 
 import (
 	"context"
-	"hopSpotAPI/internal/domain"
 
 	"gorm.io/gorm"
+
+	"hopSpotAPI/internal/domain"
 )
 
 type visitRepository struct {
