@@ -43,6 +43,10 @@ type Config struct {
 	RedisPassword   string
 	RedisDB         int
 	WeatherCacheTTL time.Duration
+
+	// Rate Limiting
+	RateLimitGlobal int // Requests per hour per IP
+	RateLimitLogin  int // Login attempts per hour per IP
 }
 
 func Load() *Config {
@@ -72,6 +76,17 @@ func Load() *Config {
 	weatherTTL, err := strconv.Atoi(getEnv("WEATHER_CACHE_TTL_MINUTES", "15"))
 	if err != nil {
 		weatherTTL = 15
+	}
+
+	// Rate Limiting
+	rateLimitGlobal, err := strconv.Atoi(getEnv("RATE_LIMIT_GLOBAL", "1000"))
+	if err != nil {
+		rateLimitGlobal = 1000
+	}
+
+	rateLimitLogin, err := strconv.Atoi(getEnv("RATE_LIMIT_LOGIN", "10"))
+	if err != nil {
+		rateLimitLogin = 10
 	}
 
 	return &Config{
@@ -108,6 +123,10 @@ func Load() *Config {
 		RedisPassword:   getEnv("REDIS_PASSWORD", ""),
 		RedisDB:         redisDB,
 		WeatherCacheTTL: time.Duration(weatherTTL) * time.Minute,
+
+		// Rate Limiting
+		RateLimitGlobal: rateLimitGlobal,
+		RateLimitLogin:  rateLimitLogin,
 	}
 }
 

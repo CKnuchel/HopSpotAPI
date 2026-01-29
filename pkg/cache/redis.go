@@ -43,7 +43,7 @@ func (r *RedisClient) Set(ctx context.Context, key string, value any, ttl time.D
 }
 
 func (r *RedisClient) Get(ctx context.Context, key string, target any) (bool, error) {
-	data, err := r.client.Get(ctx, key).Bytes() // ← r.client.Get!
+	data, err := r.client.Get(ctx, key).Bytes()
 	if err != nil {
 		if err == redis.Nil {
 			return false, nil // Key not found
@@ -60,4 +60,19 @@ func (r *RedisClient) Get(ctx context.Context, key string, target any) (bool, er
 
 func (r *RedisClient) Close() error {
 	return r.client.Close()
+}
+
+func (r *RedisClient) Increment(ctx context.Context, key string, ttl time.Duration) (int64, error) {
+	// Incr creates key with 1 if not exists else +1
+	count, err := r.client.Incr(ctx, key).Result()
+	if err != nil {
+		return 0, err
+	}
+
+	// Define ttl only on first request
+	if count == 1 {
+		r.client.Expire(ctx, key, ttl)
+	}
+
+	return count, nil
 }
