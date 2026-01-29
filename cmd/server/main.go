@@ -24,9 +24,11 @@ import (
 	"hopSpotAPI/internal/repository"
 	"hopSpotAPI/internal/router"
 	"hopSpotAPI/internal/service"
+	"hopSpotAPI/pkg/cache"
 	"hopSpotAPI/pkg/notification"
 	"hopSpotAPI/pkg/storage"
 	"hopSpotAPI/pkg/weather"
+	"log"
 	"net/http"
 )
 
@@ -66,6 +68,14 @@ func main() {
 		panic("Failed to create FCM client: " + err.Error())
 	}
 
+	// Redis Client Setup
+	redisClient := cache.NewRedisClient(*cfg)
+	if redisClient != nil {
+		log.Println("Redis connected - caching enabled")
+	} else {
+		log.Println("Redis not available - caching disabled")
+	}
+
 	// Repositorys
 	userRepo := repository.NewUserRepository(db)
 	benchRepo := repository.NewBenchRepository(db)
@@ -82,7 +92,7 @@ func main() {
 	visitService := service.NewVisitService(visitRepo)
 	adminService := service.NewAdminService(userRepo, invitationRepo)
 	photoService := service.NewPhotoService(photoRepo, benchRepo, minioClient)
-	weatherService := service.NewWeatherService(weatherClient)
+	weatherService := service.NewWeatherService(weatherClient, redisClient, cfg.WeatherCacheTTL)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService)
@@ -108,5 +118,5 @@ func main() {
 	}
 
 	go startServer(srv)
-	waitForShutdown(srv, db)
+	waitForShutdown(srv, db, redisClient)
 }

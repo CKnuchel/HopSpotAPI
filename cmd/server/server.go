@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"hopSpotAPI/pkg/cache"
 	"log"
 	"net/http"
 	"os"
@@ -19,7 +20,7 @@ func startServer(srv *http.Server) {
 	}
 }
 
-func waitForShutdown(srv *http.Server, db *gorm.DB) {
+func waitForShutdown(srv *http.Server, db *gorm.DB, redisClient *cache.RedisClient) {
 	quit := make(chan os.Signal, 1)
 
 	// SIGINT (Ctrl+C) || SIGTERM signals from docker/kubernetes
@@ -36,6 +37,15 @@ func waitForShutdown(srv *http.Server, db *gorm.DB) {
 	}
 
 	closeDatabase(db)
+
+	if redisClient != nil {
+		if err := redisClient.Close(); err != nil {
+			log.Printf("Error closing Redis: %v", err)
+		} else {
+			log.Println("Redis connection closed")
+		}
+	}
+
 	log.Println("Server stopped")
 }
 
