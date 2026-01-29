@@ -36,6 +36,13 @@ type Config struct {
 
 	// Firebase
 	FirebaseAuthKey string
+
+	// Redis
+	RedisHost       string
+	RedisPort       string
+	RedisPassword   string
+	RedisDB         int
+	WeatherCacheTTL time.Duration
 }
 
 func Load() *Config {
@@ -56,6 +63,17 @@ func Load() *Config {
 		refreshDays = 90
 	}
 
+	// Redis
+	redisDB, err := strconv.Atoi(getEnv("REDIS_DB", "0"))
+	if err != nil {
+		redisDB = 0
+	}
+
+	weatherTTL, err := strconv.Atoi(getEnv("WEATHER_CACHE_TTL_MINUTES", "15"))
+	if err != nil {
+		weatherTTL = 15
+	}
+
 	return &Config{
 		Port:     getEnv("PORT", "8080"),
 		LogLevel: getEnv("LOG_LEVEL", "INFO"),
@@ -71,7 +89,7 @@ func Load() *Config {
 		JWTSecret:          getEnv("JWT_SECRET", "supersecretkey"),
 		JWTExpire:          time.Duration(jwtSeconds) * time.Second,
 		JWTAudience:        getEnv("JWT_AUDIENCE", "yourapp.com"),
-		JWTIssuer:          getEnv("JWT_ISSUER,", "yourapp.com"),
+		JWTIssuer:          getEnv("JWT_ISSUER", "yourapp.com"),
 		RefreshTokenExpire: time.Duration(refreshDays) * 24 * time.Hour,
 
 		// MinIO
@@ -83,6 +101,13 @@ func Load() *Config {
 
 		// Firebase
 		FirebaseAuthKey: getEnv("FIREBASE_AUTH_KEY", ""),
+
+		// Redis
+		RedisHost:       getEnv("REDIS_HOST", ""),
+		RedisPort:       getEnv("REDIS_PORT", ""),
+		RedisPassword:   getEnv("REDIS_PASSWORD", ""),
+		RedisDB:         redisDB,
+		WeatherCacheTTL: time.Duration(weatherTTL) * time.Minute,
 	}
 }
 
