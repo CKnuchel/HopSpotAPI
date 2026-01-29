@@ -441,7 +441,7 @@ curl http://localhost:8080/health
 ## 📝 Roadmap
 
 - [x] Refresh token implementation
-- [ ] Redis caching for weather data
+- [x] Redis caching for weather data
 - [ ] Rate limiting
 - [ ] Structured logging
 - [ ] Unit and integration tests
