@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -94,21 +95,21 @@ func Load() *Config {
 		LogLevel: getEnv("LOG_LEVEL", "INFO"),
 
 		// Database
-		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBPort:     getEnv("DB_PORT", "5432"),
-		DBUser:     getEnv("DB_USER", "postgres"),
-		DBPassword: getEnv("DB_PASSWORD", "password"),
-		DBName:     getEnv("DB_NAME", "dbname"),
+		DBHost:     getEnv("DB_HOST", ""),
+		DBPort:     getEnv("DB_PORT", ""),
+		DBUser:     getEnv("DB_USER", ""),
+		DBPassword: getEnv("DB_PASSWORD", ""),
+		DBName:     getEnv("DB_NAME", ""),
 
 		// JWT
-		JWTSecret:          getEnv("JWT_SECRET", "supersecretkey"),
+		JWTSecret:          getEnv("JWT_SECRET", ""),
 		JWTExpire:          time.Duration(jwtSeconds) * time.Second,
 		JWTAudience:        getEnv("JWT_AUDIENCE", "yourapp.com"),
 		JWTIssuer:          getEnv("JWT_ISSUER", "yourapp.com"),
 		RefreshTokenExpire: time.Duration(refreshDays) * 24 * time.Hour,
 
 		// MinIO
-		MinioEndpoint:   getEnv("MINIO_ENDPOINT", "localhost:9000"),
+		MinioEndpoint:   getEnv("MINIO_ENDPOINT", ""),
 		MinioAccessKey:  getEnv("MINIO_ACCESS_KEY", ""),
 		MinioSecretKey:  getEnv("MINIO_SECRET_KEY", ""),
 		MinioUseSSL:     getEnv("MINIO_USE_SSL", "false") == "true",
@@ -128,6 +129,48 @@ func Load() *Config {
 		RateLimitGlobal: rateLimitGlobal,
 		RateLimitLogin:  rateLimitLogin,
 	}
+}
+
+func (c *Config) Validate() error {
+	var missing []string
+
+	// Database (required)
+	if c.DBHost == "" {
+		missing = append(missing, "DB_HOST")
+	}
+	if c.DBUser == "" {
+		missing = append(missing, "DB_USER")
+	}
+	if c.DBPassword == "" {
+		missing = append(missing, "DB_PASSWORD")
+	}
+	if c.DBName == "" {
+		missing = append(missing, "DB_NAME")
+	}
+
+	// JWT (required)
+	if c.JWTSecret == "" {
+		missing = append(missing, "JWT_SECRET")
+	} else if len(c.JWTSecret) < 32 {
+		return fmt.Errorf("JWT_SECRET must be at least 32 characters (got %d)", len(c.JWTSecret))
+	}
+
+	// MinIO (required)
+	if c.MinioEndpoint == "" {
+		missing = append(missing, "MINIO_ENDPOINT")
+	}
+	if c.MinioAccessKey == "" {
+		missing = append(missing, "MINIO_ACCESS_KEY")
+	}
+	if c.MinioSecretKey == "" {
+		missing = append(missing, "MINIO_SECRET_KEY")
+	}
+
+	if len(missing) > 0 {
+		return fmt.Errorf("missing required environment variables: %v", missing)
+	}
+
+	return nil
 }
 
 func getEnv(key, fallback string) string {

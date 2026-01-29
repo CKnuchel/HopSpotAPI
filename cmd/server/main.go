@@ -35,6 +35,9 @@ import (
 func main() {
 	// Load configuration from environment variables
 	cfg := config.Load()
+	if err := cfg.Validate(); err != nil {
+		log.Fatalf("Configuration error: %v", err)
+	}
 
 	// Initialize database connection
 	db, err := database.Connect(cfg)
