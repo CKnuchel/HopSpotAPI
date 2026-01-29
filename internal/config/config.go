@@ -11,8 +11,11 @@ import (
 
 type Config struct {
 	// Server
-	Port     string
-	LogLevel string
+	Port string
+
+	// Logging
+	LogLevel  string
+	LogFormat string // "JSON" or "CONSOLE"
 
 	// JWT
 	JWTSecret          string
@@ -88,8 +91,11 @@ func Load() *Config {
 	}
 
 	return &Config{
-		Port:     getEnv("PORT", "8080"),
-		LogLevel: getEnv("LOG_LEVEL", "INFO"),
+		Port: getEnv("PORT", "8080"),
+
+		// Logging
+		LogLevel:  getEnv("LOG_LEVEL", "INFO"),
+		LogFormat: getEnv("LOG_FORMAT", "console"),
 
 		// Database
 		DBHost:     getEnv("DB_HOST", ""),

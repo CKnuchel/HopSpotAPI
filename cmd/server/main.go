@@ -26,10 +26,10 @@ import (
 	"hopSpotAPI/internal/router"
 	"hopSpotAPI/internal/service"
 	"hopSpotAPI/pkg/cache"
+	"hopSpotAPI/pkg/logger"
 	"hopSpotAPI/pkg/notification"
 	"hopSpotAPI/pkg/storage"
 	"hopSpotAPI/pkg/weather"
-	"log"
 	"math/rand"
 	"net/http"
 )
@@ -37,31 +37,36 @@ import (
 func main() {
 	// Load configuration from environment variables
 	cfg := config.Load()
+
+	// Initialize logger FIRST (before validation)
+	logger.Init(cfg.LogLevel, cfg.LogFormat)
+	logger.Info().Str("version", "1.0.0").Msg("Starting HopSpot API")
+
+	// Validate config
 	if err := cfg.Validate(); err != nil {
-		log.Fatalf("Configuration error: %v", err)
+		logger.Fatal().Err(err).Msg("Configuration error")
 	}
 
 	// Initialize database connection
 	db, err := database.Connect(cfg)
-
 	if err != nil {
-		panic("Failed to connect to database: " + err.Error())
+		logger.Fatal().Err(err).Msg("Failed to connect to database")
 	}
 
 	// Run database migrations
 	if err := database.Migrate(db); err != nil {
-		panic("Database migration failed: " + err.Error())
+		logger.Fatal().Err(err).Msg("Database migration failed")
 	}
 
-	// MinIo client setup
+	// MinIO client setup
 	minioClient, err := storage.NewMinioClient(*cfg)
 	if err != nil {
-		panic("Failed to create MinIO client: " + err.Error())
+		logger.Fatal().Err(err).Msg("Failed to create MinIO client")
 	}
 
 	// Ensure the bucket exists
 	if err := minioClient.EnsureBucket(context.Background()); err != nil {
-		panic("Failed to ensure MinIO bucket exists: " + err.Error())
+		logger.Fatal().Err(err).Msg("Failed to ensure MinIO bucket exists")
 	}
 
 	// Weather Client
@@ -73,23 +78,23 @@ func main() {
 		var err error
 		fcmClient, err = notification.NewFCMClient(*cfg)
 		if err != nil {
-			log.Printf("FCM client not available: %v - push notifications disabled", err)
+			logger.Warn().Err(err).Msg("FCM client not available - push notifications disabled")
 		} else {
-			log.Println("FCM connected - push notifications enabled")
+			logger.Info().Msg("FCM connected - push notifications enabled")
 		}
 	} else {
-		log.Println("Firebase not configured - push notifications disabled")
+		logger.Info().Msg("Firebase not configured - push notifications disabled")
 	}
 
 	// Redis Client Setup
 	redisClient := cache.NewRedisClient(*cfg)
 	if redisClient != nil {
-		log.Println("Redis connected - caching enabled")
+		logger.Info().Msg("Redis connected - caching enabled")
 	} else {
-		log.Println("Redis not available - caching disabled")
+		logger.Warn().Msg("Redis not available - caching disabled")
 	}
 
-	// Repositorys
+	// Repositories
 	userRepo := repository.NewUserRepository(db)
 	benchRepo := repository.NewBenchRepository(db)
 	visitRepo := repository.NewVisitRepository(db)
@@ -100,7 +105,7 @@ func main() {
 	// Bootstrap: Create initial invitation code if no users exist
 	userCount, err := userRepo.Count(context.Background())
 	if err != nil {
-		log.Printf("Warning: Could not check user count: %v", err)
+		logger.Warn().Err(err).Msg("Could not check user count")
 	} else if userCount == 0 {
 		code := generateBootstrapCode()
 		invitationCode := &domain.InvitationCode{
@@ -108,13 +113,15 @@ func main() {
 			Comment: "Bootstrap - First Admin",
 		}
 		if err := invitationRepo.Create(context.Background(), invitationCode); err != nil {
-			log.Printf("Warning: Could not create bootstrap code: %v", err)
+			logger.Warn().Err(err).Msg("Could not create bootstrap code")
 		} else {
-			log.Println("═══════════════════════════════════════════════════════")
-			log.Println("  🎉 FIRST TIME SETUP")
-			log.Println("  Use this invitation code to register the first admin:")
-			log.Printf("  👉  %s", code)
-			log.Println("═══════════════════════════════════════════════════════")
+			logger.Info().
+				Str("code", code).
+				Msg("═══════════════════════════════════════════════════════\n" +
+					"  🎉 FIRST TIME SETUP\n" +
+					"  Use this invitation code to register the first admin:\n" +
+					"  👉  " + code + "\n" +
+					"═══════════════════════════════════════════════════════")
 		}
 	}
 
@@ -153,6 +160,7 @@ func main() {
 		Handler: r,
 	}
 
+	logger.Info().Str("port", cfg.Port).Msg("Server starting")
 	go startServer(srv)
 	waitForShutdown(srv, db, redisClient)
 }
