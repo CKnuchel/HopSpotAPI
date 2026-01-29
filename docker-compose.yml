@@ -31,10 +31,18 @@ services:
       - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-hopspot-photos}
       # Firebase
       - FIREBASE_AUTH_KEY=${FIREBASE_AUTH_KEY}
+      # Redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - REDIS_DB=${REDIS_DB:-0}
+      - WEATHER_CACHE_TTL_MINUTES=${WEATHER_CACHE_TTL_MINUTES:-15}
     depends_on:
       postgres:
         condition: service_healthy
       minio:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - hopspot-network
@@ -81,6 +89,21 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: hopspot-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - hopspot-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    # No Volume for persistence; caching only
 
 networks:
   hopspot-network:
