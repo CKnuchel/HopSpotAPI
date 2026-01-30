@@ -393,8 +393,8 @@ go run ./cmd/server
 ### Generate Swagger Documentation
 
 ```bash
-# Install swag CLI
-go install github.com/swaggo/swag/cmd/swag@latest
+# Install swag CLI (use version matching go.mod)
+go install github.com/swaggo/swag/cmd/swag@v1.8.12
 
 # Generate docs
 swag init -g cmd/server/main.go -o docs
