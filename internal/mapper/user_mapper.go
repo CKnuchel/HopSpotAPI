@@ -1,8 +1,6 @@
 package mapper
 
 import (
-	"strconv"
-
 	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/dto/responses"
@@ -19,7 +17,7 @@ func RegisterRequestToUser(req *requests.RegisterRequest) *domain.User {
 
 func UserToResponse(user *domain.User) responses.UserResponse {
 	return responses.UserResponse{
-		ID:          strconv.Itoa(int(user.ID)),
+		ID:          user.ID,
 		Email:       user.Email,
 		DisplayName: user.DisplayName,
 		Role:        string(user.Role),
