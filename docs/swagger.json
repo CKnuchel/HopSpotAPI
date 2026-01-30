@@ -366,18 +366,31 @@
                     },
                     {
                         "enum": [
+                            "name",
+                            "rating",
+                            "created_at",
+                            "distance"
+                        ],
+                        "type": "string",
+                        "default": "created_at",
+                        "description": "Sort by field",
+                        "name": "sort_by",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
                             "asc",
                             "desc"
                         ],
                         "type": "string",
-                        "default": "\"desc\"",
+                        "default": "desc",
                         "description": "Sort order",
                         "name": "sort_order",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Search term for bench name or location",
+                        "description": "Search term for bench name or description",
                         "name": "search",
                         "in": "query"
                     },
@@ -395,7 +408,7 @@
                     },
                     {
                         "type": "integer",
-                        "description": "Filter by minimum rating",
+                        "description": "Filter by minimum rating (1-5)",
                         "name": "min_rating",
                         "in": "query"
                     },
@@ -426,11 +439,31 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new bench with the provided details",
                 "consumes": [
                     "application/json"
@@ -461,7 +494,31 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
             }
@@ -496,12 +553,41 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Invalid bench ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Bench not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
             },
             "delete": {
-                "description": "Delete a bench by ID",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a bench by ID. Only the owner or an admin can delete a bench.",
                 "consumes": [
                     "application/json"
                 ],
@@ -523,15 +609,62 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "Successfully deleted"
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Invalid bench ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - not owner or admin",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Bench not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
             },
             "patch": {
-                "description": "Update bench details by ID",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update bench details by ID. Only the owner or an admin can update a bench.",
                 "consumes": [
                     "application/json"
                 ],
@@ -568,7 +701,49 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - not owner or admin",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Bench not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
             }
@@ -1469,6 +1644,9 @@
                 },
                 "longitude": {
                     "type": "number"
+                },
+                "main_photo_url": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
