@@ -3,11 +3,12 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"hopSpotAPI/internal/dto/responses"
 	"hopSpotAPI/pkg/cache"
 	"hopSpotAPI/pkg/logger"
 	"hopSpotAPI/pkg/weather"
-	"time"
 )
 
 type WeatherService interface {

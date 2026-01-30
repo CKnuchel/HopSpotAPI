@@ -17,6 +17,9 @@ package main
 
 import (
 	"context"
+	"math/rand"
+	"net/http"
+
 	"hopSpotAPI/internal/config"
 	"hopSpotAPI/internal/database"
 	"hopSpotAPI/internal/domain"
@@ -30,8 +33,6 @@ import (
 	"hopSpotAPI/pkg/notification"
 	"hopSpotAPI/pkg/storage"
 	"hopSpotAPI/pkg/weather"
-	"math/rand"
-	"net/http"
 )
 
 func main() {

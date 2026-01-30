@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"time"
+
 	"hopSpotAPI/internal/config"
 	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/dto/requests"
@@ -10,7 +12,6 @@ import (
 	"hopSpotAPI/internal/repository"
 	"hopSpotAPI/pkg/apperror"
 	"hopSpotAPI/pkg/utils"
-	"time"
 )
 
 type AuthService interface {

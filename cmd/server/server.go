@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"hopSpotAPI/pkg/cache"
-	"hopSpotAPI/pkg/logger"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"hopSpotAPI/pkg/cache"
+	"hopSpotAPI/pkg/logger"
 
 	"gorm.io/gorm"
 )

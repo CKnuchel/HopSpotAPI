@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+
 	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/repository"
 	"hopSpotAPI/pkg/apperror"

@@ -2,12 +2,13 @@ package service
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/repository"
 	"hopSpotAPI/mocks"
-	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

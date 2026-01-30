@@ -1,12 +1,13 @@
 package handler
 
 import (
+	"net/http"
+	"strconv"
+
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/dto/responses"
 	"hopSpotAPI/internal/middleware"
 	"hopSpotAPI/internal/service"
-	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )

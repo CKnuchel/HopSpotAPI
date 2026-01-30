@@ -4,6 +4,7 @@ package mocks
 
 import (
 	context "context"
+
 	requests "hopSpotAPI/internal/dto/requests"
 
 	mock "github.com/stretchr/testify/mock"

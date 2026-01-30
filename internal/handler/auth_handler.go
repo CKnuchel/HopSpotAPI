@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
- "hopSpotAPI/internal/dto/requests"
+	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/service"
 )
 

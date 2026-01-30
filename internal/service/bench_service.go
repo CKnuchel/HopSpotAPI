@@ -2,6 +2,9 @@ package service
 
 import (
 	"context"
+	"math"
+	"sort"
+
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/dto/responses"
 	"hopSpotAPI/internal/mapper"
@@ -9,8 +12,6 @@ import (
 	"hopSpotAPI/pkg/apperror"
 	"hopSpotAPI/pkg/logger"
 	"hopSpotAPI/pkg/utils"
-	"math"
-	"sort"
 )
 
 type BenchService interface {

@@ -1,10 +1,11 @@
 package handler
 
 import (
+	"net/http"
+
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/middleware"
 	"hopSpotAPI/internal/service"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
