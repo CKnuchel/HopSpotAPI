@@ -294,6 +294,10 @@ func TestBenchService_Update_Success_AsOwner(t *testing.T) {
 		}).
 		Return(nil)
 
+	photoRepo.EXPECT().
+		GetMainPhoto(mock.Anything, uint(1)).
+		Return(nil, nil)
+
 	// Act
 	result, err := svc.Update(context.Background(), uint(1), req, uint(1), false)
 
@@ -335,6 +339,10 @@ func TestBenchService_Update_Success_AsAdmin(t *testing.T) {
 	benchRepo.EXPECT().
 		Update(mock.Anything, mock.AnythingOfType("*domain.Bench")).
 		Return(nil)
+
+	photoRepo.EXPECT().
+		GetMainPhoto(mock.Anything, uint(1)).
+		Return(nil, nil)
 
 	// Act - user 2 is admin
 	result, err := svc.Update(context.Background(), uint(1), req, uint(2), true)

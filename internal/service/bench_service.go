@@ -205,6 +205,15 @@ func (b *benchService) Update(ctx context.Context, id uint, req *requests.Update
 	}
 
 	response := mapper.BenchToResponse(bench)
+
+	// Get main photo URL
+	mainPhotoURL, err := b.getMainPhotoURL(ctx, id)
+	if err != nil {
+		logger.Warn().Err(err).Uint("benchID", id).Msg("failed to get main photo URL")
+		// Continue without main photo
+	}
+	response.MainPhotoURL = mainPhotoURL
+
 	return &response, nil
 }
 

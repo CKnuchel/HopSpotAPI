@@ -197,6 +197,8 @@ definitions:
         type: number
       longitude:
         type: number
+      main_photo_url:
+        type: string
       name:
         type: string
       rating:
@@ -597,7 +599,17 @@ paths:
         in: query
         name: limit
         type: integer
-      - default: '"desc"'
+      - default: created_at
+        description: Sort by field
+        enum:
+        - name
+        - rating
+        - created_at
+        - distance
+        in: query
+        name: sort_by
+        type: string
+      - default: desc
         description: Sort order
         enum:
         - asc
@@ -605,7 +617,7 @@ paths:
         in: query
         name: sort_order
         type: string
-      - description: Search term for bench name or location
+      - description: Search term for bench name or description
         in: query
         name: search
         type: string
@@ -617,7 +629,7 @@ paths:
         in: query
         name: has_trash_bin
         type: boolean
-      - description: Filter by minimum rating
+      - description: Filter by minimum rating (1-5)
         in: query
         name: min_rating
         type: integer
@@ -642,6 +654,16 @@ paths:
             $ref: '#/definitions/responses.PaginatedBenchesResponse'
         "400":
           description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       summary: List benches
       tags:
       - Benches
@@ -665,6 +687,24 @@ paths:
             $ref: '#/definitions/responses.BenchResponse'
         "400":
           description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
       summary: Create a new bench
       tags:
       - Benches
@@ -672,7 +712,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Delete a bench by ID
+      description: Delete a bench by ID. Only the owner or an admin can delete a bench.
       parameters:
       - description: Bench ID
         in: path
@@ -683,9 +723,39 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Successfully deleted
         "400":
-          description: Bad Request
+          description: Invalid bench ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden - not owner or admin
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Bench not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
       summary: Delete a bench
       tags:
       - Benches
@@ -707,14 +777,31 @@ paths:
           schema:
             $ref: '#/definitions/responses.BenchResponse'
         "400":
-          description: Bad Request
+          description: Invalid bench ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Bench not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       summary: Get bench by ID
       tags:
       - Benches
     patch:
       consumes:
       - application/json
-      description: Update bench details by ID
+      description: Update bench details by ID. Only the owner or an admin can update
+        a bench.
       parameters:
       - description: Bench ID
         in: path
@@ -736,6 +823,36 @@ paths:
             $ref: '#/definitions/responses.BenchResponse'
         "400":
           description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden - not owner or admin
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Bench not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
       summary: Update a bench
       tags:
       - Benches
