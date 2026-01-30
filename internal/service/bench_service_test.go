@@ -178,6 +178,14 @@ func TestBenchService_List_Success(t *testing.T) {
 		FindAll(mock.Anything, mock.AnythingOfType("repository.BenchFilter")).
 		Return(benches, int64(2), nil)
 
+	photoRepo.EXPECT().
+		GetMainPhoto(mock.Anything, uint(1)).
+		Return(nil, nil).Maybe()
+
+	photoRepo.EXPECT().
+		GetMainPhoto(mock.Anything, uint(2)).
+		Return(nil, nil).Maybe()
+
 	// Act
 	result, err := svc.List(context.Background(), req)
 
@@ -228,6 +236,14 @@ func TestBenchService_List_WithCoordinatesAndRadius(t *testing.T) {
 	benchRepo.EXPECT().
 		FindAll(mock.Anything, mock.AnythingOfType("repository.BenchFilter")).
 		Return(benches, int64(2), nil)
+
+	photoRepo.EXPECT().
+		GetMainPhoto(mock.Anything, uint(1)).
+		Return(nil, nil).Maybe()
+
+	photoRepo.EXPECT().
+		GetMainPhoto(mock.Anything, uint(2)).
+		Return(nil, nil).Maybe()
 
 	// Act
 	result, err := svc.List(context.Background(), req)
@@ -538,6 +554,14 @@ func TestBenchService_List_SortByDistance(t *testing.T) {
 			return f.Lat != nil && f.Lon != nil
 		})).
 		Return(benches, int64(2), nil)
+
+	photoRepo.EXPECT().
+		GetMainPhoto(mock.Anything, uint(1)).
+		Return(nil, nil).Maybe()
+
+	photoRepo.EXPECT().
+		GetMainPhoto(mock.Anything, uint(2)).
+		Return(nil, nil).Maybe()
 
 	// Act
 	result, err := svc.List(context.Background(), req)
