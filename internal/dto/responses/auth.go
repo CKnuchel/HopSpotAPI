@@ -5,7 +5,7 @@ import (
 )
 
 type UserResponse struct {
-	ID          string    `json:"id"`
+	ID          uint      `json:"id"`
 	Email       string    `json:"email"`
 	DisplayName string    `json:"display_name"`
 	Role        string    `json:"role"`
