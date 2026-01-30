@@ -130,7 +130,7 @@ func main() {
 	authService := service.NewAuthService(userRepo, invitationRepo, refreshTokenRepo, *cfg)
 	userService := service.NewUserService(userRepo, *cfg)
 	notificationService := service.NewNotificationService(fcmClient, userRepo)
-	benchService := service.NewBenchService(benchRepo, notificationService)
+	benchService := service.NewBenchService(benchRepo, photoRepo, minioClient, notificationService)
 	visitService := service.NewVisitService(visitRepo)
 	adminService := service.NewAdminService(userRepo, invitationRepo)
 	photoService := service.NewPhotoService(photoRepo, benchRepo, minioClient)

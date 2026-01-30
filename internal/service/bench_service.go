@@ -4,6 +4,7 @@ import (
 	"context"
 	"math"
 	"sort"
+	"time"
 
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/dto/responses"
@@ -11,6 +12,7 @@ import (
 	"hopSpotAPI/internal/repository"
 	"hopSpotAPI/pkg/apperror"
 	"hopSpotAPI/pkg/logger"
+	"hopSpotAPI/pkg/storage"
 	"hopSpotAPI/pkg/utils"
 )
 
@@ -24,12 +26,16 @@ type BenchService interface {
 
 type benchService struct {
 	benchRepo           repository.BenchRepository
+	photoRepo           repository.PhotoRepository
+	minioClient         *storage.MinioClient
 	notificationService NotificationService
 }
 
-func NewBenchService(benchRepo repository.BenchRepository, notificationService NotificationService) BenchService {
+func NewBenchService(benchRepo repository.BenchRepository, photoRepo repository.PhotoRepository, minioClient *storage.MinioClient, notificationService NotificationService) BenchService {
 	return &benchService{
 		benchRepo:           benchRepo,
+		photoRepo:           photoRepo,
+		minioClient:         minioClient,
 		notificationService: notificationService,
 	}
 }
@@ -71,6 +77,13 @@ func (b *benchService) GetByID(ctx context.Context, id uint) (*responses.BenchRe
 	}
 
 	response := mapper.BenchToResponse(bench)
+	mainPhotoURL, err := b.getMainPhotoURL(ctx, id)
+	if err != nil {
+		logger.Warn().Err(err).Uint("benchID", id).Msg("failed to get main photo URL")
+		// Continue without main photo
+	}
+	response.MainPhotoURL = mainPhotoURL
+
 	return &response, nil
 }
 
@@ -107,6 +120,13 @@ func (s *benchService) List(ctx context.Context, req *requests.ListBenchesReques
 
 	for _, bench := range benches {
 		resp := mapper.BenchToListResponse(&bench)
+
+		mainPhotoURL, err := s.getMainPhotoURL(ctx, bench.ID)
+		if err != nil {
+			logger.Warn().Err(err).Uint("benchID", bench.ID).Msg("failed to get main photo URL")
+		}
+
+		resp.MainPhotoURL = mainPhotoURL
 
 		if req.Lat != nil && req.Lon != nil {
 			distance := utils.DistanceMeters(*req.Lat, *req.Lon, bench.Latitude, bench.Longitude)
@@ -206,4 +226,23 @@ func (b *benchService) Delete(ctx context.Context, id uint, userID uint, isAdmin
 
 	// Delete bench
 	return b.benchRepo.Delete(ctx, id)
+}
+
+// getMainPhotoURL lädt das Hauptfoto einer Bank und generiert eine presigned URL
+func (s *benchService) getMainPhotoURL(ctx context.Context, benchID uint) (*string, error) {
+	mainPhoto, err := s.photoRepo.GetMainPhoto(ctx, benchID)
+	if err != nil {
+		return nil, err
+	}
+	if mainPhoto == nil {
+		return nil, nil // No main photo
+	}
+
+	// Generate presigned URL for thumbnail (valid for 1 hour)
+	url, err := s.minioClient.GetPresignedURL(ctx, mainPhoto.FilePathThumbnail, time.Hour)
+	if err != nil {
+		return nil, err
+	}
+
+	return &url, nil
 }

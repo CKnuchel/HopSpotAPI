@@ -8,6 +8,7 @@ import (
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/repository"
 	"hopSpotAPI/mocks"
+	"hopSpotAPI/pkg/storage"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -17,8 +18,10 @@ import (
 func TestBenchService_Create_Success(t *testing.T) {
 	// Arrange
 	benchRepo := mocks.NewBenchRepository(t)
+	photoRepo := mocks.NewPhotoRepository(t)
+	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, notificationSvc)
+	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	description := "A nice bench"
 	req := &requests.CreateBenchRequest{
@@ -82,8 +85,10 @@ func TestBenchService_Create_Success(t *testing.T) {
 func TestBenchService_GetByID_Success(t *testing.T) {
 	// Arrange
 	benchRepo := mocks.NewBenchRepository(t)
+	photoRepo := mocks.NewPhotoRepository(t)
+	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, notificationSvc)
+	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	creator := domain.User{
 		Model:       &gorm.Model{ID: 1},
@@ -105,6 +110,12 @@ func TestBenchService_GetByID_Success(t *testing.T) {
 		FindByID(mock.Anything, uint(1)).
 		Return(bench, nil)
 
+	photoRepo.EXPECT().
+		GetMainPhoto(mock.Anything, uint(1)).
+		Return(&domain.Photo{
+			FilePathThumbnail: "benches/1/photos/1_thumbnail.jpg",
+		}, nil)
+
 	// Act
 	result, err := svc.GetByID(context.Background(), uint(1))
 
@@ -117,8 +128,10 @@ func TestBenchService_GetByID_Success(t *testing.T) {
 func TestBenchService_GetByID_NotFound(t *testing.T) {
 	// Arrange
 	benchRepo := mocks.NewBenchRepository(t)
+	photoRepo := mocks.NewPhotoRepository(t)
+	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, notificationSvc)
+	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	benchRepo.EXPECT().
 		FindByID(mock.Anything, uint(999)).
@@ -136,8 +149,10 @@ func TestBenchService_GetByID_NotFound(t *testing.T) {
 func TestBenchService_List_Success(t *testing.T) {
 	// Arrange
 	benchRepo := mocks.NewBenchRepository(t)
+	photoRepo := mocks.NewPhotoRepository(t)
+	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, notificationSvc)
+	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	benches := []domain.Bench{
 		{
@@ -176,8 +191,10 @@ func TestBenchService_List_Success(t *testing.T) {
 func TestBenchService_List_WithCoordinatesAndRadius(t *testing.T) {
 	// Arrange
 	benchRepo := mocks.NewBenchRepository(t)
+	photoRepo := mocks.NewPhotoRepository(t)
+	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, notificationSvc)
+	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	// Bench 1: very close (should be included)
 	// Bench 2: far away (should be excluded by radius)
@@ -227,8 +244,10 @@ func TestBenchService_List_WithCoordinatesAndRadius(t *testing.T) {
 func TestBenchService_Update_Success_AsOwner(t *testing.T) {
 	// Arrange
 	benchRepo := mocks.NewBenchRepository(t)
+	photoRepo := mocks.NewPhotoRepository(t)
+	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, notificationSvc)
+	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	creator := domain.User{
 		Model:       &gorm.Model{ID: 1},
@@ -271,8 +290,10 @@ func TestBenchService_Update_Success_AsOwner(t *testing.T) {
 func TestBenchService_Update_Success_AsAdmin(t *testing.T) {
 	// Arrange
 	benchRepo := mocks.NewBenchRepository(t)
+	photoRepo := mocks.NewPhotoRepository(t)
+	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, notificationSvc)
+	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	creator := domain.User{
 		Model:       &gorm.Model{ID: 1},
@@ -311,8 +332,10 @@ func TestBenchService_Update_Success_AsAdmin(t *testing.T) {
 func TestBenchService_Update_Forbidden(t *testing.T) {
 	// Arrange
 	benchRepo := mocks.NewBenchRepository(t)
+	photoRepo := mocks.NewPhotoRepository(t)
+	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, notificationSvc)
+	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	creator := domain.User{
 		Model:       &gorm.Model{ID: 1},
@@ -347,8 +370,10 @@ func TestBenchService_Update_Forbidden(t *testing.T) {
 func TestBenchService_Update_NotFound(t *testing.T) {
 	// Arrange
 	benchRepo := mocks.NewBenchRepository(t)
+	photoRepo := mocks.NewPhotoRepository(t)
+	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, notificationSvc)
+	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	newName := "Name"
 	req := &requests.UpdateBenchRequest{
@@ -371,8 +396,10 @@ func TestBenchService_Update_NotFound(t *testing.T) {
 func TestBenchService_Delete_Success_AsOwner(t *testing.T) {
 	// Arrange
 	benchRepo := mocks.NewBenchRepository(t)
+	photoRepo := mocks.NewPhotoRepository(t)
+	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, notificationSvc)
+	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	bench := &domain.Bench{
 		Model:     &gorm.Model{ID: 1},
@@ -398,8 +425,10 @@ func TestBenchService_Delete_Success_AsOwner(t *testing.T) {
 func TestBenchService_Delete_Success_AsAdmin(t *testing.T) {
 	// Arrange
 	benchRepo := mocks.NewBenchRepository(t)
+	photoRepo := mocks.NewPhotoRepository(t)
+	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, notificationSvc)
+	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	bench := &domain.Bench{
 		Model:     &gorm.Model{ID: 1},
@@ -425,8 +454,10 @@ func TestBenchService_Delete_Success_AsAdmin(t *testing.T) {
 func TestBenchService_Delete_Forbidden(t *testing.T) {
 	// Arrange
 	benchRepo := mocks.NewBenchRepository(t)
+	photoRepo := mocks.NewPhotoRepository(t)
+	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, notificationSvc)
+	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	bench := &domain.Bench{
 		Model:     &gorm.Model{ID: 1},
@@ -449,8 +480,10 @@ func TestBenchService_Delete_Forbidden(t *testing.T) {
 func TestBenchService_Delete_NotFound(t *testing.T) {
 	// Arrange
 	benchRepo := mocks.NewBenchRepository(t)
+	photoRepo := mocks.NewPhotoRepository(t)
+	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, notificationSvc)
+	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	benchRepo.EXPECT().
 		FindByID(mock.Anything, uint(999)).
@@ -467,8 +500,10 @@ func TestBenchService_Delete_NotFound(t *testing.T) {
 func TestBenchService_List_SortByDistance(t *testing.T) {
 	// Arrange
 	benchRepo := mocks.NewBenchRepository(t)
+	photoRepo := mocks.NewPhotoRepository(t)
+	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, notificationSvc)
+	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	// Benches at different distances
 	benches := []domain.Bench{
