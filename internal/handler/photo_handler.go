@@ -65,7 +65,11 @@ func (h *PhotoHandler) Upload(c *gin.Context) {
 
 	result, err := h.photoService.Upload(c.Request.Context(), uint(id), userID, file, isMain)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload photo"})
+		// Temporäres Debug-Logging
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to upload photo",
+			"details": err.Error(),
+		})
 		return
 	}
 
