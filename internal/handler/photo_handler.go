@@ -7,6 +7,7 @@ import (
 	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/middleware"
 	"hopSpotAPI/internal/service"
+	"hopSpotAPI/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 )
@@ -65,6 +66,7 @@ func (h *PhotoHandler) Upload(c *gin.Context) {
 
 	result, err := h.photoService.Upload(c.Request.Context(), uint(id), userID, file, isMain)
 	if err != nil {
+		logger.Log.Error().Err(err).Msg("Photo upload failed")
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Failed to upload photo",
 			"details": err.Error(),
