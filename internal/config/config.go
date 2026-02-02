@@ -32,11 +32,13 @@ type Config struct {
 	DBName     string
 
 	// MinIO
-	MinioEndpoint   string
-	MinioAccessKey  string
-	MinioSecretKey  string
-	MinioUseSSL     bool
-	MinioBucketName string
+	MinioEndpoint       string
+	MinioPublicEndpoint string
+	MinioAccessKey      string
+	MinioSecretKey      string
+	MinioUseSSL         bool
+	MinioPublicSSL      bool
+	MinioBucketName     string
 
 	// Firebase
 	FirebaseAuthKey string
@@ -112,11 +114,14 @@ func Load() *Config {
 		RefreshTokenExpire: time.Duration(refreshDays) * 24 * time.Hour,
 
 		// MinIO
-		MinioEndpoint:   getEnv("MINIO_ENDPOINT", ""),
-		MinioAccessKey:  getEnv("MINIO_ACCESS_KEY", ""),
-		MinioSecretKey:  getEnv("MINIO_SECRET_KEY", ""),
-		MinioUseSSL:     getEnv("MINIO_USE_SSL", "false") == "true",
-		MinioBucketName: getEnv("MINIO_BUCKET_NAME", "hopspot-photos"),
+		// MinIO
+		MinioEndpoint:       getEnv("MINIO_ENDPOINT", ""),
+		MinioPublicEndpoint: getEnv("MINIO_PUBLIC_ENDPOINT", ""),
+		MinioAccessKey:      getEnv("MINIO_ACCESS_KEY", ""),
+		MinioSecretKey:      getEnv("MINIO_SECRET_KEY", ""),
+		MinioUseSSL:         getEnv("MINIO_USE_SSL", "false") == "true",
+		MinioPublicSSL:      getEnv("MINIO_PUBLIC_SSL", "true") == "true",
+		MinioBucketName:     getEnv("MINIO_BUCKET_NAME", "hopspot-photos"),
 
 		// Firebase
 		FirebaseAuthKey: getEnv("FIREBASE_AUTH_KEY", ""),

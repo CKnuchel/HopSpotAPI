@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -13,8 +14,10 @@ import (
 )
 
 type MinioClient struct {
-	client     *minio.Client
-	bucketName string
+	client         *minio.Client
+	bucketName     string
+	publicEndpoint string
+	publicSSL      bool
 }
 
 func NewMinioClient(cfg config.Config) (*MinioClient, error) {
@@ -26,9 +29,17 @@ func NewMinioClient(cfg config.Config) (*MinioClient, error) {
 		return nil, fmt.Errorf("failed to create minio client: %w", err)
 	}
 
+	// Public Endpoint fallback to internal if not set
+	publicEndpoint := cfg.MinioPublicEndpoint
+	if publicEndpoint == "" {
+		publicEndpoint = cfg.MinioEndpoint
+	}
+
 	return &MinioClient{
-		client:     client,
-		bucketName: cfg.MinioBucketName,
+		client:         client,
+		bucketName:     cfg.MinioBucketName,
+		publicEndpoint: publicEndpoint,
+		publicSSL:      cfg.MinioPublicSSL,
 	}, nil
 }
 
@@ -81,10 +92,34 @@ func (m *MinioClient) GetPresignedURL(ctx context.Context, objectName string, ex
 		return "", fmt.Errorf("failed to generate presigned url: %w", err)
 	}
 
-	return url.String(), nil
+	// Replace internal endpoint with public endpoint
+	urlStr := url.String()
+	internalHost := m.client.EndpointURL().Host
+
+	// Build public URL prefix
+	publicScheme := "http"
+	if m.publicSSL {
+		publicScheme = "https"
+	}
+
+	// Replace internal with public endpoint (http and https)
+	urlStr = strings.Replace(urlStr,
+		fmt.Sprintf("http://%s", internalHost),
+		fmt.Sprintf("%s://%s", publicScheme, m.publicEndpoint),
+		1)
+	urlStr = strings.Replace(urlStr,
+		fmt.Sprintf("https://%s", internalHost),
+		fmt.Sprintf("%s://%s", publicScheme, m.publicEndpoint),
+		1)
+
+	return urlStr, nil
 }
 
 // GetPublicURL returns the public URL of the object. If the bucket is public.
 func (m *MinioClient) GetPublicURL(objectName string) string {
-	return fmt.Sprintf("%s/%s/%s", m.client.EndpointURL(), m.bucketName, objectName)
+	scheme := "http"
+	if m.publicSSL {
+		scheme = "https"
+	}
+	return fmt.Sprintf("%s://%s/%s/%s", scheme, m.publicEndpoint, m.bucketName, objectName)
 }
