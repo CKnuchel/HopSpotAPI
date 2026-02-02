@@ -31,6 +31,8 @@ services:
       - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
       - MINIO_USE_SSL=false
       - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-hopspot-photos}
+      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT}
+      - MINIO_PUBLIC_SSL=${MINIO_PUBLIC_SSL}
       # Firebase
       - FIREBASE_AUTH_KEY=${FIREBASE_AUTH_KEY}
       # Redis
