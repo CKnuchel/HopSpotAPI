@@ -136,7 +136,7 @@ func (h *BenchHandler) Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, result)
+	c.JSON(http.StatusCreated, gin.H{"data": result})
 }
 
 // PATCH /api/v1/benches/:id
