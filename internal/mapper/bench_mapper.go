@@ -7,15 +7,24 @@ import (
 )
 
 func CreateBenchRequestToDomain(req *requests.CreateBenchRequest) *domain.Bench {
-	return &domain.Bench{
+	bench := &domain.Bench{
 		Name:        req.Name,
-		Description: *req.Description,
 		Latitude:    req.Latitude,
 		Longitude:   req.Longitude,
-		Rating:      req.Rating,
 		HasToilet:   req.HasToilet,
 		HasTrashBin: req.HasTrashBin,
 	}
+
+	// Handle optional fields with nil checks
+	if req.Description != nil {
+		bench.Description = *req.Description
+	}
+
+	if req.Rating != nil {
+		bench.Rating = req.Rating
+	}
+
+	return bench
 }
 
 func BenchToResponse(bench *domain.Bench) responses.BenchResponse {
