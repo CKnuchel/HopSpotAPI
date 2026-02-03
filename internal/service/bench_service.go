@@ -232,6 +232,39 @@ func (b *benchService) Delete(ctx context.Context, id uint, userID uint, isAdmin
 		return apperror.ErrForbidden
 	}
 
+	// Get all photos for this bench
+	photos, err := b.photoRepo.FindByBenchID(ctx, id)
+	if err != nil {
+		logger.Warn().Err(err).Uint("benchID", id).Msg("failed to get photos for deletion")
+		// Continue anyway - try to delete what we can
+	}
+
+	// Delete photos from MinIO storage
+	for _, photo := range photos {
+		if photo.FilePathOriginal != "" {
+			if err := b.minioClient.Delete(ctx, photo.FilePathOriginal); err != nil {
+				logger.Warn().Err(err).Str("path", photo.FilePathOriginal).Msg("failed to delete original from storage")
+			}
+		}
+		if photo.FilePathMedium != "" {
+			if err := b.minioClient.Delete(ctx, photo.FilePathMedium); err != nil {
+				logger.Warn().Err(err).Str("path", photo.FilePathMedium).Msg("failed to delete medium from storage")
+			}
+		}
+		if photo.FilePathThumbnail != "" {
+			if err := b.minioClient.Delete(ctx, photo.FilePathThumbnail); err != nil {
+				logger.Warn().Err(err).Str("path", photo.FilePathThumbnail).Msg("failed to delete thumbnail from storage")
+			}
+		}
+	}
+
+	// Delete photos from database
+	for _, photo := range photos {
+		if err := b.photoRepo.Delete(ctx, photo.ID); err != nil {
+			logger.Warn().Err(err).Uint("photoID", photo.ID).Msg("failed to delete photo record")
+		}
+	}
+
 	// Delete bench
 	return b.benchRepo.Delete(ctx, id)
 }
