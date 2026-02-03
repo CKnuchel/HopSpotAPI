@@ -54,6 +54,23 @@ func (m *MinioClient) EnsureBucket(ctx context.Context) error {
 			return fmt.Errorf("failed to create bucket: %w", err)
 		}
 	}
+
+	// Set public read policy
+	policy := fmt.Sprintf(`{
+		"Version": "2012-10-17",
+		"Statement": [{
+			"Effect": "Allow",
+			"Principal": {"AWS": ["*"]},
+			"Action": ["s3:GetObject"],
+			"Resource": ["arn:aws:s3:::%s/*"]
+		}]
+	}`, m.bucketName)
+
+	err = m.client.SetBucketPolicy(ctx, m.bucketName, policy)
+	if err != nil {
+		return fmt.Errorf("failed to set bucket policy: %w", err)
+	}
+
 	return nil
 }
 
@@ -115,7 +132,6 @@ func (m *MinioClient) GetPresignedURL(ctx context.Context, objectName string, ex
 	return urlStr, nil
 }
 
-// GetPublicURL returns the public URL of the object. If the bucket is public.
 func (m *MinioClient) GetPublicURL(objectName string) string {
 	scheme := "http"
 	if m.publicSSL {

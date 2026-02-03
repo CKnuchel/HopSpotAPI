@@ -4,7 +4,6 @@ import (
 	"context"
 	"math"
 	"sort"
-	"time"
 
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/dto/responses"
@@ -247,11 +246,7 @@ func (s *benchService) getMainPhotoURL(ctx context.Context, benchID uint) (*stri
 		return nil, nil // No main photo
 	}
 
-	// Generate presigned URL for thumbnail (valid for 1 hour)
-	url, err := s.minioClient.GetPresignedURL(ctx, mainPhoto.FilePathThumbnail, time.Hour)
-	if err != nil {
-		return nil, err
-	}
+	url := s.minioClient.GetPublicURL(mainPhoto.FilePathThumbnail)
 
 	return &url, nil
 }
