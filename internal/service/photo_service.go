@@ -242,7 +242,22 @@ func (s *photoService) GetByBenchID(ctx context.Context, benchID uint) ([]respon
 		return nil, err
 	}
 
-	return mapper.PhotosToResponse(photos), nil
+	// Generate public URLs for each photo
+	result := make([]responses.PhotoResponse, len(photos))
+	for i, photo := range photos {
+		result[i] = responses.PhotoResponse{
+			ID:           photo.ID,
+			BenchID:      photo.BenchID,
+			IsMain:       photo.IsMain,
+			URLOriginal:  s.minioClient.GetPublicURL(photo.FilePathOriginal),
+			URLMedium:    s.minioClient.GetPublicURL(photo.FilePathMedium),
+			URLThumbnail: s.minioClient.GetPublicURL(photo.FilePathThumbnail),
+			UploadedBy:   photo.UploadedBy,
+			CreatedAt:    photo.CreatedAt,
+		}
+	}
+
+	return result, nil
 }
 
 // GetPresignedURL implements PhotoService.
