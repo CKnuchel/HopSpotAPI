@@ -38,8 +38,8 @@ func TestVisitService_Create_Success(t *testing.T) {
 			}
 			// Simulate DB preloading Bench
 			v.Bench = domain.Bench{
-				Model: &gorm.Model{ID: 1},
-				Name:  "Test Bench",
+				ID:   1,
+				Name: "Test Bench",
 			}
 		}).
 		Return(nil)
@@ -75,8 +75,8 @@ func TestVisitService_Create_WithoutComment(t *testing.T) {
 			}
 			// Simulate DB preloading Bench
 			v.Bench = domain.Bench{
-				Model: &gorm.Model{ID: 2},
-				Name:  "Another Bench",
+				ID:   2,
+				Name: "Another Bench",
 			}
 		}).
 		Return(nil)
@@ -101,8 +101,8 @@ func TestVisitService_List_Success(t *testing.T) {
 			UserID:  5,
 			Comment: "First visit",
 			Bench: domain.Bench{
-				Model: &gorm.Model{ID: 1},
-				Name:  "Bench 1",
+				ID:   1,
+				Name: "Bench 1",
 			},
 		},
 		{
@@ -111,8 +111,8 @@ func TestVisitService_List_Success(t *testing.T) {
 			UserID:  5,
 			Comment: "Second visit",
 			Bench: domain.Bench{
-				Model: &gorm.Model{ID: 2},
-				Name:  "Bench 2",
+				ID:   2,
+				Name: "Bench 2",
 			},
 		},
 	}
@@ -150,8 +150,8 @@ func TestVisitService_List_WithBenchFilter(t *testing.T) {
 			UserID:  5,
 			Comment: "Visit to bench 1",
 			Bench: domain.Bench{
-				Model: &gorm.Model{ID: 1},
-				Name:  "Bench 1",
+				ID:   1,
+				Name: "Bench 1",
 			},
 		},
 	}
@@ -191,8 +191,8 @@ func TestVisitService_List_Pagination(t *testing.T) {
 			BenchID: uint(i + 1),
 			UserID:  5,
 			Bench: domain.Bench{
-				Model: &gorm.Model{ID: uint(i + 1)},
-				Name:  "Bench",
+				ID:   uint(i + 1),
+				Name: "Bench",
 			},
 		}
 	}
