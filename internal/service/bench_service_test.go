@@ -44,7 +44,7 @@ func TestBenchService_Create_Success(t *testing.T) {
 	benchRepo.EXPECT().
 		Create(mock.Anything, mock.AnythingOfType("*domain.Bench")).
 		Run(func(ctx context.Context, b *domain.Bench) {
-			b.Model = &gorm.Model{ID: 1}
+			b.ID = 1
 		}).
 		Return(nil)
 
@@ -52,7 +52,7 @@ func TestBenchService_Create_Success(t *testing.T) {
 	benchRepo.EXPECT().
 		FindByID(mock.Anything, uint(1)).
 		Return(&domain.Bench{
-			Model:       &gorm.Model{ID: 1},
+			ID:          1,
 			Name:        "Park Bench",
 			Latitude:    47.3769,
 			Longitude:   8.5417,
@@ -97,7 +97,7 @@ func TestBenchService_GetByID_Success(t *testing.T) {
 	}
 
 	bench := &domain.Bench{
-		Model:       &gorm.Model{ID: 1},
+		ID:          1,
 		Name:        "Test Bench",
 		Latitude:    47.0,
 		Longitude:   8.0,
@@ -156,13 +156,13 @@ func TestBenchService_List_Success(t *testing.T) {
 
 	benches := []domain.Bench{
 		{
-			Model:     &gorm.Model{ID: 1},
+			ID:        1,
 			Name:      "Bench 1",
 			Latitude:  47.0,
 			Longitude: 8.0,
 		},
 		{
-			Model:     &gorm.Model{ID: 2},
+			ID:        2,
 			Name:      "Bench 2",
 			Latitude:  47.1,
 			Longitude: 8.1,
@@ -208,13 +208,13 @@ func TestBenchService_List_WithCoordinatesAndRadius(t *testing.T) {
 	// Bench 2: far away (should be excluded by radius)
 	benches := []domain.Bench{
 		{
-			Model:     &gorm.Model{ID: 1},
+			ID:        1,
 			Name:      "Close Bench",
 			Latitude:  47.3770, // Very close to search point
 			Longitude: 8.5418,
 		},
 		{
-			Model:     &gorm.Model{ID: 2},
+			ID:        2,
 			Name:      "Far Bench",
 			Latitude:  48.0, // Far from search point
 			Longitude: 9.0,
@@ -271,7 +271,7 @@ func TestBenchService_Update_Success_AsOwner(t *testing.T) {
 	}
 
 	bench := &domain.Bench{
-		Model:       &gorm.Model{ID: 1},
+		ID:          1,
 		Name:        "Old Name",
 		Description: "Old Description",
 		CreatedBy:   1,
@@ -321,7 +321,7 @@ func TestBenchService_Update_Success_AsAdmin(t *testing.T) {
 	}
 
 	bench := &domain.Bench{
-		Model:     &gorm.Model{ID: 1},
+		ID:        1,
 		Name:      "Old Name",
 		CreatedBy: 1, // Created by user 1
 		Creator:   creator,
@@ -367,7 +367,7 @@ func TestBenchService_Update_Forbidden(t *testing.T) {
 	}
 
 	bench := &domain.Bench{
-		Model:     &gorm.Model{ID: 1},
+		ID:        1,
 		Name:      "Test Bench",
 		CreatedBy: 1, // Created by user 1
 		Creator:   creator,
@@ -426,7 +426,7 @@ func TestBenchService_Delete_Success_AsOwner(t *testing.T) {
 	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	bench := &domain.Bench{
-		Model:     &gorm.Model{ID: 1},
+		ID:        1,
 		Name:      "Test Bench",
 		CreatedBy: 1,
 	}
@@ -455,7 +455,7 @@ func TestBenchService_Delete_Success_AsAdmin(t *testing.T) {
 	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	bench := &domain.Bench{
-		Model:     &gorm.Model{ID: 1},
+		ID:        1,
 		Name:      "Test Bench",
 		CreatedBy: 1, // Owner is user 1
 	}
@@ -484,7 +484,7 @@ func TestBenchService_Delete_Forbidden(t *testing.T) {
 	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
 
 	bench := &domain.Bench{
-		Model:     &gorm.Model{ID: 1},
+		ID:        1,
 		Name:      "Test Bench",
 		CreatedBy: 1, // Owner is user 1
 	}
@@ -532,13 +532,13 @@ func TestBenchService_List_SortByDistance(t *testing.T) {
 	// Benches at different distances
 	benches := []domain.Bench{
 		{
-			Model:     &gorm.Model{ID: 1},
+			ID:        1,
 			Name:      "Far Bench",
 			Latitude:  47.38,
 			Longitude: 8.55,
 		},
 		{
-			Model:     &gorm.Model{ID: 2},
+			ID:        2,
 			Name:      "Close Bench",
 			Latitude:  47.377,
 			Longitude: 8.542,
