@@ -1,12 +1,14 @@
 package domain
 
 import (
-	"gorm.io/gorm"
+	"time"
 )
 
 type Bench struct {
-	*gorm.Model
-	Name        string  `gorm:"type:varchar(255);uniqueIndex" json:"name"`
+	ID          uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	Name        string    `gorm:"type:varchar(255);uniqueIndex" json:"name"`
 	Description string  `gorm:"type:text" json:"description"`
 	Latitude    float64 `gorm:"type:float;index:idx_location,priority:1" json:"latitude"`
 	Longitude   float64 `gorm:"type:float;index:idx_location,priority:2" json:"longitude"`
