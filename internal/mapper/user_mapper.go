@@ -21,6 +21,7 @@ func UserToResponse(user *domain.User) responses.UserResponse {
 		Email:       user.Email,
 		DisplayName: user.DisplayName,
 		Role:        string(user.Role),
+		IsActive:    user.IsActive,
 		CreatedAt:   user.CreatedAt,
 	}
 }
