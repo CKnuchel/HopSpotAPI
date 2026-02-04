@@ -9,6 +9,8 @@ var (
 	ErrInvalidInvitationCode         = errors.New("invalid invitation code")
 	ErrInvitationCodeAlreadyRedeemed = errors.New("invitation code already redeemed")
 	ErrCannotDeleteSelf              = errors.New("admin cannot delete themselves")
+	ErrInvitationCodeNotFound        = errors.New("invitation code not found")
+	ErrCannotDeleteRedeemedCode      = errors.New("cannot delete redeemed invitation code")
 )
 
 // Authentication-related errors

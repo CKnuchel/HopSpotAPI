@@ -205,3 +205,31 @@ func (h *AdminHandler) CreateInvitationCode(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, result)
 }
+
+// DELETE /api/v1/admin/invitation-codes/:id
+// DeleteInvitationCode godoc
+//
+//	@Summary		Delete an invitation code
+//	@Description	Delete an invitation code by ID (only if not redeemed)
+//	@Tags			Admin
+//	@Param			id	path	int	true	"Invitation Code ID"
+//	@Success		204	"No Content"
+//	@Failure		400
+//	@Failure		404
+//	@Router			/api/v1/admin/invitation-codes/{id} [delete]
+func (h *AdminHandler) DeleteInvitationCode(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid invitation code ID"})
+		return
+	}
+
+	err = h.adminService.DeleteInvitationCode(c.Request.Context(), uint(id))
+	if err != nil {
+		logger.Error().Err(err).Uint("code_id", uint(id)).Msg("Failed to delete invitation code")
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}

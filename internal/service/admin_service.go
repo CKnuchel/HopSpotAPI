@@ -21,6 +21,7 @@ type AdminService interface {
 	// Invitation Codes
 	ListInvitationCodes(ctx context.Context, req *requests.ListInvitationCodesRequest) (*responses.PaginatedInvitationCodesResponse, error)
 	CreateInvitationCode(ctx context.Context, req *requests.CreateInvitationCodeRequest, adminID uint) (*responses.InvitationCodeResponse, error)
+	DeleteInvitationCode(ctx context.Context, id uint) error
 }
 
 type adminService struct {
@@ -173,4 +174,22 @@ func (a *adminService) CreateInvitationCode(ctx context.Context, req *requests.C
 
 	response := mapper.InvitationCodeToResponse(invitationCode)
 	return &response, nil
+}
+
+func (a *adminService) DeleteInvitationCode(ctx context.Context, id uint) error {
+	// Check if code exists
+	code, err := a.invitationCodeRepo.FindByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if code == nil {
+		return apperror.ErrInvitationCodeNotFound
+	}
+
+	// Don't allow deleting redeemed codes
+	if code.RedeemedBy != nil {
+		return apperror.ErrCannotDeleteRedeemedCode
+	}
+
+	return a.invitationCodeRepo.Delete(ctx, id)
 }

@@ -101,6 +101,7 @@ func Setup(
 				admin.DELETE("/users/:id", adminHandler.DeleteUser)
 				admin.GET("/invitation-codes", adminHandler.ListInvitationCodes)
 				admin.POST("/invitation-codes", adminHandler.CreateInvitationCode)
+				admin.DELETE("/invitation-codes/:id", adminHandler.DeleteInvitationCode)
 			}
 
 			// Weather routes
