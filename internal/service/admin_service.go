@@ -42,10 +42,11 @@ func (a *adminService) ListUsers(ctx context.Context, req *requests.ListUsersReq
 		Page:     req.Page,
 		Limit:    req.Limit,
 		IsActive: req.IsActive,
-		Role:     &req.Role,
 		Search:   req.Search,
+		// Role isn't a pointer in the request, so we need to check for empty string
 	}
 
+	// Only set Role filter if provided
 	if req.Role != "" {
 		filter.Role = &req.Role
 	}
