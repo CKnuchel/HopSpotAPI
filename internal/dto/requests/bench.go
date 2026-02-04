@@ -11,11 +11,13 @@ type CreateBenchRequest struct {
 }
 
 type UpdateBenchRequest struct {
-	Name        *string `json:"name" binding:"omitempty,min=1,max=255"`
-	Description *string `json:"description" binding:"omitempty,max=5000"`
-	Rating      *int    `json:"rating" binding:"omitempty,min=1,max=5"`
-	HasToilet   *bool   `json:"has_toilet"`
-	HasTrashBin *bool   `json:"has_trash_bin"`
+	Name        *string  `json:"name" binding:"omitempty,min=1,max=255"`
+	Latitude    *float64 `json:"latitude" binding:"omitempty,min=-90,max=90"`
+	Longitude   *float64 `json:"longitude" binding:"omitempty,min=-180,max=180"`
+	Description *string  `json:"description" binding:"omitempty,max=5000"`
+	Rating      *int     `json:"rating" binding:"omitempty,min=1,max=5"`
+	HasToilet   *bool    `json:"has_toilet"`
+	HasTrashBin *bool    `json:"has_trash_bin"`
 }
 
 type ListBenchesRequest struct {

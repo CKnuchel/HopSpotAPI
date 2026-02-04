@@ -185,6 +185,12 @@ func (b *benchService) Update(ctx context.Context, id uint, req *requests.Update
 	if req.Name != nil {
 		bench.Name = *req.Name
 	}
+	if req.Latitude != nil {
+		bench.Latitude = *req.Latitude
+	}
+	if req.Longitude != nil {
+		bench.Longitude = *req.Longitude
+	}
 	if req.Description != nil {
 		bench.Description = *req.Description
 	}
