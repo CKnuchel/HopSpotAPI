@@ -18,15 +18,19 @@ func InvitationCodeToResponse(code *domain.InvitationCode) responses.InvitationC
 		ID:        code.ID,
 		Code:      code.Code,
 		Comment:   code.Comment,
-		CreatedBy: UserToResponse(code.Creator),
 		CreatedAt: code.CreatedAt,
+	}
+
+	// Creator (with nil check)
+	if code.Creator != nil {
+		response.CreatedBy = UserToResponse(code.Creator)
 	}
 
 	// Redeemer (if exists)
 	if code.Redeemer != nil {
 		redeemerResponse := UserToResponse(code.Redeemer)
 		response.RedeemedBy = &redeemerResponse
-		response.RedeemedAt = &code.UpdatedAt // UpdatedAt =  RedeemedAt
+		response.RedeemedAt = &code.UpdatedAt
 	}
 
 	return response

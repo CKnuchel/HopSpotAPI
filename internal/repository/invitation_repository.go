@@ -58,6 +58,7 @@ func (r invitationRepository) FindByCode(ctx context.Context, code string) (*dom
 	return &invitationCode, nil
 }
 
+// FindAll
 func (r invitationRepository) FindAll(ctx context.Context, filter InvitationFilter) ([]domain.InvitationCode, int64, error) {
 	var codes []domain.InvitationCode
 	var total int64
@@ -88,7 +89,10 @@ func (r invitationRepository) FindAll(ctx context.Context, filter InvitationFilt
 	}
 
 	// Execute query
-	if err := query.Find(&codes).Error; err != nil {
+	if err := query.
+		Preload("Creator").
+		Preload("Redeemer").
+		Find(&codes).Error; err != nil {
 		return nil, 0, err
 	}
 

@@ -165,6 +165,12 @@ func (a *adminService) CreateInvitationCode(ctx context.Context, req *requests.C
 		return nil, err
 	}
 
+	// Reload with Creator preloaded
+	invitationCode, err = a.invitationCodeRepo.FindByID(ctx, invitationCode.ID)
+	if err != nil {
+		return nil, err
+	}
+
 	response := mapper.InvitationCodeToResponse(invitationCode)
 	return &response, nil
 }
