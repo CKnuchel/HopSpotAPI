@@ -11,8 +11,9 @@ type VisitResponse struct {
 }
 
 type VisitBenchResponse struct {
-	ID   uint   `json:"id"`
-	Name string `json:"name"`
+	ID           uint    `json:"id"`
+	Name         string  `json:"name"`
+	MainPhotoURL *string `json:"main_photo_url,omitempty"`
 }
 
 type PaginatedVisitsResponse struct {

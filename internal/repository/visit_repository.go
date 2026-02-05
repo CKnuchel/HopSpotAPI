@@ -57,7 +57,7 @@ func (r *visitRepository) FindByUserID(ctx context.Context, userID uint, filter 
 		query = query.Offset(offset)
 	}
 
-	if err := query.Find(&visits).Error; err != nil {
+	if err := query.Preload("Bench").Find(&visits).Error; err != nil {
 		return nil, 0, err
 	}
 

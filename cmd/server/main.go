@@ -131,7 +131,7 @@ func main() {
 	userService := service.NewUserService(userRepo, *cfg)
 	notificationService := service.NewNotificationService(fcmClient, userRepo)
 	benchService := service.NewBenchService(benchRepo, photoRepo, minioClient, notificationService)
-	visitService := service.NewVisitService(visitRepo)
+	visitService := service.NewVisitService(visitRepo, photoRepo, minioClient)
 	adminService := service.NewAdminService(userRepo, invitationRepo)
 	photoService := service.NewPhotoService(photoRepo, benchRepo, minioClient)
 	weatherService := service.NewWeatherService(weatherClient, redisClient, cfg.WeatherCacheTTL)

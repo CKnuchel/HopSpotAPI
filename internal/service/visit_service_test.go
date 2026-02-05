@@ -9,16 +9,26 @@ import (
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/repository"
 	"hopSpotAPI/mocks"
+	"hopSpotAPI/pkg/storage"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
 )
 
+// Helper function to create a test visit service with nil photo dependencies
+// Photo URL will be nil in all test responses, which is acceptable for testing core visit functionality
+func newTestVisitService(t *testing.T, visitRepo *mocks.VisitRepository) VisitService {
+	photoRepo := mocks.NewPhotoRepository(t)
+	// Return nil for all GetMainPhoto calls - no photos in tests
+	photoRepo.EXPECT().GetMainPhoto(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
+	return NewVisitService(visitRepo, photoRepo, (*storage.MinioClient)(nil))
+}
+
 func TestVisitService_Create_Success(t *testing.T) {
 	// Arrange
 	visitRepo := mocks.NewVisitRepository(t)
-	svc := NewVisitService(visitRepo)
+	svc := newTestVisitService(t, visitRepo)
 
 	req := &requests.CreateVisitRequest{
 		BenchID: 1,
@@ -36,13 +46,22 @@ func TestVisitService_Create_Success(t *testing.T) {
 				ID:        1,
 				CreatedAt: time.Now(),
 			}
-			// Simulate DB preloading Bench
-			v.Bench = domain.Bench{
-				ID:   1,
-				Name: "Test Bench",
-			}
 		}).
 		Return(nil)
+
+	// Mock FindByID to return the visit with preloaded bench
+	visitRepo.EXPECT().
+		FindByID(mock.Anything, uint(1)).
+		Return(&domain.Visit{
+			Model:   &gorm.Model{ID: 1, CreatedAt: time.Now()},
+			BenchID: 1,
+			UserID:  5,
+			Comment: "Nice bench!",
+			Bench: domain.Bench{
+				ID:   1,
+				Name: "Test Bench",
+			},
+		}, nil)
 
 	// Act
 	result, err := svc.Create(context.Background(), req, uint(5))
@@ -56,7 +75,7 @@ func TestVisitService_Create_Success(t *testing.T) {
 func TestVisitService_Create_WithoutComment(t *testing.T) {
 	// Arrange
 	visitRepo := mocks.NewVisitRepository(t)
-	svc := NewVisitService(visitRepo)
+	svc := newTestVisitService(t, visitRepo)
 
 	req := &requests.CreateVisitRequest{
 		BenchID: 2,
@@ -73,13 +92,21 @@ func TestVisitService_Create_WithoutComment(t *testing.T) {
 				ID:        2,
 				CreatedAt: time.Now(),
 			}
-			// Simulate DB preloading Bench
-			v.Bench = domain.Bench{
-				ID:   2,
-				Name: "Another Bench",
-			}
 		}).
 		Return(nil)
+
+	// Mock FindByID to return the visit with preloaded bench
+	visitRepo.EXPECT().
+		FindByID(mock.Anything, uint(2)).
+		Return(&domain.Visit{
+			Model:   &gorm.Model{ID: 2, CreatedAt: time.Now()},
+			BenchID: 2,
+			UserID:  3,
+			Bench: domain.Bench{
+				ID:   2,
+				Name: "Another Bench",
+			},
+		}, nil)
 
 	// Act
 	result, err := svc.Create(context.Background(), req, uint(3))
@@ -92,7 +119,7 @@ func TestVisitService_Create_WithoutComment(t *testing.T) {
 func TestVisitService_List_Success(t *testing.T) {
 	// Arrange
 	visitRepo := mocks.NewVisitRepository(t)
-	svc := NewVisitService(visitRepo)
+	svc := newTestVisitService(t, visitRepo)
 
 	visits := []domain.Visit{
 		{
@@ -140,7 +167,7 @@ func TestVisitService_List_Success(t *testing.T) {
 func TestVisitService_List_WithBenchFilter(t *testing.T) {
 	// Arrange
 	visitRepo := mocks.NewVisitRepository(t)
-	svc := NewVisitService(visitRepo)
+	svc := newTestVisitService(t, visitRepo)
 
 	benchID := uint(1)
 	visits := []domain.Visit{
@@ -181,7 +208,7 @@ func TestVisitService_List_WithBenchFilter(t *testing.T) {
 func TestVisitService_List_Pagination(t *testing.T) {
 	// Arrange
 	visitRepo := mocks.NewVisitRepository(t)
-	svc := NewVisitService(visitRepo)
+	svc := newTestVisitService(t, visitRepo)
 
 	// Page 2 of results (55 total, 50 per page = 5 on page 2)
 	visits := make([]domain.Visit, 5)
@@ -223,7 +250,7 @@ func TestVisitService_List_Pagination(t *testing.T) {
 func TestVisitService_List_Empty(t *testing.T) {
 	// Arrange
 	visitRepo := mocks.NewVisitRepository(t)
-	svc := NewVisitService(visitRepo)
+	svc := newTestVisitService(t, visitRepo)
 
 	req := &requests.ListVisitsRequest{
 		Page:  1,
@@ -247,7 +274,7 @@ func TestVisitService_List_Empty(t *testing.T) {
 func TestVisitService_GetCountByBenchID_Success(t *testing.T) {
 	// Arrange
 	visitRepo := mocks.NewVisitRepository(t)
-	svc := NewVisitService(visitRepo)
+	svc := newTestVisitService(t, visitRepo)
 
 	visitRepo.EXPECT().
 		CountByBenchID(mock.Anything, uint(1)).
@@ -264,7 +291,7 @@ func TestVisitService_GetCountByBenchID_Success(t *testing.T) {
 func TestVisitService_GetCountByBenchID_Zero(t *testing.T) {
 	// Arrange
 	visitRepo := mocks.NewVisitRepository(t)
-	svc := NewVisitService(visitRepo)
+	svc := newTestVisitService(t, visitRepo)
 
 	visitRepo.EXPECT().
 		CountByBenchID(mock.Anything, uint(999)).
