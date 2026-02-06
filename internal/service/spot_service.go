@@ -60,7 +60,7 @@ func (s *spotService) Create(ctx context.Context, req *requests.CreateSpotReques
 
 	// Notify about new Spot (async)
 	go func() {
-		if err := s.notificationService.NotifyNewSpot(ctx, spot, userID); err != nil {
+		if err := s.notificationService.NotifyNewSpot(context.Background(), spot, userID); err != nil {
 			logger.Warn().Err(err).Uint("spotID", spot.ID).Msg("failed to send new spot notification")
 		}
 	}()
