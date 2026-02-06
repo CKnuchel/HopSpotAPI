@@ -54,6 +54,7 @@ type PhotoRepository interface {
 	FindByID(ctx context.Context, id uint) (*domain.Photo, error)
 	Update(ctx context.Context, photo *domain.Photo) error
 	Delete(ctx context.Context, id uint) error
+	HardDelete(ctx context.Context, id uint) error
 
 	FindBySpotID(ctx context.Context, spotID uint) ([]domain.Photo, error)
 	CountBySpotID(ctx context.Context, spotID uint) (int64, error)

@@ -301,7 +301,7 @@ func (s *spotService) Delete(ctx context.Context, id uint, userID uint, isAdmin 
 
 	// Delete photos from database
 	for _, photo := range photos {
-		if err := s.photoRepo.Delete(ctx, photo.ID); err != nil {
+		if err := s.photoRepo.HardDelete(ctx, photo.ID); err != nil {
 			logger.Warn().Err(err).Uint("photoID", photo.ID).Msg("failed to delete photo record")
 		}
 	}

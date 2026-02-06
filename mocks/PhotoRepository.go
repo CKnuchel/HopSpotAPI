@@ -174,6 +174,53 @@ func (_c *PhotoRepository_Delete_Call) RunAndReturn(run func(context.Context, ui
 	return _c
 }
 
+// HardDelete provides a mock function with given fields: ctx, id
+func (_m *PhotoRepository) HardDelete(ctx context.Context, id uint) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for HardDelete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// PhotoRepository_HardDelete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'HardDelete'
+type PhotoRepository_HardDelete_Call struct {
+	*mock.Call
+}
+
+// HardDelete is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id uint
+func (_e *PhotoRepository_Expecter) HardDelete(ctx interface{}, id interface{}) *PhotoRepository_HardDelete_Call {
+	return &PhotoRepository_HardDelete_Call{Call: _e.mock.On("HardDelete", ctx, id)}
+}
+
+func (_c *PhotoRepository_HardDelete_Call) Run(run func(ctx context.Context, id uint)) *PhotoRepository_HardDelete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(uint))
+	})
+	return _c
+}
+
+func (_c *PhotoRepository_HardDelete_Call) Return(_a0 error) *PhotoRepository_HardDelete_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *PhotoRepository_HardDelete_Call) RunAndReturn(run func(context.Context, uint) error) *PhotoRepository_HardDelete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // FindBySpotID provides a mock function with given fields: ctx, spotID
 func (_m *PhotoRepository) FindBySpotID(ctx context.Context, spotID uint) ([]domain.Photo, error) {
 	ret := _m.Called(ctx, spotID)
