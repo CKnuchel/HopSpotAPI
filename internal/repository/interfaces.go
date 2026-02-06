@@ -67,8 +67,10 @@ type VisitRepository interface {
 	Create(ctx context.Context, visit *domain.Visit) error
 	FindByID(ctx context.Context, id uint) (*domain.Visit, error)
 	Delete(ctx context.Context, id uint) error
+	HardDelete(ctx context.Context, id uint) error
 
 	FindByUserID(ctx context.Context, userID uint, filter VisitFilter) ([]domain.Visit, int64, error)
+	FindBySpotIDUnscoped(ctx context.Context, spotID uint) ([]domain.Visit, error)
 	CountBySpotID(ctx context.Context, spotID uint) (int64, error)
 }
 
@@ -112,6 +114,7 @@ type VisitFilter struct {
 type FavoriteRepository interface {
 	Create(ctx context.Context, favorite *domain.Favorite) error
 	Delete(ctx context.Context, userID, spotID uint) error
+	DeleteBySpotID(ctx context.Context, spotID uint) error
 	Exists(ctx context.Context, userID, spotID uint) (bool, error)
 	FindByUserID(ctx context.Context, userID uint, filter FavoriteFilter) ([]domain.Favorite, int64, error)
 	GetSpotIDsByUserID(ctx context.Context, userID uint) ([]uint, error)
@@ -124,6 +127,7 @@ type FavoriteFilter struct {
 
 type ActivityRepository interface {
 	Create(ctx context.Context, activity *domain.Activity) error
+	DeleteBySpotID(ctx context.Context, spotID uint) error
 	FindAll(ctx context.Context, filter ActivityFilter) ([]domain.Activity, int64, error)
 }
 
@@ -131,4 +135,10 @@ type ActivityFilter struct {
 	Page       int
 	Limit      int
 	ActionType *string
+}
+
+type NotificationRepository interface {
+	Create(ctx context.Context, notification *domain.Notification) error
+	FindByRelatedSpotIDUnscoped(ctx context.Context, relatedSpotID uint) ([]domain.Notification, error)
+	HardDelete(ctx context.Context, id uint) error
 }

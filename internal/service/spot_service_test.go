@@ -21,7 +21,7 @@ func TestSpotService_Create_Success(t *testing.T) {
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
+	svc := NewSpotService(spotRepo, photoRepo, nil, nil, nil, nil, minioClient, notificationSvc, nil)
 
 	description := "A nice spot"
 	req := &requests.CreateSpotRequest{
@@ -88,7 +88,7 @@ func TestSpotService_GetByID_Success(t *testing.T) {
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
+	svc := NewSpotService(spotRepo, photoRepo, nil, nil, nil, nil, minioClient, notificationSvc, nil)
 
 	creator := domain.User{
 		Model:       &gorm.Model{ID: 1},
@@ -131,7 +131,7 @@ func TestSpotService_GetByID_NotFound(t *testing.T) {
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
+	svc := NewSpotService(spotRepo, photoRepo, nil, nil, nil, nil, minioClient, notificationSvc, nil)
 
 	spotRepo.EXPECT().
 		FindByID(mock.Anything, uint(999)).
@@ -152,7 +152,7 @@ func TestSpotService_List_Success(t *testing.T) {
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
+	svc := NewSpotService(spotRepo, photoRepo, nil, nil, nil, nil, minioClient, notificationSvc, nil)
 
 	spots := []domain.Spot{
 		{
@@ -202,7 +202,7 @@ func TestSpotService_List_WithCoordinatesAndRadius(t *testing.T) {
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
+	svc := NewSpotService(spotRepo, photoRepo, nil, nil, nil, nil, minioClient, notificationSvc, nil)
 
 	// Spot 1: very close (should be included)
 	// Spot 2: far away (should be excluded by radius)
@@ -263,7 +263,7 @@ func TestSpotService_Update_Success_AsOwner(t *testing.T) {
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
+	svc := NewSpotService(spotRepo, photoRepo, nil, nil, nil, nil, minioClient, notificationSvc, nil)
 
 	creator := domain.User{
 		Model:       &gorm.Model{ID: 1},
@@ -313,7 +313,7 @@ func TestSpotService_Update_Success_AsAdmin(t *testing.T) {
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
+	svc := NewSpotService(spotRepo, photoRepo, nil, nil, nil, nil, minioClient, notificationSvc, nil)
 
 	creator := domain.User{
 		Model:       &gorm.Model{ID: 1},
@@ -359,7 +359,7 @@ func TestSpotService_Update_Forbidden(t *testing.T) {
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
+	svc := NewSpotService(spotRepo, photoRepo, nil, nil, nil, nil, minioClient, notificationSvc, nil)
 
 	creator := domain.User{
 		Model:       &gorm.Model{ID: 1},
@@ -397,7 +397,7 @@ func TestSpotService_Update_NotFound(t *testing.T) {
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
+	svc := NewSpotService(spotRepo, photoRepo, nil, nil, nil, nil, minioClient, notificationSvc, nil)
 
 	newName := "Name"
 	req := &requests.UpdateSpotRequest{
@@ -423,7 +423,7 @@ func TestSpotService_Delete_Success_AsOwner(t *testing.T) {
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
+	svc := NewSpotService(spotRepo, photoRepo, nil, nil, nil, nil, minioClient, notificationSvc, nil)
 
 	spot := &domain.Spot{
 		ID:        1,
@@ -456,7 +456,7 @@ func TestSpotService_Delete_Success_AsAdmin(t *testing.T) {
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
+	svc := NewSpotService(spotRepo, photoRepo, nil, nil, nil, nil, minioClient, notificationSvc, nil)
 
 	spot := &domain.Spot{
 		ID:        1,
@@ -489,7 +489,7 @@ func TestSpotService_Delete_WithPhotos_UsesHardDelete(t *testing.T) {
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
+	svc := NewSpotService(spotRepo, photoRepo, nil, nil, nil, nil, minioClient, notificationSvc, nil)
 
 	spot := &domain.Spot{
 		ID:        1,
@@ -548,7 +548,7 @@ func TestSpotService_Delete_WithSoftDeletedPhotos_IncludesAll(t *testing.T) {
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
+	svc := NewSpotService(spotRepo, photoRepo, nil, nil, nil, nil, minioClient, notificationSvc, nil)
 
 	spot := &domain.Spot{
 		ID:        1,
@@ -610,7 +610,7 @@ func TestSpotService_Delete_Forbidden(t *testing.T) {
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
+	svc := NewSpotService(spotRepo, photoRepo, nil, nil, nil, nil, minioClient, notificationSvc, nil)
 
 	spot := &domain.Spot{
 		ID:        1,
@@ -636,7 +636,7 @@ func TestSpotService_Delete_NotFound(t *testing.T) {
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
+	svc := NewSpotService(spotRepo, photoRepo, nil, nil, nil, nil, minioClient, notificationSvc, nil)
 
 	spotRepo.EXPECT().
 		FindByID(mock.Anything, uint(999)).
@@ -656,7 +656,7 @@ func TestSpotService_List_SortByDistance(t *testing.T) {
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
+	svc := NewSpotService(spotRepo, photoRepo, nil, nil, nil, nil, minioClient, notificationSvc, nil)
 
 	// Spots at different distances
 	spots := []domain.Spot{

@@ -176,6 +176,112 @@ func (_c *VisitRepository_Delete_Call) RunAndReturn(run func(context.Context, ui
 	return _c
 }
 
+// FindBySpotIDUnscoped provides a mock function with given fields: ctx, spotID
+func (_m *VisitRepository) FindBySpotIDUnscoped(ctx context.Context, spotID uint) ([]domain.Visit, error) {
+	ret := _m.Called(ctx, spotID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindBySpotIDUnscoped")
+	}
+
+	var r0 []domain.Visit
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint) ([]domain.Visit, error)); ok {
+		return rf(ctx, spotID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint) []domain.Visit); ok {
+		r0 = rf(ctx, spotID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]domain.Visit)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint) error); ok {
+		r1 = rf(ctx, spotID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// VisitRepository_FindBySpotIDUnscoped_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindBySpotIDUnscoped'
+type VisitRepository_FindBySpotIDUnscoped_Call struct {
+	*mock.Call
+}
+
+// FindBySpotIDUnscoped is a helper method to define mock.On call
+//   - ctx context.Context
+//   - spotID uint
+func (_e *VisitRepository_Expecter) FindBySpotIDUnscoped(ctx interface{}, spotID interface{}) *VisitRepository_FindBySpotIDUnscoped_Call {
+	return &VisitRepository_FindBySpotIDUnscoped_Call{Call: _e.mock.On("FindBySpotIDUnscoped", ctx, spotID)}
+}
+
+func (_c *VisitRepository_FindBySpotIDUnscoped_Call) Run(run func(ctx context.Context, spotID uint)) *VisitRepository_FindBySpotIDUnscoped_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(uint))
+	})
+	return _c
+}
+
+func (_c *VisitRepository_FindBySpotIDUnscoped_Call) Return(_a0 []domain.Visit, _a1 error) *VisitRepository_FindBySpotIDUnscoped_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *VisitRepository_FindBySpotIDUnscoped_Call) RunAndReturn(run func(context.Context, uint) ([]domain.Visit, error)) *VisitRepository_FindBySpotIDUnscoped_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// HardDelete provides a mock function with given fields: ctx, id
+func (_m *VisitRepository) HardDelete(ctx context.Context, id uint) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for HardDelete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// VisitRepository_HardDelete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'HardDelete'
+type VisitRepository_HardDelete_Call struct {
+	*mock.Call
+}
+
+// HardDelete is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id uint
+func (_e *VisitRepository_Expecter) HardDelete(ctx interface{}, id interface{}) *VisitRepository_HardDelete_Call {
+	return &VisitRepository_HardDelete_Call{Call: _e.mock.On("HardDelete", ctx, id)}
+}
+
+func (_c *VisitRepository_HardDelete_Call) Run(run func(ctx context.Context, id uint)) *VisitRepository_HardDelete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(uint))
+	})
+	return _c
+}
+
+func (_c *VisitRepository_HardDelete_Call) Return(_a0 error) *VisitRepository_HardDelete_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *VisitRepository_HardDelete_Call) RunAndReturn(run func(context.Context, uint) error) *VisitRepository_HardDelete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // FindByID provides a mock function with given fields: ctx, id
 func (_m *VisitRepository) FindByID(ctx context.Context, id uint) (*domain.Visit, error) {
 	ret := _m.Called(ctx, id)
