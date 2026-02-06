@@ -7,6 +7,7 @@ import (
 
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/service"
+	"hopSpotAPI/pkg/apperror"
 )
 
 type AuthHandler struct {
@@ -27,19 +28,19 @@ func NewAuthHandler(authService service.AuthService) *AuthHandler {
 //	@Produce		json
 //	@Param			registerRequest	body		requests.RegisterRequest	true	"Register Request"
 //	@Success		201				{object}	responses.LoginResponse
-//	@Failure		400				{object}	map[string]string
-//	@Failure		409				{object}	map[string]string
+//	@Failure		400				{object}	apperror.ErrorResponse
+//	@Failure		409				{object}	apperror.ErrorResponse
 //	@Router			/api/v1/auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req requests.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		apperror.RespondWithError(c, apperror.AppErrValidationInvalidRequest)
 		return
 	}
 
 	result, err := h.authService.Register(c.Request.Context(), &req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apperror.RespondWithMappedError(c, err)
 		return
 	}
 
@@ -56,20 +57,20 @@ func (h *AuthHandler) Register(c *gin.Context) {
 //	@Produce		json
 //	@Param			loginRequest	body		requests.LoginRequest	true	"Login Request"
 //	@Success		200				{object}	responses.LoginResponse
-//	@Failure		400				{object}	map[string]string
-//	@Failure		401				{object}	map[string]string
-//	@Failure		403				{object}	map[string]string
+//	@Failure		400				{object}	apperror.ErrorResponse
+//	@Failure		401				{object}	apperror.ErrorResponse
+//	@Failure		403				{object}	apperror.ErrorResponse
 //	@Router			/api/v1/auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req requests.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		apperror.RespondWithError(c, apperror.AppErrValidationInvalidRequest)
 		return
 	}
 
 	result, err := h.authService.Login(c.Request.Context(), &req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apperror.RespondWithMappedError(c, err)
 		return
 	}
 
@@ -86,33 +87,33 @@ func (h *AuthHandler) Login(c *gin.Context) {
 //	@Produce		json
 //	@Param			refreshFCMTokenRequest	body		requests.RefreshFCMTokenRequest	true	"Refresh FCM Token Request"
 //	@Success		200						{object}	map[string]string
-//	@Failure		400						{object}	map[string]string
-//	@Failure		401						{object}	map[string]string
+//	@Failure		400						{object}	apperror.ErrorResponse
+//	@Failure		401						{object}	apperror.ErrorResponse
 //	@Router			/auth/refresh-fcm-token [post]
 func (h *AuthHandler) RefreshFCMToken(c *gin.Context) {
 	// Get UserId from context (set by auth middleware)
 	userId, exists := c.Get("userID")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		apperror.RespondWithError(c, apperror.AppErrInvalidToken)
 		return
 	}
 
 	// Bind request body
 	var req requests.RefreshFCMTokenRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		apperror.RespondWithError(c, apperror.AppErrValidationInvalidRequest)
 		return
 	}
 
 	// Call service to refresh FCM token
 	userID, ok := userId.(uint)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		apperror.RespondWithError(c, apperror.AppErrSystemInternal)
 		return
 	}
 	err := h.authService.RefreshFCMToken(c.Request.Context(), userID, req.FCMToken)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apperror.RespondWithMappedError(c, err)
 		return
 	}
 
@@ -129,19 +130,19 @@ func (h *AuthHandler) RefreshFCMToken(c *gin.Context) {
 //	@Produce		json
 //	@Param			refreshRequest	body		requests.RefreshTokenRequest	true	"Refresh Token Request"
 //	@Success		200				{object}	responses.LoginResponse
-//	@Failure		400				{object}	map[string]string
-//	@Failure		401				{object}	map[string]string
+//	@Failure		400				{object}	apperror.ErrorResponse
+//	@Failure		401				{object}	apperror.ErrorResponse
 //	@Router			/auth/refresh [post]
 func (h *AuthHandler) Refresh(c *gin.Context) {
 	var req requests.RefreshTokenRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		apperror.RespondWithError(c, apperror.AppErrValidationInvalidRequest)
 		return
 	}
 
 	result, err := h.authService.Refresh(c.Request.Context(), &req)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		apperror.RespondWithMappedError(c, err)
 		return
 	}
 
@@ -158,18 +159,18 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 //	@Produce		json
 //	@Param			logoutRequest	body	requests.LogoutRequest	true	"Logout Request"
 //	@Success		204				"No Content"
-//	@Failure		400				{object}	map[string]string
+//	@Failure		400				{object}	apperror.ErrorResponse
 //	@Router			/auth/logout [post]
 func (h *AuthHandler) Logout(c *gin.Context) {
 	var req requests.LogoutRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		apperror.RespondWithError(c, apperror.AppErrValidationInvalidRequest)
 		return
 	}
 
 	err := h.authService.Logout(c.Request.Context(), &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apperror.RespondWithMappedError(c, err)
 		return
 	}
 

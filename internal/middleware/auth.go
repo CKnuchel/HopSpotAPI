@@ -1,13 +1,13 @@
 package middleware
 
 import (
-	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 
 	"hopSpotAPI/internal/domain"
+	"hopSpotAPI/pkg/apperror"
 	"hopSpotAPI/pkg/utils"
 )
 
@@ -24,28 +24,28 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 		// Reading the header
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing"})
+			apperror.AbortWithError(c, apperror.AppErrInvalidToken.WithDetails("Authorization header missing"))
 			return
 		}
 
-		// Removin the Bearer prefix
+		// Removing the Bearer prefix
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		if tokenString == authHeader {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
+			apperror.AbortWithError(c, apperror.AppErrInvalidToken.WithDetails("Invalid token format"))
 			return
 		}
 
 		// Validating the token
 		claims, err := utils.ValidateJWT(tokenString, m.jwtSecret)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			apperror.AbortWithError(c, apperror.AppErrTokenExpired)
 			return
 		}
 
 		// Parsing user ID
 		userID, err := strconv.ParseUint(claims.RegisteredClaims.Subject, 10, 64)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid user id"})
+			apperror.AbortWithError(c, apperror.AppErrInvalidToken.WithDetails("Invalid user ID in token"))
 			return
 		}
 
@@ -63,7 +63,7 @@ func (m *AuthMiddleware) RequireAdmin() gin.HandlerFunc {
 		role, exists := c.Get("userRole")
 		roleValue, ok := role.(domain.Role)
 		if !exists || !ok || roleValue != domain.RoleAdmin {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Admin access required"})
+			apperror.AbortWithError(c, apperror.AppErrAdminRequired)
 			return
 		}
 

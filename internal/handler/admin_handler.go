@@ -9,6 +9,7 @@ import (
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/middleware"
 	"hopSpotAPI/internal/service"
+	"hopSpotAPI/pkg/apperror"
 	"hopSpotAPI/pkg/logger"
 )
 
@@ -34,12 +35,12 @@ func NewAdminHandler(adminService service.AdminService) *AdminHandler {
 //	@Param			is_active	query		bool	false	"Filter by active status"
 //	@Param			is_admin	query		bool	false	"Filter by admin status"
 //	@Success		200			{object}	responses.PaginatedUsersResponse
-//	@Failure		400
+//	@Failure		400			{object}	apperror.ErrorResponse
 //	@Router			/api/v1/admin/users [get]
 func (h *AdminHandler) ListUsers(c *gin.Context) {
 	var req requests.ListUsersRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apperror.RespondWithError(c, apperror.AppErrValidationInvalidRequest)
 		return
 	}
 
@@ -53,7 +54,7 @@ func (h *AdminHandler) ListUsers(c *gin.Context) {
 
 	users, err := h.adminService.ListUsers(c.Request.Context(), &req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
+		apperror.RespondWithMappedError(c, err)
 		return
 	}
 
@@ -71,24 +72,25 @@ func (h *AdminHandler) ListUsers(c *gin.Context) {
 //	@Param			id		path		int								true	"User ID"
 //	@Param			user	body		requests.AdminUpdateUserRequest	true	"User update payload"
 //	@Success		200		{object}	responses.UserResponse
-//	@Failure		400
+//	@Failure		400		{object}	apperror.ErrorResponse
+//	@Failure		404		{object}	apperror.ErrorResponse
 //	@Router			/api/v1/admin/users/{id} [patch]
 func (h *AdminHandler) UpdateUser(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		apperror.RespondWithError(c, apperror.AppErrValidationInvalidID)
 		return
 	}
 
 	var req requests.AdminUpdateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apperror.RespondWithError(c, apperror.AppErrValidationInvalidRequest)
 		return
 	}
 
 	user, err := h.adminService.UpdateUser(c.Request.Context(), uint(id), &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
+		apperror.RespondWithMappedError(c, err)
 		return
 	}
 
@@ -105,24 +107,25 @@ func (h *AdminHandler) UpdateUser(c *gin.Context) {
 //	@Produce		json
 //	@Param			id	path	int	true	"User ID"
 //	@Success		204	"No Content"
-//	@Failure		400
+//	@Failure		400	{object}	apperror.ErrorResponse
+//	@Failure		404	{object}	apperror.ErrorResponse
 //	@Router			/api/v1/admin/users/{id} [delete]
 func (h *AdminHandler) DeleteUser(c *gin.Context) {
 	adminID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		apperror.RespondWithError(c, apperror.AppErrSystemInternal)
 		return
 	}
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		apperror.RespondWithError(c, apperror.AppErrValidationInvalidID)
 		return
 	}
 
 	err = h.adminService.DeleteUser(c.Request.Context(), uint(id), adminID)
 	if err != nil {
 		logger.Error().Err(err).Uint("user_id", uint(id)).Msg("Failed to delete user")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
+		apperror.RespondWithMappedError(c, err)
 		return
 	}
 
@@ -146,13 +149,13 @@ func (h *AdminHandler) DeleteUser(c *gin.Context) {
 //	@Param			page	query		int	false	"Page number"				default(1)
 //	@Param			limit	query		int	false	"Number of codes per page"	default(50)
 //	@Success		200		{object}	responses.PaginatedInvitationCodesResponse
-//	@Failure		400
+//	@Failure		400		{object}	apperror.ErrorResponse
 //	@Router			/api/v1/admin/invitation-codes [get]
 func (h *AdminHandler) ListInvitationCodes(c *gin.Context) {
 	var req = requests.ListInvitationCodesRequest{}
 
 	if err := c.ShouldBindQuery(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apperror.RespondWithError(c, apperror.AppErrValidationInvalidRequest)
 		return
 	}
 
@@ -166,7 +169,7 @@ func (h *AdminHandler) ListInvitationCodes(c *gin.Context) {
 
 	result, err := h.adminService.ListInvitationCodes(c.Request.Context(), &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve invitation codes"})
+		apperror.RespondWithMappedError(c, err)
 		return
 	}
 
@@ -183,23 +186,23 @@ func (h *AdminHandler) ListInvitationCodes(c *gin.Context) {
 //	@Produce		json
 //	@Param			invitation_code	body		requests.CreateInvitationCodeRequest	true	"Invitation code payload"
 //	@Success		201				{object}	responses.InvitationCodeResponse
-//	@Failure		400
+//	@Failure		400				{object}	apperror.ErrorResponse
 //	@Router			/api/v1/admin/invitation-codes [post]
 func (h *AdminHandler) CreateInvitationCode(c *gin.Context) {
 	adminID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		apperror.RespondWithError(c, apperror.AppErrSystemInternal)
 		return
 	}
 
 	var req requests.CreateInvitationCodeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apperror.RespondWithError(c, apperror.AppErrValidationInvalidRequest)
 		return
 	}
 	result, err := h.adminService.CreateInvitationCode(c.Request.Context(), &req, adminID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create invitation code"})
+		apperror.RespondWithMappedError(c, err)
 		return
 	}
 
@@ -214,20 +217,20 @@ func (h *AdminHandler) CreateInvitationCode(c *gin.Context) {
 //	@Tags			Admin
 //	@Param			id	path	int	true	"Invitation Code ID"
 //	@Success		204	"No Content"
-//	@Failure		400
-//	@Failure		404
+//	@Failure		400	{object}	apperror.ErrorResponse
+//	@Failure		404	{object}	apperror.ErrorResponse
 //	@Router			/api/v1/admin/invitation-codes/{id} [delete]
 func (h *AdminHandler) DeleteInvitationCode(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid invitation code ID"})
+		apperror.RespondWithError(c, apperror.AppErrValidationInvalidID)
 		return
 	}
 
 	err = h.adminService.DeleteInvitationCode(c.Request.Context(), uint(id))
 	if err != nil {
 		logger.Error().Err(err).Uint("code_id", uint(id)).Msg("Failed to delete invitation code")
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apperror.RespondWithMappedError(c, err)
 		return
 	}
 
