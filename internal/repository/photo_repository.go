@@ -42,6 +42,10 @@ func (r *photoRepository) Delete(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).Delete(&domain.Photo{}, id).Error
 }
 
+func (r *photoRepository) HardDelete(ctx context.Context, id uint) error {
+	return r.db.WithContext(ctx).Unscoped().Delete(&domain.Photo{}, id).Error
+}
+
 func (r *photoRepository) FindBySpotID(ctx context.Context, spotID uint) ([]domain.Photo, error) {
 	var photos []domain.Photo
 	if err := r.db.WithContext(ctx).Where("spot_id = ?", spotID).Find(&photos).Error; err != nil {
