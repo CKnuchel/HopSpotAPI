@@ -280,6 +280,65 @@ func (_c *PhotoRepository_FindBySpotID_Call) RunAndReturn(run func(context.Conte
 	return _c
 }
 
+// FindBySpotIDUnscoped provides a mock function with given fields: ctx, spotID
+func (_m *PhotoRepository) FindBySpotIDUnscoped(ctx context.Context, spotID uint) ([]domain.Photo, error) {
+	ret := _m.Called(ctx, spotID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindBySpotIDUnscoped")
+	}
+
+	var r0 []domain.Photo
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint) ([]domain.Photo, error)); ok {
+		return rf(ctx, spotID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint) []domain.Photo); ok {
+		r0 = rf(ctx, spotID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]domain.Photo)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint) error); ok {
+		r1 = rf(ctx, spotID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PhotoRepository_FindBySpotIDUnscoped_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindBySpotIDUnscoped'
+type PhotoRepository_FindBySpotIDUnscoped_Call struct {
+	*mock.Call
+}
+
+// FindBySpotIDUnscoped is a helper method to define mock.On call
+//   - ctx context.Context
+//   - spotID uint
+func (_e *PhotoRepository_Expecter) FindBySpotIDUnscoped(ctx interface{}, spotID interface{}) *PhotoRepository_FindBySpotIDUnscoped_Call {
+	return &PhotoRepository_FindBySpotIDUnscoped_Call{Call: _e.mock.On("FindBySpotIDUnscoped", ctx, spotID)}
+}
+
+func (_c *PhotoRepository_FindBySpotIDUnscoped_Call) Run(run func(ctx context.Context, spotID uint)) *PhotoRepository_FindBySpotIDUnscoped_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(uint))
+	})
+	return _c
+}
+
+func (_c *PhotoRepository_FindBySpotIDUnscoped_Call) Return(_a0 []domain.Photo, _a1 error) *PhotoRepository_FindBySpotIDUnscoped_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *PhotoRepository_FindBySpotIDUnscoped_Call) RunAndReturn(run func(context.Context, uint) ([]domain.Photo, error)) *PhotoRepository_FindBySpotIDUnscoped_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // FindByID provides a mock function with given fields: ctx, id
 func (_m *PhotoRepository) FindByID(ctx context.Context, id uint) (*domain.Photo, error) {
 	ret := _m.Called(ctx, id)

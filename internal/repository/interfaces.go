@@ -57,6 +57,7 @@ type PhotoRepository interface {
 	HardDelete(ctx context.Context, id uint) error
 
 	FindBySpotID(ctx context.Context, spotID uint) ([]domain.Photo, error)
+	FindBySpotIDUnscoped(ctx context.Context, spotID uint) ([]domain.Photo, error)
 	CountBySpotID(ctx context.Context, spotID uint) (int64, error)
 	SetMainPhoto(ctx context.Context, photoID uint, spotID uint) error
 	GetMainPhoto(ctx context.Context, spotID uint) (*domain.Photo, error)

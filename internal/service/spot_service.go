@@ -273,8 +273,8 @@ func (s *spotService) Delete(ctx context.Context, id uint, userID uint, isAdmin 
 		return apperror.ErrForbidden
 	}
 
-	// Get all photos for this spot
-	photos, err := s.photoRepo.FindBySpotID(ctx, id)
+	// Get all photos for this spot (including soft-deleted ones)
+	photos, err := s.photoRepo.FindBySpotIDUnscoped(ctx, id)
 	if err != nil {
 		logger.Warn().Err(err).Uint("spotID", id).Msg("failed to get photos for deletion")
 		// Continue anyway - try to delete what we can
