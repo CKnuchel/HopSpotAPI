@@ -102,6 +102,7 @@ func main() {
 	invitationRepo := repository.NewInvitationRepository(db)
 	photoRepo := repository.NewPhotoRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
+	favoriteRepo := repository.NewFavoriteRepository(db)
 
 	// Bootstrap: Create initial invitation code if no users exist
 	userCount, err := userRepo.Count(context.Background())
@@ -135,6 +136,7 @@ func main() {
 	adminService := service.NewAdminService(userRepo, invitationRepo)
 	photoService := service.NewPhotoService(photoRepo, benchRepo, minioClient)
 	weatherService := service.NewWeatherService(weatherClient, redisClient, cfg.WeatherCacheTTL)
+	favoriteService := service.NewFavoriteService(favoriteRepo, benchRepo, photoRepo, minioClient)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService)
@@ -144,6 +146,7 @@ func main() {
 	adminHandler := handler.NewAdminHandler(adminService)
 	photoHandler := handler.NewPhotoHandler(photoService)
 	weatherHandler := handler.NewWeatherHandler(weatherService)
+	favoriteHandler := handler.NewFavoriteHandler(favoriteService)
 
 	// Middlewares
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
@@ -153,7 +156,7 @@ func main() {
 	// Router
 	r := router.Setup(authHandler, userHandler, benchHandler,
 		visitHandler, adminHandler, photoHandler, weatherHandler,
-		authMiddleware, globalRateLimiter, loginRateLimiter)
+		favoriteHandler, authMiddleware, globalRateLimiter, loginRateLimiter)
 
 	// Server mit Graceful Shutdown
 	srv := &http.Server{

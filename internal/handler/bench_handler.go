@@ -69,6 +69,28 @@ func (h *BenchHandler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": benches})
 }
 
+// GET /api/v1/benches/random
+// GetRandomBench godoc
+//
+//	@Summary		Get a random bench
+//	@Description	Retrieve a random bench from the database
+//	@Tags			Benches
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	responses.BenchResponse
+//	@Failure		404	{object}	map[string]string	"No benches found"
+//	@Failure		500	{object}	map[string]string	"Internal Server Error"
+//	@Router			/api/v1/benches/random [get]
+func (h *BenchHandler) GetRandom(c *gin.Context) {
+	bench, err := h.benchService.GetRandom(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve random bench"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": bench})
+}
+
 // GET /api/v1/benches/:id
 // GetBenchByID godoc
 //

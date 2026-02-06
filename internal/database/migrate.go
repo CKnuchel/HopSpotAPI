@@ -20,6 +20,7 @@ func Migrate(db *gorm.DB) error {
 		&domain.InvitationCode{},
 		&domain.Visit{},
 		&domain.RefreshToken{},
+		&domain.Favorite{},
 	)
 
 	if err != nil {

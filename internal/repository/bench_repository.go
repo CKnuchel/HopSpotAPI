@@ -140,6 +140,22 @@ func (r benchRepository) FindAll(ctx context.Context, filter BenchFilter) ([]dom
 	return benches, total, nil
 }
 
+func (r benchRepository) FindRandom(ctx context.Context) (*domain.Bench, error) {
+	var bench domain.Bench
+	err := r.db.WithContext(ctx).
+		Preload("Creator").
+		Order("RANDOM()").
+		First(&bench).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &bench, nil
+}
+
 func (r benchRepository) UpdateFields(ctx context.Context, id uint, fields map[string]interface{}) error {
 	return r.db.WithContext(ctx).Model(&domain.Bench{}).Where("id = ?", id).Updates(fields).Error
 }

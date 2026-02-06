@@ -19,6 +19,7 @@ func Setup(
 	adminHandler *handler.AdminHandler,
 	photoHandler *handler.PhotoHandler,
 	weatherHandler *handler.WeatherHandler,
+	favoriteHandler *handler.FavoriteHandler,
 	authMiddleware *middleware.AuthMiddleware,
 	globalRateLimiter *middleware.RateLimitMiddleware,
 	loginRateLimiter *middleware.RateLimitMiddleware,
@@ -64,6 +65,7 @@ func Setup(
 			bench := protected.Group("/benches")
 			{
 				bench.GET("", benchHandler.List)
+				bench.GET("/random", benchHandler.GetRandom)
 				bench.GET("/:id", benchHandler.GetByID)
 				bench.POST("", benchHandler.Create)
 				bench.PATCH("/:id", benchHandler.Update)
@@ -71,6 +73,11 @@ func Setup(
 
 				// Visit count by bench ID
 				bench.GET("/:id/visits/count", visitHandler.GetVisitCountByBenchID)
+
+				// Favorite routes unter /benches/:id
+				bench.GET("/:id/favorite", favoriteHandler.Check)
+				bench.POST("/:id/favorite", favoriteHandler.Add)
+				bench.DELETE("/:id/favorite", favoriteHandler.Remove)
 
 				// Photo routes unter /benches/:id
 				bench.POST("/:id/photos", photoHandler.Upload)
@@ -82,6 +89,13 @@ func Setup(
 			{
 				visits.GET("", visitHandler.ListVisits)
 				visits.POST("", visitHandler.CreateVisit)
+				visits.DELETE("/:id", visitHandler.DeleteVisit)
+			}
+
+			// Favorites routes
+			favorites := protected.Group("/favorites")
+			{
+				favorites.GET("", favoriteHandler.List)
 			}
 
 			// Photo routes

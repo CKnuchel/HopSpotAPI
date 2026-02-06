@@ -18,6 +18,7 @@ import (
 type BenchService interface {
 	Create(ctx context.Context, req *requests.CreateBenchRequest, userID uint) (*responses.BenchResponse, error)
 	GetByID(ctx context.Context, id uint) (*responses.BenchResponse, error)
+	GetRandom(ctx context.Context) (*responses.BenchResponse, error)
 	List(ctx context.Context, req *requests.ListBenchesRequest) (*responses.PaginatedBenchesResponse, error)
 	Update(ctx context.Context, id uint, req *requests.UpdateBenchRequest, userID uint, isAdmin bool) (*responses.BenchResponse, error)
 	Delete(ctx context.Context, id uint, userID uint, isAdmin bool) error
@@ -79,6 +80,27 @@ func (b *benchService) GetByID(ctx context.Context, id uint) (*responses.BenchRe
 	mainPhotoURL, err := b.getMainPhotoURL(ctx, id)
 	if err != nil {
 		logger.Warn().Err(err).Uint("benchID", id).Msg("failed to get main photo URL")
+		// Continue without main photo
+	}
+	response.MainPhotoURL = mainPhotoURL
+
+	return &response, nil
+}
+
+// GetRandom implements BenchService.
+func (b *benchService) GetRandom(ctx context.Context) (*responses.BenchResponse, error) {
+	bench, err := b.benchRepo.FindRandom(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if bench == nil {
+		return nil, apperror.ErrBenchNotFound
+	}
+
+	response := mapper.BenchToResponse(bench)
+	mainPhotoURL, err := b.getMainPhotoURL(ctx, bench.ID)
+	if err != nil {
+		logger.Warn().Err(err).Uint("benchID", bench.ID).Msg("failed to get main photo URL")
 		// Continue without main photo
 	}
 	response.MainPhotoURL = mainPhotoURL

@@ -124,3 +124,46 @@ func (h *VisitHandler) CreateVisit(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, response)
 }
+
+// DELETE /api/v1/visits/:id
+// DeleteVisit godoc
+//
+//	@Summary		Delete a visit
+//	@Description	Delete a visit by ID (only own visits can be deleted)
+//	@Tags			Visits
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	int	true	"Visit ID"
+//	@Success		204
+//	@Failure		400
+//	@Failure		403
+//	@Failure		404
+//	@Router			/api/v1/visits/{id} [delete]
+func (h *VisitHandler) DeleteVisit(c *gin.Context) {
+	userID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user context"})
+		return
+	}
+
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid visit ID"})
+		return
+	}
+
+	if err := h.visitService.Delete(c.Request.Context(), uint(id), userID); err != nil {
+		if err.Error() == "forbidden" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "You can only delete your own visits"})
+			return
+		}
+		if err.Error() == "record not found" {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Visit not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete visit"})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}

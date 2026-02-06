@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"hopSpotAPI/pkg/apperror"
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/dto/responses"
 	"hopSpotAPI/internal/mapper"
@@ -14,6 +15,7 @@ type VisitService interface {
 	Create(ctx context.Context, req *requests.CreateVisitRequest, userID uint) (*responses.VisitResponse, error)
 	List(ctx context.Context, req *requests.ListVisitsRequest, userID uint) (*responses.PaginatedVisitsResponse, error)
 	GetCountByBenchID(ctx context.Context, benchID uint) (int64, error)
+	Delete(ctx context.Context, visitID uint, userID uint) error
 }
 
 type visitService struct {
@@ -107,4 +109,19 @@ func (v *visitService) getMainPhotoURL(ctx context.Context, benchID uint) *strin
 
 	url := v.minioClient.GetPublicURL(mainPhoto.FilePathThumbnail)
 	return &url
+}
+
+// Delete deletes a visit if it belongs to the user
+func (v *visitService) Delete(ctx context.Context, visitID uint, userID uint) error {
+	// Check if visit exists and belongs to the user
+	visit, err := v.visitRepo.FindByID(ctx, visitID)
+	if err != nil {
+		return err
+	}
+
+	if visit.UserID != userID {
+		return apperror.ErrForbidden
+	}
+
+	return v.visitRepo.Delete(ctx, visitID)
 }

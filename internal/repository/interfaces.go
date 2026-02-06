@@ -45,6 +45,7 @@ type BenchRepository interface {
 	Delete(ctx context.Context, id uint) error
 
 	FindAll(ctx context.Context, filter BenchFilter) ([]domain.Bench, int64, error)
+	FindRandom(ctx context.Context) (*domain.Bench, error)
 	UpdateFields(ctx context.Context, id uint, fields map[string]interface{}) error
 }
 
@@ -104,4 +105,17 @@ type VisitFilter struct {
 	Limit     int
 	SortOrder string // asc, desc
 	BenchID   *uint
+}
+
+type FavoriteRepository interface {
+	Create(ctx context.Context, favorite *domain.Favorite) error
+	Delete(ctx context.Context, userID, benchID uint) error
+	Exists(ctx context.Context, userID, benchID uint) (bool, error)
+	FindByUserID(ctx context.Context, userID uint, filter FavoriteFilter) ([]domain.Favorite, int64, error)
+	GetBenchIDsByUserID(ctx context.Context, userID uint) ([]uint, error)
+}
+
+type FavoriteFilter struct {
+	Page  int
+	Limit int
 }
