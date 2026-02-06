@@ -38,14 +38,14 @@ type InvitationRepository interface {
 	MarkAsRedeemed(ctx context.Context, codeID uint, userID uint) error
 }
 
-type BenchRepository interface {
-	Create(ctx context.Context, bench *domain.Bench) error
-	FindByID(ctx context.Context, id uint) (*domain.Bench, error)
-	Update(ctx context.Context, bench *domain.Bench) error
+type SpotRepository interface {
+	Create(ctx context.Context, spot *domain.Spot) error
+	FindByID(ctx context.Context, id uint) (*domain.Spot, error)
+	Update(ctx context.Context, spot *domain.Spot) error
 	Delete(ctx context.Context, id uint) error
 
-	FindAll(ctx context.Context, filter BenchFilter) ([]domain.Bench, int64, error)
-	FindRandom(ctx context.Context) (*domain.Bench, error)
+	FindAll(ctx context.Context, filter SpotFilter) ([]domain.Spot, int64, error)
+	FindRandom(ctx context.Context) (*domain.Spot, error)
 	UpdateFields(ctx context.Context, id uint, fields map[string]interface{}) error
 }
 
@@ -55,10 +55,10 @@ type PhotoRepository interface {
 	Update(ctx context.Context, photo *domain.Photo) error
 	Delete(ctx context.Context, id uint) error
 
-	FindByBenchID(ctx context.Context, benchID uint) ([]domain.Photo, error)
-	CountByBenchID(ctx context.Context, benchID uint) (int64, error)
-	SetMainPhoto(ctx context.Context, photoID uint, benchID uint) error
-	GetMainPhoto(ctx context.Context, benchID uint) (*domain.Photo, error)
+	FindBySpotID(ctx context.Context, spotID uint) ([]domain.Photo, error)
+	CountBySpotID(ctx context.Context, spotID uint) (int64, error)
+	SetMainPhoto(ctx context.Context, photoID uint, spotID uint) error
+	GetMainPhoto(ctx context.Context, spotID uint) (*domain.Photo, error)
 }
 
 type VisitRepository interface {
@@ -67,7 +67,7 @@ type VisitRepository interface {
 	Delete(ctx context.Context, id uint) error
 
 	FindByUserID(ctx context.Context, userID uint, filter VisitFilter) ([]domain.Visit, int64, error)
-	CountByBenchID(ctx context.Context, benchID uint) (int64, error)
+	CountBySpotID(ctx context.Context, spotID uint) (int64, error)
 }
 
 type UserFilter struct {
@@ -85,7 +85,7 @@ type InvitationFilter struct {
 	CreatedBy  *uint
 }
 
-type BenchFilter struct {
+type SpotFilter struct {
 	Page        int
 	Limit       int
 	SortBy      string // name, rating, created_at, distance, visit_count
@@ -104,15 +104,15 @@ type VisitFilter struct {
 	Page      int
 	Limit     int
 	SortOrder string // asc, desc
-	BenchID   *uint
+	SpotID    *uint
 }
 
 type FavoriteRepository interface {
 	Create(ctx context.Context, favorite *domain.Favorite) error
-	Delete(ctx context.Context, userID, benchID uint) error
-	Exists(ctx context.Context, userID, benchID uint) (bool, error)
+	Delete(ctx context.Context, userID, spotID uint) error
+	Exists(ctx context.Context, userID, spotID uint) (bool, error)
 	FindByUserID(ctx context.Context, userID uint, filter FavoriteFilter) ([]domain.Favorite, int64, error)
-	GetBenchIDsByUserID(ctx context.Context, userID uint) ([]uint, error)
+	GetSpotIDsByUserID(ctx context.Context, userID uint) ([]uint, error)
 }
 
 type FavoriteFilter struct {

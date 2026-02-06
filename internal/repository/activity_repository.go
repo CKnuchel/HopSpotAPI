@@ -49,7 +49,7 @@ func (r *activityRepository) FindAll(ctx context.Context, filter ActivityFilter)
 	}
 
 	// Load relations
-	if err := query.Preload("User").Preload("Bench").Find(&activities).Error; err != nil {
+	if err := query.Preload("User").Preload("Spot").Find(&activities).Error; err != nil {
 		return nil, 0, err
 	}
 

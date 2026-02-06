@@ -14,7 +14,7 @@ import (
 func Setup(
 	authHandler *handler.AuthHandler,
 	userHandler *handler.UserHandler,
-	benchHandler *handler.BenchHandler,
+	spotHandler *handler.SpotHandler,
 	visitHandler *handler.VisitHandler,
 	adminHandler *handler.AdminHandler,
 	photoHandler *handler.PhotoHandler,
@@ -62,27 +62,27 @@ func Setup(
 				user.POST("/me/change-password", userHandler.ChangePassword)
 			}
 
-			// Bench routes
-			bench := protected.Group("/benches")
+			// Spot routes
+			spot := protected.Group("/spots")
 			{
-				bench.GET("", benchHandler.List)
-				bench.GET("/random", benchHandler.GetRandom)
-				bench.GET("/:id", benchHandler.GetByID)
-				bench.POST("", benchHandler.Create)
-				bench.PATCH("/:id", benchHandler.Update)
-				bench.DELETE("/:id", benchHandler.Delete)
+				spot.GET("", spotHandler.List)
+				spot.GET("/random", spotHandler.GetRandom)
+				spot.GET("/:id", spotHandler.GetByID)
+				spot.POST("", spotHandler.Create)
+				spot.PATCH("/:id", spotHandler.Update)
+				spot.DELETE("/:id", spotHandler.Delete)
 
-				// Visit count by bench ID
-				bench.GET("/:id/visits/count", visitHandler.GetVisitCountByBenchID)
+				// Visit count by spot ID
+				spot.GET("/:id/visits/count", visitHandler.GetVisitCountBySpotID)
 
-				// Favorite routes unter /benches/:id
-				bench.GET("/:id/favorite", favoriteHandler.Check)
-				bench.POST("/:id/favorite", favoriteHandler.Add)
-				bench.DELETE("/:id/favorite", favoriteHandler.Remove)
+				// Favorite routes unter /spots/:id
+				spot.GET("/:id/favorite", favoriteHandler.Check)
+				spot.POST("/:id/favorite", favoriteHandler.Add)
+				spot.DELETE("/:id/favorite", favoriteHandler.Remove)
 
-				// Photo routes unter /benches/:id
-				bench.POST("/:id/photos", photoHandler.Upload)
-				bench.GET("/:id/photos", photoHandler.GetByBenchID)
+				// Photo routes unter /spots/:id
+				spot.POST("/:id/photos", photoHandler.Upload)
+				spot.GET("/:id/photos", photoHandler.GetBySpotID)
 			}
 
 			// Visit routes

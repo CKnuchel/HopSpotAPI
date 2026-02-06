@@ -4,7 +4,7 @@ import "time"
 
 type PhotoResponse struct {
 	ID           uint      `json:"id"`
-	BenchID      uint      `json:"bench_id"`
+	SpotID       uint      `json:"spot_id"`
 	IsMain       bool      `json:"is_main"`
 	URLOriginal  string    `json:"url_original,omitempty"`
 	URLMedium    string    `json:"url_medium,omitempty"`

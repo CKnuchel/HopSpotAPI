@@ -18,48 +18,48 @@ import (
 )
 
 const (
-	MaxPhotosPerBench = 10
-	MaxFileSize       = 10 * 1024 * 1024 // 10 MB
+	MaxPhotosPerSpot = 10
+	MaxFileSize      = 10 * 1024 * 1024 // 10 MB
 )
 
 type PhotoService interface {
-	Upload(ctx context.Context, benchID uint, userID uint, file *multipart.FileHeader, isMain bool) (*responses.PhotoResponse, error)
+	Upload(ctx context.Context, spotID uint, userID uint, file *multipart.FileHeader, isMain bool) (*responses.PhotoResponse, error)
 	Delete(ctx context.Context, photoID uint, userID uint, isAdmin bool) error
 	SetMainPhoto(ctx context.Context, photoID uint, userID uint, isAdmin bool) error
-	GetByBenchID(ctx context.Context, benchID uint) ([]responses.PhotoResponse, error)
+	GetBySpotID(ctx context.Context, spotID uint) ([]responses.PhotoResponse, error)
 	GetPresignedURL(ctx context.Context, photoID uint, size string) (string, error)
 }
 
 type photoService struct {
 	photoRepo   repository.PhotoRepository
-	benchRepo   repository.BenchRepository
+	spotRepo    repository.SpotRepository
 	minioClient *storage.MinioClient
 }
 
-func NewPhotoService(photoRepo repository.PhotoRepository, benchRepo repository.BenchRepository, minioClient *storage.MinioClient) PhotoService {
+func NewPhotoService(photoRepo repository.PhotoRepository, spotRepo repository.SpotRepository, minioClient *storage.MinioClient) PhotoService {
 	return &photoService{
 		photoRepo:   photoRepo,
-		benchRepo:   benchRepo,
+		spotRepo:    spotRepo,
 		minioClient: minioClient,
 	}
 }
 
-func (s *photoService) Upload(ctx context.Context, benchID uint, userID uint, file *multipart.FileHeader, isMain bool) (*responses.PhotoResponse, error) {
-	// Check if the referenced bench exists
-	bench, err := s.benchRepo.FindByID(ctx, benchID)
+func (s *photoService) Upload(ctx context.Context, spotID uint, userID uint, file *multipart.FileHeader, isMain bool) (*responses.PhotoResponse, error) {
+	// Check if the referenced spot exists
+	spot, err := s.spotRepo.FindByID(ctx, spotID)
 	if err != nil {
 		return nil, err
 	}
-	if bench == nil {
-		return nil, apperror.ErrBenchNotFound
+	if spot == nil {
+		return nil, apperror.ErrSpotNotFound
 	}
 
-	// Check the number of existing photos for the bench
-	count, err := s.photoRepo.CountByBenchID(ctx, benchID)
+	// Check the number of existing photos for the spot
+	count, err := s.photoRepo.CountBySpotID(ctx, spotID)
 	if err != nil {
 		return nil, err
 	}
-	if count >= MaxPhotosPerBench {
+	if count >= MaxPhotosPerSpot {
 		return nil, apperror.ErrMaxPhotosReached
 	}
 
@@ -88,7 +88,7 @@ func (s *photoService) Upload(ctx context.Context, benchID uint, userID uint, fi
 
 	// Creating the photo record to get the ID
 	photo := &domain.Photo{
-		BenchID:    benchID,
+		SpotID:     spotID,
 		UploadedBy: userID,
 		IsMain:     isMain,
 		MimeType:   "image/jpeg",
@@ -100,9 +100,9 @@ func (s *photoService) Upload(ctx context.Context, benchID uint, userID uint, fi
 	}
 
 	// Generating storage paths
-	pathOriginal := utils.GeneratePhotoPath(benchID, photo.ID, "original")
-	pathMedium := utils.GeneratePhotoPath(benchID, photo.ID, "medium")
-	pathThumbnail := utils.GeneratePhotoPath(benchID, photo.ID, "thumbnail")
+	pathOriginal := utils.GeneratePhotoPath(spotID, photo.ID, "original")
+	pathMedium := utils.GeneratePhotoPath(spotID, photo.ID, "medium")
+	pathThumbnail := utils.GeneratePhotoPath(spotID, photo.ID, "thumbnail")
 
 	// Uploading the images to MinIO
 	if err := s.minioClient.Upload(ctx, pathOriginal, bytes.NewReader(processed.Original), int64(len(processed.Original)), "image/jpeg"); err != nil {
@@ -147,7 +147,7 @@ func (s *photoService) Upload(ctx context.Context, benchID uint, userID uint, fi
 
 	// If it's the first photo, set it as main
 	if isMain || count == 0 {
-		if err := s.photoRepo.SetMainPhoto(ctx, photo.ID, benchID); err != nil {
+		if err := s.photoRepo.SetMainPhoto(ctx, photo.ID, spotID); err != nil {
 			logger.Warn().Err(err).Uint("photoID", photo.ID).Msg("failed to set main photo")
 		}
 		photo.IsMain = true
@@ -196,9 +196,9 @@ func (s *photoService) Delete(ctx context.Context, photoID uint, userID uint, is
 
 	// If it was the main photo, set another as main
 	if photo.IsMain {
-		photos, err := s.photoRepo.FindByBenchID(ctx, photo.BenchID)
+		photos, err := s.photoRepo.FindBySpotID(ctx, photo.SpotID)
 		if err == nil && len(photos) > 0 {
-			if err := s.photoRepo.SetMainPhoto(ctx, photos[0].ID, photo.BenchID); err != nil {
+			if err := s.photoRepo.SetMainPhoto(ctx, photos[0].ID, photo.SpotID); err != nil {
 				logger.Warn().Err(err).Uint("photoID", photos[0].ID).Msg("failed to set new main photo")
 			}
 		}
@@ -218,26 +218,26 @@ func (s *photoService) SetMainPhoto(ctx context.Context, photoID uint, userID ui
 		return apperror.ErrPhotoNotFound
 	}
 
-	// Fetch the bench
-	bench, err := s.benchRepo.FindByID(ctx, photo.BenchID)
+	// Fetch the spot
+	spot, err := s.spotRepo.FindByID(ctx, photo.SpotID)
 	if err != nil {
 		return err
 	}
-	if bench == nil {
-		return apperror.ErrBenchNotFound
+	if spot == nil {
+		return apperror.ErrSpotNotFound
 	}
 
-	// Authorization check: only admin or bench owner can set main photo
-	if bench.CreatedBy != userID && !isAdmin {
+	// Authorization check: only admin or spot owner can set main photo
+	if spot.CreatedBy != userID && !isAdmin {
 		return apperror.ErrForbidden
 	}
 
-	return s.photoRepo.SetMainPhoto(ctx, photoID, photo.BenchID)
+	return s.photoRepo.SetMainPhoto(ctx, photoID, photo.SpotID)
 }
 
-// GetByBenchID implements PhotoService.
-func (s *photoService) GetByBenchID(ctx context.Context, benchID uint) ([]responses.PhotoResponse, error) {
-	photos, err := s.photoRepo.FindByBenchID(ctx, benchID)
+// GetBySpotID implements PhotoService.
+func (s *photoService) GetBySpotID(ctx context.Context, spotID uint) ([]responses.PhotoResponse, error) {
+	photos, err := s.photoRepo.FindBySpotID(ctx, spotID)
 	if err != nil {
 		return nil, err
 	}
@@ -247,7 +247,7 @@ func (s *photoService) GetByBenchID(ctx context.Context, benchID uint) ([]respon
 	for i, photo := range photos {
 		result[i] = responses.PhotoResponse{
 			ID:           photo.ID,
-			BenchID:      photo.BenchID,
+			SpotID:       photo.SpotID,
 			IsMain:       photo.IsMain,
 			URLOriginal:  s.minioClient.GetPublicURL(photo.FilePathOriginal),
 			URLMedium:    s.minioClient.GetPublicURL(photo.FilePathMedium),

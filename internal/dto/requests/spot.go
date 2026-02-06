@@ -1,6 +1,6 @@
 package requests
 
-type CreateBenchRequest struct {
+type CreateSpotRequest struct {
 	Name        string  `json:"name" binding:"required,min=1,max=255"`
 	Latitude    float64 `json:"latitude" binding:"required,min=-90,max=90"`
 	Longitude   float64 `json:"longitude" binding:"required,min=-180,max=180"`
@@ -10,7 +10,7 @@ type CreateBenchRequest struct {
 	HasTrashBin bool    `json:"has_trash_bin"`
 }
 
-type UpdateBenchRequest struct {
+type UpdateSpotRequest struct {
 	Name        *string  `json:"name" binding:"omitempty,min=1,max=255"`
 	Latitude    *float64 `json:"latitude" binding:"omitempty,min=-90,max=90"`
 	Longitude   *float64 `json:"longitude" binding:"omitempty,min=-180,max=180"`
@@ -20,7 +20,7 @@ type UpdateBenchRequest struct {
 	HasTrashBin *bool    `json:"has_trash_bin"`
 }
 
-type ListBenchesRequest struct {
+type ListSpotsRequest struct {
 	Page        int      `form:"page,default=1" binding:"min=1"`
 	Limit       int      `form:"limit,default=50" binding:"min=1,max=100"`
 	SortBy      string   `form:"sort_by,default=created_at" binding:"omitempty,oneof=name rating created_at distance"` // Supported sort values: distance

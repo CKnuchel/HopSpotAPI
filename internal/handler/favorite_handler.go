@@ -19,22 +19,22 @@ func NewFavoriteHandler(favoriteService service.FavoriteService) *FavoriteHandle
 	return &FavoriteHandler{favoriteService: favoriteService}
 }
 
-// POST /api/v1/benches/:id/favorite
+// POST /api/v1/spots/:id/favorite
 // AddFavorite godoc
 //
-//	@Summary		Add bench to favorites
-//	@Description	Add a bench to the user's favorites
+//	@Summary		Add spot to favorites
+//	@Description	Add a spot to the user's favorites
 //	@Tags			Favorites
 //	@Security		BearerAuth
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path	int	true	"Bench ID"
+//	@Param			id	path	int	true	"Spot ID"
 //	@Success		201	{object}	map[string]bool	"is_favorite: true"
-//	@Failure		400	{object}	apperror.ErrorResponse	"Invalid bench ID"
+//	@Failure		400	{object}	apperror.ErrorResponse	"Invalid spot ID"
 //	@Failure		401	{object}	apperror.ErrorResponse	"Unauthorized"
 //	@Failure		409	{object}	apperror.ErrorResponse	"Already in favorites"
 //	@Failure		500	{object}	apperror.ErrorResponse	"Internal Server Error"
-//	@Router			/api/v1/benches/{id}/favorite [post]
+//	@Router			/api/v1/spots/{id}/favorite [post]
 func (h *FavoriteHandler) Add(c *gin.Context) {
 	userID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
 	if !ok {
@@ -42,13 +42,13 @@ func (h *FavoriteHandler) Add(c *gin.Context) {
 		return
 	}
 
-	benchID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	spotID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		apperror.RespondWithError(c, apperror.AppErrValidationInvalidID)
 		return
 	}
 
-	if err := h.favoriteService.Add(c.Request.Context(), userID, uint(benchID)); err != nil {
+	if err := h.favoriteService.Add(c.Request.Context(), userID, uint(spotID)); err != nil {
 		apperror.RespondWithMappedError(c, err)
 		return
 	}
@@ -56,22 +56,22 @@ func (h *FavoriteHandler) Add(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"is_favorite": true})
 }
 
-// DELETE /api/v1/benches/:id/favorite
+// DELETE /api/v1/spots/:id/favorite
 // RemoveFavorite godoc
 //
-//	@Summary		Remove bench from favorites
-//	@Description	Remove a bench from the user's favorites
+//	@Summary		Remove spot from favorites
+//	@Description	Remove a spot from the user's favorites
 //	@Tags			Favorites
 //	@Security		BearerAuth
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path	int	true	"Bench ID"
+//	@Param			id	path	int	true	"Spot ID"
 //	@Success		200	{object}	map[string]bool	"is_favorite: false"
-//	@Failure		400	{object}	apperror.ErrorResponse	"Invalid bench ID"
+//	@Failure		400	{object}	apperror.ErrorResponse	"Invalid spot ID"
 //	@Failure		401	{object}	apperror.ErrorResponse	"Unauthorized"
 //	@Failure		404	{object}	apperror.ErrorResponse	"Favorite not found"
 //	@Failure		500	{object}	apperror.ErrorResponse	"Internal Server Error"
-//	@Router			/api/v1/benches/{id}/favorite [delete]
+//	@Router			/api/v1/spots/{id}/favorite [delete]
 func (h *FavoriteHandler) Remove(c *gin.Context) {
 	userID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
 	if !ok {
@@ -79,13 +79,13 @@ func (h *FavoriteHandler) Remove(c *gin.Context) {
 		return
 	}
 
-	benchID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	spotID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		apperror.RespondWithError(c, apperror.AppErrValidationInvalidID)
 		return
 	}
 
-	if err := h.favoriteService.Remove(c.Request.Context(), userID, uint(benchID)); err != nil {
+	if err := h.favoriteService.Remove(c.Request.Context(), userID, uint(spotID)); err != nil {
 		apperror.RespondWithMappedError(c, err)
 		return
 	}
@@ -93,21 +93,21 @@ func (h *FavoriteHandler) Remove(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"is_favorite": false})
 }
 
-// GET /api/v1/benches/:id/favorite
+// GET /api/v1/spots/:id/favorite
 // CheckFavorite godoc
 //
-//	@Summary		Check if bench is favorited
-//	@Description	Check if a bench is in the user's favorites
+//	@Summary		Check if spot is favorited
+//	@Description	Check if a spot is in the user's favorites
 //	@Tags			Favorites
 //	@Security		BearerAuth
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path		int	true	"Bench ID"
+//	@Param			id	path		int	true	"Spot ID"
 //	@Success		200	{object}	map[string]bool	"is_favorite: true/false"
-//	@Failure		400	{object}	apperror.ErrorResponse	"Invalid bench ID"
+//	@Failure		400	{object}	apperror.ErrorResponse	"Invalid spot ID"
 //	@Failure		401	{object}	apperror.ErrorResponse	"Unauthorized"
 //	@Failure		500	{object}	apperror.ErrorResponse	"Internal Server Error"
-//	@Router			/api/v1/benches/{id}/favorite [get]
+//	@Router			/api/v1/spots/{id}/favorite [get]
 func (h *FavoriteHandler) Check(c *gin.Context) {
 	userID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
 	if !ok {
@@ -115,13 +115,13 @@ func (h *FavoriteHandler) Check(c *gin.Context) {
 		return
 	}
 
-	benchID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	spotID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		apperror.RespondWithError(c, apperror.AppErrValidationInvalidID)
 		return
 	}
 
-	isFavorite, err := h.favoriteService.IsFavorite(c.Request.Context(), userID, uint(benchID))
+	isFavorite, err := h.favoriteService.IsFavorite(c.Request.Context(), userID, uint(spotID))
 	if err != nil {
 		apperror.RespondWithMappedError(c, err)
 		return
@@ -134,7 +134,7 @@ func (h *FavoriteHandler) Check(c *gin.Context) {
 // ListFavorites godoc
 //
 //	@Summary		List user's favorites
-//	@Description	Get a paginated list of the user's favorite benches
+//	@Description	Get a paginated list of the user's favorite spots
 //	@Tags			Favorites
 //	@Security		BearerAuth
 //	@Accept			json

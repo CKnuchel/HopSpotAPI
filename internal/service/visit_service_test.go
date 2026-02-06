@@ -22,7 +22,7 @@ func newTestVisitService(t *testing.T, visitRepo *mocks.VisitRepository) VisitSe
 	photoRepo := mocks.NewPhotoRepository(t)
 	// Return nil for all GetMainPhoto calls - no photos in tests
 	photoRepo.EXPECT().GetMainPhoto(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
-	return NewVisitService(visitRepo, photoRepo, (*storage.MinioClient)(nil))
+	return NewVisitService(visitRepo, photoRepo, (*storage.MinioClient)(nil), nil)
 }
 
 func TestVisitService_Create_Success(t *testing.T) {
@@ -31,16 +31,16 @@ func TestVisitService_Create_Success(t *testing.T) {
 	svc := newTestVisitService(t, visitRepo)
 
 	req := &requests.CreateVisitRequest{
-		BenchID: 1,
-		Comment: "Nice bench!",
+		SpotID:  1,
+		Comment: "Nice spot!",
 	}
 
 	visitRepo.EXPECT().
 		Create(mock.Anything, mock.AnythingOfType("*domain.Visit")).
 		Run(func(ctx context.Context, v *domain.Visit) {
-			assert.Equal(t, uint(1), v.BenchID)
+			assert.Equal(t, uint(1), v.SpotID)
 			assert.Equal(t, uint(5), v.UserID)
-			assert.Equal(t, "Nice bench!", v.Comment)
+			assert.Equal(t, "Nice spot!", v.Comment)
 			// Simulate DB setting ID and timestamps
 			v.Model = &gorm.Model{
 				ID:        1,
@@ -49,17 +49,17 @@ func TestVisitService_Create_Success(t *testing.T) {
 		}).
 		Return(nil)
 
-	// Mock FindByID to return the visit with preloaded bench
+	// Mock FindByID to return the visit with preloaded spot
 	visitRepo.EXPECT().
 		FindByID(mock.Anything, uint(1)).
 		Return(&domain.Visit{
 			Model:   &gorm.Model{ID: 1, CreatedAt: time.Now()},
-			BenchID: 1,
+			SpotID:  1,
 			UserID:  5,
-			Comment: "Nice bench!",
-			Bench: domain.Bench{
+			Comment: "Nice spot!",
+			Spot: domain.Spot{
 				ID:   1,
-				Name: "Test Bench",
+				Name: "Test Spot",
 			},
 		}, nil)
 
@@ -69,7 +69,7 @@ func TestVisitService_Create_Success(t *testing.T) {
 	// Assert
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
-	assert.Equal(t, uint(1), result.Bench.ID)
+	assert.Equal(t, uint(1), result.Spot.ID)
 }
 
 func TestVisitService_Create_WithoutComment(t *testing.T) {
@@ -78,14 +78,14 @@ func TestVisitService_Create_WithoutComment(t *testing.T) {
 	svc := newTestVisitService(t, visitRepo)
 
 	req := &requests.CreateVisitRequest{
-		BenchID: 2,
+		SpotID:  2,
 		Comment: "",
 	}
 
 	visitRepo.EXPECT().
 		Create(mock.Anything, mock.AnythingOfType("*domain.Visit")).
 		Run(func(ctx context.Context, v *domain.Visit) {
-			assert.Equal(t, uint(2), v.BenchID)
+			assert.Equal(t, uint(2), v.SpotID)
 			assert.Equal(t, uint(3), v.UserID)
 			assert.Empty(t, v.Comment)
 			v.Model = &gorm.Model{
@@ -95,16 +95,16 @@ func TestVisitService_Create_WithoutComment(t *testing.T) {
 		}).
 		Return(nil)
 
-	// Mock FindByID to return the visit with preloaded bench
+	// Mock FindByID to return the visit with preloaded spot
 	visitRepo.EXPECT().
 		FindByID(mock.Anything, uint(2)).
 		Return(&domain.Visit{
-			Model:   &gorm.Model{ID: 2, CreatedAt: time.Now()},
-			BenchID: 2,
-			UserID:  3,
-			Bench: domain.Bench{
+			Model:  &gorm.Model{ID: 2, CreatedAt: time.Now()},
+			SpotID: 2,
+			UserID: 3,
+			Spot: domain.Spot{
 				ID:   2,
-				Name: "Another Bench",
+				Name: "Another Spot",
 			},
 		}, nil)
 
@@ -124,22 +124,22 @@ func TestVisitService_List_Success(t *testing.T) {
 	visits := []domain.Visit{
 		{
 			Model:   &gorm.Model{ID: 1, CreatedAt: time.Now()},
-			BenchID: 1,
+			SpotID:  1,
 			UserID:  5,
 			Comment: "First visit",
-			Bench: domain.Bench{
+			Spot: domain.Spot{
 				ID:   1,
-				Name: "Bench 1",
+				Name: "Spot 1",
 			},
 		},
 		{
 			Model:   &gorm.Model{ID: 2, CreatedAt: time.Now()},
-			BenchID: 2,
+			SpotID:  2,
 			UserID:  5,
 			Comment: "Second visit",
-			Bench: domain.Bench{
+			Spot: domain.Spot{
 				ID:   2,
-				Name: "Bench 2",
+				Name: "Spot 2",
 			},
 		},
 	}
@@ -164,34 +164,34 @@ func TestVisitService_List_Success(t *testing.T) {
 	assert.Equal(t, 1, result.Pagination.Page)
 }
 
-func TestVisitService_List_WithBenchFilter(t *testing.T) {
+func TestVisitService_List_WithSpotFilter(t *testing.T) {
 	// Arrange
 	visitRepo := mocks.NewVisitRepository(t)
 	svc := newTestVisitService(t, visitRepo)
 
-	benchID := uint(1)
+	spotID := uint(1)
 	visits := []domain.Visit{
 		{
 			Model:   &gorm.Model{ID: 1, CreatedAt: time.Now()},
-			BenchID: 1,
+			SpotID:  1,
 			UserID:  5,
-			Comment: "Visit to bench 1",
-			Bench: domain.Bench{
+			Comment: "Visit to spot 1",
+			Spot: domain.Spot{
 				ID:   1,
-				Name: "Bench 1",
+				Name: "Spot 1",
 			},
 		},
 	}
 
 	req := &requests.ListVisitsRequest{
-		Page:    1,
-		Limit:   50,
-		BenchID: &benchID,
+		Page:   1,
+		Limit:  50,
+		SpotID: &spotID,
 	}
 
 	visitRepo.EXPECT().
 		FindByUserID(mock.Anything, uint(5), mock.MatchedBy(func(f repository.VisitFilter) bool {
-			return f.BenchID != nil && *f.BenchID == uint(1)
+			return f.SpotID != nil && *f.SpotID == uint(1)
 		})).
 		Return(visits, int64(1), nil)
 
@@ -214,12 +214,12 @@ func TestVisitService_List_Pagination(t *testing.T) {
 	visits := make([]domain.Visit, 5)
 	for i := 0; i < 5; i++ {
 		visits[i] = domain.Visit{
-			Model:   &gorm.Model{ID: uint(51 + i), CreatedAt: time.Now()},
-			BenchID: uint(i + 1),
-			UserID:  5,
-			Bench: domain.Bench{
+			Model:  &gorm.Model{ID: uint(51 + i), CreatedAt: time.Now()},
+			SpotID: uint(i + 1),
+			UserID: 5,
+			Spot: domain.Spot{
 				ID:   uint(i + 1),
-				Name: "Bench",
+				Name: "Spot",
 			},
 		}
 	}
@@ -271,34 +271,34 @@ func TestVisitService_List_Empty(t *testing.T) {
 	assert.Equal(t, int64(0), result.Pagination.Total)
 }
 
-func TestVisitService_GetCountByBenchID_Success(t *testing.T) {
+func TestVisitService_GetCountBySpotID_Success(t *testing.T) {
 	// Arrange
 	visitRepo := mocks.NewVisitRepository(t)
 	svc := newTestVisitService(t, visitRepo)
 
 	visitRepo.EXPECT().
-		CountByBenchID(mock.Anything, uint(1)).
+		CountBySpotID(mock.Anything, uint(1)).
 		Return(int64(42), nil)
 
 	// Act
-	count, err := svc.GetCountByBenchID(context.Background(), uint(1))
+	count, err := svc.GetCountBySpotID(context.Background(), uint(1))
 
 	// Assert
 	assert.NoError(t, err)
 	assert.Equal(t, int64(42), count)
 }
 
-func TestVisitService_GetCountByBenchID_Zero(t *testing.T) {
+func TestVisitService_GetCountBySpotID_Zero(t *testing.T) {
 	// Arrange
 	visitRepo := mocks.NewVisitRepository(t)
 	svc := newTestVisitService(t, visitRepo)
 
 	visitRepo.EXPECT().
-		CountByBenchID(mock.Anything, uint(999)).
+		CountBySpotID(mock.Anything, uint(999)).
 		Return(int64(0), nil)
 
 	// Act
-	count, err := svc.GetCountByBenchID(context.Background(), uint(999))
+	count, err := svc.GetCountBySpotID(context.Background(), uint(999))
 
 	// Assert
 	assert.NoError(t, err)

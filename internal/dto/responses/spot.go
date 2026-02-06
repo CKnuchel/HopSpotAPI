@@ -2,7 +2,15 @@ package responses
 
 import "time"
 
-type BenchResponse struct {
+// PaginationResponse contains pagination metadata
+type PaginationResponse struct {
+	Page       int   `json:"page"`
+	Limit      int   `json:"limit"`
+	Total      int64 `json:"total"`
+	TotalPages int   `json:"total_pages"`
+}
+
+type SpotResponse struct {
 	ID           uint         `json:"id"`
 	Name         string       `json:"name"`
 	Latitude     float64      `json:"latitude"`
@@ -17,7 +25,7 @@ type BenchResponse struct {
 	UpdatedAt    time.Time    `json:"updated_at"`
 }
 
-type BenchListResponse struct {
+type SpotListResponse struct {
 	ID           uint     `json:"id"`
 	Name         string   `json:"name"`
 	Latitude     float64  `json:"latitude"`
@@ -29,14 +37,7 @@ type BenchListResponse struct {
 	Distance     *float64 `json:"distance,omitempty"` // Falls Koordinaten mitgegeben
 }
 
-type PaginatedBenchesResponse struct {
-	Benches    []BenchListResponse `json:"benches"`
-	Pagination PaginationResponse  `json:"pagination"`
-}
-
-type PaginationResponse struct {
-	Page       int   `json:"page"`
-	Limit      int   `json:"limit"`
-	Total      int64 `json:"total"`
-	TotalPages int   `json:"total_pages"`
+type PaginatedSpotsResponse struct {
+	Spots      []SpotListResponse `json:"spots"`
+	Pagination PaginationResponse `json:"pagination"`
 }

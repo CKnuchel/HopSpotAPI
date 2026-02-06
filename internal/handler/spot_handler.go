@@ -13,39 +13,39 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type BenchHandler struct {
-	benchService service.BenchService
+type SpotHandler struct {
+	spotService service.SpotService
 }
 
-func NewBenchHandler(benchService service.BenchService) *BenchHandler {
-	return &BenchHandler{benchService: benchService}
+func NewSpotHandler(spotService service.SpotService) *SpotHandler {
+	return &SpotHandler{spotService: spotService}
 }
 
-// GET /api/v1/benches
-// ListBenches godoc
+// GET /api/v1/spots
+// ListSpots godoc
 //
-//	@Summary		List benches
-//	@Description	Get a paginated list of benches with optional filters
-//	@Tags			Benches
+//	@Summary		List spots
+//	@Description	Get a paginated list of spots with optional filters
+//	@Tags			Spots
 //	@Accept			json
 //	@Produce		json
 //	@Param			page			query		int		false	"Page number"					default(1)
-//	@Param			limit			query		int		false	"Number of benches per page"	default(50)
+//	@Param			limit			query		int		false	"Number of spots per page"	default(50)
 //	@Param			sort_by			query		string	false	"Sort by field"					Enums(name, rating, created_at, distance)	default(created_at)
 //	@Param			sort_order		query		string	false	"Sort order"					Enums(asc, desc)							default(desc)
-//	@Param			search			query		string	false	"Search term for bench name or description"
+//	@Param			search			query		string	false	"Search term for spot name or description"
 //	@Param			has_toilet		query		bool	false	"Filter by presence of toilet"
 //	@Param			has_trash_bin	query		bool	false	"Filter by presence of trash bin"
 //	@Param			min_rating		query		int		false	"Filter by minimum rating (1-5)"
 //	@Param			lat				query		number	false	"Latitude for proximity search"
 //	@Param			lon				query		number	false	"Longitude for proximity search"
 //	@Param			radius			query		int		false	"Radius in meters for proximity search"
-//	@Success		200				{object}	responses.PaginatedBenchesResponse
+//	@Success		200				{object}	responses.PaginatedSpotsResponse
 //	@Failure		400				{object}	apperror.ErrorResponse	"Bad Request"
 //	@Failure		500				{object}	apperror.ErrorResponse	"Internal Server Error"
-//	@Router			/api/v1/benches [get]
-func (h *BenchHandler) List(c *gin.Context) {
-	var req requests.ListBenchesRequest
+//	@Router			/api/v1/spots [get]
+func (h *SpotHandler) List(c *gin.Context) {
+	var req requests.ListSpotsRequest
 
 	if err := c.ShouldBindQuery(&req); err != nil {
 		apperror.RespondWithError(c, apperror.AppErrValidationInvalidRequest)
@@ -60,85 +60,85 @@ func (h *BenchHandler) List(c *gin.Context) {
 		req.Limit = 50
 	}
 
-	// Call the service to get benches
-	benches, err := h.benchService.List(c.Request.Context(), &req)
+	// Call the service to get spots
+	spots, err := h.spotService.List(c.Request.Context(), &req)
 	if err != nil {
 		apperror.RespondWithMappedError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": benches})
+	c.JSON(http.StatusOK, gin.H{"data": spots})
 }
 
-// GET /api/v1/benches/random
-// GetRandomBench godoc
+// GET /api/v1/spots/random
+// GetRandomSpot godoc
 //
-//	@Summary		Get a random bench
-//	@Description	Retrieve a random bench from the database
-//	@Tags			Benches
+//	@Summary		Get a random spot
+//	@Description	Retrieve a random spot from the database
+//	@Tags			Spots
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	responses.BenchResponse
-//	@Failure		404	{object}	apperror.ErrorResponse	"No benches found"
+//	@Success		200	{object}	responses.SpotResponse
+//	@Failure		404	{object}	apperror.ErrorResponse	"No spots found"
 //	@Failure		500	{object}	apperror.ErrorResponse	"Internal Server Error"
-//	@Router			/api/v1/benches/random [get]
-func (h *BenchHandler) GetRandom(c *gin.Context) {
-	bench, err := h.benchService.GetRandom(c.Request.Context())
+//	@Router			/api/v1/spots/random [get]
+func (h *SpotHandler) GetRandom(c *gin.Context) {
+	spot, err := h.spotService.GetRandom(c.Request.Context())
 	if err != nil {
 		apperror.RespondWithMappedError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": bench})
+	c.JSON(http.StatusOK, gin.H{"data": spot})
 }
 
-// GET /api/v1/benches/:id
-// GetBenchByID godoc
+// GET /api/v1/spots/:id
+// GetSpotByID godoc
 //
-//	@Summary		Get bench by ID
-//	@Description	Retrieve a single bench by its ID
-//	@Tags			Benches
+//	@Summary		Get spot by ID
+//	@Description	Retrieve a single spot by its ID
+//	@Tags			Spots
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path		int	true	"Bench ID"
-//	@Success		200	{object}	responses.BenchResponse
-//	@Failure		400	{object}	apperror.ErrorResponse	"Invalid bench ID"
-//	@Failure		404	{object}	apperror.ErrorResponse	"Bench not found"
+//	@Param			id	path		int	true	"Spot ID"
+//	@Success		200	{object}	responses.SpotResponse
+//	@Failure		400	{object}	apperror.ErrorResponse	"Invalid spot ID"
+//	@Failure		404	{object}	apperror.ErrorResponse	"Spot not found"
 //	@Failure		500	{object}	apperror.ErrorResponse	"Internal Server Error"
-//	@Router			/api/v1/benches/{id} [get]
-func (h *BenchHandler) GetByID(c *gin.Context) {
+//	@Router			/api/v1/spots/{id} [get]
+func (h *SpotHandler) GetByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		apperror.RespondWithError(c, apperror.AppErrValidationInvalidID)
 		return
 	}
 
-	// Call the service to get the bench by ID
-	bench, err := h.benchService.GetByID(c.Request.Context(), uint(id))
+	// Call the service to get the spot by ID
+	spot, err := h.spotService.GetByID(c.Request.Context(), uint(id))
 	if err != nil {
 		apperror.RespondWithMappedError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": bench})
+	c.JSON(http.StatusOK, gin.H{"data": spot})
 }
 
-// POST /api/v1/benches
-// CreateBench godoc
+// POST /api/v1/spots
+// CreateSpot godoc
 //
-//	@Summary		Create a new bench
-//	@Description	Create a new bench with the provided details
-//	@Tags			Benches
+//	@Summary		Create a new spot
+//	@Description	Create a new spot with the provided details
+//	@Tags			Spots
 //	@Security		BearerAuth
 //	@Accept			json
 //	@Produce		json
-//	@Param			bench	body		requests.CreateBenchRequest	true	"Bench payload"
-//	@Success		201		{object}	responses.BenchResponse
+//	@Param			spot	body		requests.CreateSpotRequest	true	"Spot payload"
+//	@Success		201		{object}	responses.SpotResponse
 //	@Failure		400		{object}	apperror.ErrorResponse	"Bad Request"
 //	@Failure		401		{object}	apperror.ErrorResponse	"Unauthorized"
 //	@Failure		500		{object}	apperror.ErrorResponse	"Internal Server Error"
-//	@Router			/api/v1/benches [post]
-func (h *BenchHandler) Create(c *gin.Context) {
+//	@Router			/api/v1/spots [post]
+func (h *SpotHandler) Create(c *gin.Context) {
 	// JWT Claims
 	userID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
 	if !ok {
@@ -147,13 +147,13 @@ func (h *BenchHandler) Create(c *gin.Context) {
 	}
 
 	// Request data
-	var req requests.CreateBenchRequest
+	var req requests.CreateSpotRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		apperror.RespondWithError(c, apperror.AppErrValidationInvalidRequest)
 		return
 	}
 
-	result, err := h.benchService.Create(c.Request.Context(), &req, userID)
+	result, err := h.spotService.Create(c.Request.Context(), &req, userID)
 	if err != nil {
 		apperror.RespondWithMappedError(c, err)
 		return
@@ -162,25 +162,25 @@ func (h *BenchHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"data": result})
 }
 
-// PATCH /api/v1/benches/:id
-// UpdateBench godoc
+// PATCH /api/v1/spots/:id
+// UpdateSpot godoc
 //
-//	@Summary		Update a bench
-//	@Description	Update bench details by ID. Only the owner or an admin can update a bench.
-//	@Tags			Benches
+//	@Summary		Update a spot
+//	@Description	Update spot details by ID. Only the owner or an admin can update a spot.
+//	@Tags			Spots
 //	@Security		BearerAuth
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		int							true	"Bench ID"
-//	@Param			bench	body		requests.UpdateBenchRequest	true	"Bench update payload"
-//	@Success		200		{object}	responses.BenchResponse
+//	@Param			id		path		int							true	"Spot ID"
+//	@Param			spot	body		requests.UpdateSpotRequest	true	"Spot update payload"
+//	@Success		200		{object}	responses.SpotResponse
 //	@Failure		400		{object}	apperror.ErrorResponse	"Bad Request"
 //	@Failure		401		{object}	apperror.ErrorResponse	"Unauthorized"
 //	@Failure		403		{object}	apperror.ErrorResponse	"Forbidden - not owner or admin"
-//	@Failure		404		{object}	apperror.ErrorResponse	"Bench not found"
+//	@Failure		404		{object}	apperror.ErrorResponse	"Spot not found"
 //	@Failure		500		{object}	apperror.ErrorResponse	"Internal Server Error"
-//	@Router			/api/v1/benches/{id} [patch]
-func (h *BenchHandler) Update(c *gin.Context) {
+//	@Router			/api/v1/spots/{id} [patch]
+func (h *SpotHandler) Update(c *gin.Context) {
 	// JWT Claims
 	userID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
 	if !ok {
@@ -201,13 +201,13 @@ func (h *BenchHandler) Update(c *gin.Context) {
 		return
 	}
 
-	var req requests.UpdateBenchRequest
+	var req requests.UpdateSpotRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		apperror.RespondWithError(c, apperror.AppErrValidationInvalidRequest)
 		return
 	}
 
-	result, err := h.benchService.Update(c.Request.Context(), uint(id), &req, userID, isAdmin)
+	result, err := h.spotService.Update(c.Request.Context(), uint(id), &req, userID, isAdmin)
 	if err != nil {
 		apperror.RespondWithMappedError(c, err)
 		return
@@ -216,24 +216,24 @@ func (h *BenchHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": result})
 }
 
-// DELETE /api/v1/benches/:id
-// DeleteBench godoc
+// DELETE /api/v1/spots/:id
+// DeleteSpot godoc
 //
-//	@Summary		Delete a bench
-//	@Description	Delete a bench by ID. Only the owner or an admin can delete a bench.
-//	@Tags			Benches
+//	@Summary		Delete a spot
+//	@Description	Delete a spot by ID. Only the owner or an admin can delete a spot.
+//	@Tags			Spots
 //	@Security		BearerAuth
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path		int	true	"Bench ID"
+//	@Param			id	path		int	true	"Spot ID"
 //	@Success		200	{object}	nil	"Successfully deleted"
-//	@Failure		400	{object}	apperror.ErrorResponse	"Invalid bench ID"
+//	@Failure		400	{object}	apperror.ErrorResponse	"Invalid spot ID"
 //	@Failure		401	{object}	apperror.ErrorResponse	"Unauthorized"
 //	@Failure		403	{object}	apperror.ErrorResponse	"Forbidden - not owner or admin"
-//	@Failure		404	{object}	apperror.ErrorResponse	"Bench not found"
+//	@Failure		404	{object}	apperror.ErrorResponse	"Spot not found"
 //	@Failure		500	{object}	apperror.ErrorResponse	"Internal Server Error"
-//	@Router			/api/v1/benches/{id} [delete]
-func (h *BenchHandler) Delete(c *gin.Context) {
+//	@Router			/api/v1/spots/{id} [delete]
+func (h *SpotHandler) Delete(c *gin.Context) {
 	// JWT Claims
 	userID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
 	if !ok {
@@ -254,7 +254,7 @@ func (h *BenchHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	err = h.benchService.Delete(c.Request.Context(), uint(id), userID, isAdmin)
+	err = h.spotService.Delete(c.Request.Context(), uint(id), userID, isAdmin)
 	if err != nil {
 		apperror.RespondWithMappedError(c, err)
 		return

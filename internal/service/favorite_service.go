@@ -12,16 +12,16 @@ import (
 )
 
 type FavoriteService interface {
-	Add(ctx context.Context, userID, benchID uint) error
-	Remove(ctx context.Context, userID, benchID uint) error
-	IsFavorite(ctx context.Context, userID, benchID uint) (bool, error)
+	Add(ctx context.Context, userID, spotID uint) error
+	Remove(ctx context.Context, userID, spotID uint) error
+	IsFavorite(ctx context.Context, userID, spotID uint) (bool, error)
 	List(ctx context.Context, userID uint, page, limit int) (*responses.PaginatedFavoritesResponse, error)
-	GetFavoriteBenchIDs(ctx context.Context, userID uint) ([]uint, error)
+	GetFavoriteSpotIDs(ctx context.Context, userID uint) ([]uint, error)
 }
 
 type favoriteService struct {
 	favoriteRepo    repository.FavoriteRepository
-	benchRepo       repository.BenchRepository
+	spotRepo        repository.SpotRepository
 	photoRepo       repository.PhotoRepository
 	minioClient     *storage.MinioClient
 	activityService ActivityService
@@ -29,23 +29,23 @@ type favoriteService struct {
 
 func NewFavoriteService(
 	favoriteRepo repository.FavoriteRepository,
-	benchRepo repository.BenchRepository,
+	spotRepo repository.SpotRepository,
 	photoRepo repository.PhotoRepository,
 	minioClient *storage.MinioClient,
 	activityService ActivityService,
 ) FavoriteService {
 	return &favoriteService{
 		favoriteRepo:    favoriteRepo,
-		benchRepo:       benchRepo,
+		spotRepo:        spotRepo,
 		photoRepo:       photoRepo,
 		minioClient:     minioClient,
 		activityService: activityService,
 	}
 }
 
-func (s *favoriteService) Add(ctx context.Context, userID, benchID uint) error {
+func (s *favoriteService) Add(ctx context.Context, userID, spotID uint) error {
 	// Check if already favorited
-	exists, err := s.favoriteRepo.Exists(ctx, userID, benchID)
+	exists, err := s.favoriteRepo.Exists(ctx, userID, spotID)
 	if err != nil {
 		return err
 	}
@@ -54,8 +54,8 @@ func (s *favoriteService) Add(ctx context.Context, userID, benchID uint) error {
 	}
 
 	favorite := &domain.Favorite{
-		UserID:  userID,
-		BenchID: benchID,
+		UserID: userID,
+		SpotID: spotID,
 	}
 
 	if err := s.favoriteRepo.Create(ctx, favorite); err != nil {
@@ -64,21 +64,21 @@ func (s *favoriteService) Add(ctx context.Context, userID, benchID uint) error {
 
 	// Create activity for favorite (async)
 	go func() {
-		bid := benchID
-		if err := s.activityService.Create(context.Background(), userID, domain.ActionFavoriteAdded, &bid); err != nil {
-			logger.Warn().Err(err).Uint("benchID", benchID).Msg("failed to create favorite_added activity")
+		sid := spotID
+		if err := s.activityService.Create(context.Background(), userID, domain.ActionFavoriteAdded, &sid); err != nil {
+			logger.Warn().Err(err).Uint("spotID", spotID).Msg("failed to create favorite_added activity")
 		}
 	}()
 
 	return nil
 }
 
-func (s *favoriteService) Remove(ctx context.Context, userID, benchID uint) error {
-	return s.favoriteRepo.Delete(ctx, userID, benchID)
+func (s *favoriteService) Remove(ctx context.Context, userID, spotID uint) error {
+	return s.favoriteRepo.Delete(ctx, userID, spotID)
 }
 
-func (s *favoriteService) IsFavorite(ctx context.Context, userID, benchID uint) (bool, error) {
-	return s.favoriteRepo.Exists(ctx, userID, benchID)
+func (s *favoriteService) IsFavorite(ctx context.Context, userID, spotID uint) (bool, error) {
+	return s.favoriteRepo.Exists(ctx, userID, spotID)
 }
 
 func (s *favoriteService) List(ctx context.Context, userID uint, page, limit int) (*responses.PaginatedFavoritesResponse, error) {
@@ -98,18 +98,18 @@ func (s *favoriteService) List(ctx context.Context, userID uint, page, limit int
 		favoriteResponses[i] = responses.FavoriteResponse{
 			ID:        fav.ID,
 			CreatedAt: fav.CreatedAt,
-			Bench: responses.FavoriteBenchResponse{
-				ID:          fav.Bench.ID,
-				Name:        fav.Bench.Name,
-				Latitude:    fav.Bench.Latitude,
-				Longitude:   fav.Bench.Longitude,
-				Rating:      fav.Bench.Rating,
-				HasToilet:   fav.Bench.HasToilet,
-				HasTrashBin: fav.Bench.HasTrashBin,
+			Spot: responses.FavoriteSpotResponse{
+				ID:          fav.Spot.ID,
+				Name:        fav.Spot.Name,
+				Latitude:    fav.Spot.Latitude,
+				Longitude:   fav.Spot.Longitude,
+				Rating:      fav.Spot.Rating,
+				HasToilet:   fav.Spot.HasToilet,
+				HasTrashBin: fav.Spot.HasTrashBin,
 			},
 		}
 		// Get main photo URL
-		favoriteResponses[i].Bench.MainPhotoURL = s.getMainPhotoURL(ctx, fav.BenchID)
+		favoriteResponses[i].Spot.MainPhotoURL = s.getMainPhotoURL(ctx, fav.SpotID)
 	}
 
 	totalPages := int(math.Ceil(float64(total) / float64(limit)))
@@ -125,12 +125,12 @@ func (s *favoriteService) List(ctx context.Context, userID uint, page, limit int
 	}, nil
 }
 
-func (s *favoriteService) GetFavoriteBenchIDs(ctx context.Context, userID uint) ([]uint, error) {
-	return s.favoriteRepo.GetBenchIDsByUserID(ctx, userID)
+func (s *favoriteService) GetFavoriteSpotIDs(ctx context.Context, userID uint) ([]uint, error) {
+	return s.favoriteRepo.GetSpotIDsByUserID(ctx, userID)
 }
 
-func (s *favoriteService) getMainPhotoURL(ctx context.Context, benchID uint) *string {
-	mainPhoto, err := s.photoRepo.GetMainPhoto(ctx, benchID)
+func (s *favoriteService) getMainPhotoURL(ctx context.Context, spotID uint) *string {
+	mainPhoto, err := s.photoRepo.GetMainPhoto(ctx, spotID)
 	if err != nil || mainPhoto == nil {
 		return nil
 	}

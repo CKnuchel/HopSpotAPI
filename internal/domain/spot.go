@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type Bench struct {
+type Spot struct {
 	ID          uint      `gorm:"primaryKey" json:"id"`
 	CreatedAt   time.Time `json:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt"`

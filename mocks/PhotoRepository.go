@@ -23,27 +23,27 @@ func (_m *PhotoRepository) EXPECT() *PhotoRepository_Expecter {
 	return &PhotoRepository_Expecter{mock: &_m.Mock}
 }
 
-// CountByBenchID provides a mock function with given fields: ctx, benchID
-func (_m *PhotoRepository) CountByBenchID(ctx context.Context, benchID uint) (int64, error) {
-	ret := _m.Called(ctx, benchID)
+// CountBySpotID provides a mock function with given fields: ctx, spotID
+func (_m *PhotoRepository) CountBySpotID(ctx context.Context, spotID uint) (int64, error) {
+	ret := _m.Called(ctx, spotID)
 
 	if len(ret) == 0 {
-		panic("no return value specified for CountByBenchID")
+		panic("no return value specified for CountBySpotID")
 	}
 
 	var r0 int64
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, uint) (int64, error)); ok {
-		return rf(ctx, benchID)
+		return rf(ctx, spotID)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, uint) int64); ok {
-		r0 = rf(ctx, benchID)
+		r0 = rf(ctx, spotID)
 	} else {
 		r0 = ret.Get(0).(int64)
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, uint) error); ok {
-		r1 = rf(ctx, benchID)
+		r1 = rf(ctx, spotID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -51,31 +51,31 @@ func (_m *PhotoRepository) CountByBenchID(ctx context.Context, benchID uint) (in
 	return r0, r1
 }
 
-// PhotoRepository_CountByBenchID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CountByBenchID'
-type PhotoRepository_CountByBenchID_Call struct {
+// PhotoRepository_CountBySpotID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CountBySpotID'
+type PhotoRepository_CountBySpotID_Call struct {
 	*mock.Call
 }
 
-// CountByBenchID is a helper method to define mock.On call
+// CountBySpotID is a helper method to define mock.On call
 //   - ctx context.Context
-//   - benchID uint
-func (_e *PhotoRepository_Expecter) CountByBenchID(ctx interface{}, benchID interface{}) *PhotoRepository_CountByBenchID_Call {
-	return &PhotoRepository_CountByBenchID_Call{Call: _e.mock.On("CountByBenchID", ctx, benchID)}
+//   - spotID uint
+func (_e *PhotoRepository_Expecter) CountBySpotID(ctx interface{}, spotID interface{}) *PhotoRepository_CountBySpotID_Call {
+	return &PhotoRepository_CountBySpotID_Call{Call: _e.mock.On("CountBySpotID", ctx, spotID)}
 }
 
-func (_c *PhotoRepository_CountByBenchID_Call) Run(run func(ctx context.Context, benchID uint)) *PhotoRepository_CountByBenchID_Call {
+func (_c *PhotoRepository_CountBySpotID_Call) Run(run func(ctx context.Context, spotID uint)) *PhotoRepository_CountBySpotID_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(uint))
 	})
 	return _c
 }
 
-func (_c *PhotoRepository_CountByBenchID_Call) Return(_a0 int64, _a1 error) *PhotoRepository_CountByBenchID_Call {
+func (_c *PhotoRepository_CountBySpotID_Call) Return(_a0 int64, _a1 error) *PhotoRepository_CountBySpotID_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *PhotoRepository_CountByBenchID_Call) RunAndReturn(run func(context.Context, uint) (int64, error)) *PhotoRepository_CountByBenchID_Call {
+func (_c *PhotoRepository_CountBySpotID_Call) RunAndReturn(run func(context.Context, uint) (int64, error)) *PhotoRepository_CountBySpotID_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -174,21 +174,21 @@ func (_c *PhotoRepository_Delete_Call) RunAndReturn(run func(context.Context, ui
 	return _c
 }
 
-// FindByBenchID provides a mock function with given fields: ctx, benchID
-func (_m *PhotoRepository) FindByBenchID(ctx context.Context, benchID uint) ([]domain.Photo, error) {
-	ret := _m.Called(ctx, benchID)
+// FindBySpotID provides a mock function with given fields: ctx, spotID
+func (_m *PhotoRepository) FindBySpotID(ctx context.Context, spotID uint) ([]domain.Photo, error) {
+	ret := _m.Called(ctx, spotID)
 
 	if len(ret) == 0 {
-		panic("no return value specified for FindByBenchID")
+		panic("no return value specified for FindBySpotID")
 	}
 
 	var r0 []domain.Photo
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, uint) ([]domain.Photo, error)); ok {
-		return rf(ctx, benchID)
+		return rf(ctx, spotID)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, uint) []domain.Photo); ok {
-		r0 = rf(ctx, benchID)
+		r0 = rf(ctx, spotID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]domain.Photo)
@@ -196,7 +196,7 @@ func (_m *PhotoRepository) FindByBenchID(ctx context.Context, benchID uint) ([]d
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, uint) error); ok {
-		r1 = rf(ctx, benchID)
+		r1 = rf(ctx, spotID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -204,31 +204,31 @@ func (_m *PhotoRepository) FindByBenchID(ctx context.Context, benchID uint) ([]d
 	return r0, r1
 }
 
-// PhotoRepository_FindByBenchID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindByBenchID'
-type PhotoRepository_FindByBenchID_Call struct {
+// PhotoRepository_FindBySpotID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindBySpotID'
+type PhotoRepository_FindBySpotID_Call struct {
 	*mock.Call
 }
 
-// FindByBenchID is a helper method to define mock.On call
+// FindBySpotID is a helper method to define mock.On call
 //   - ctx context.Context
-//   - benchID uint
-func (_e *PhotoRepository_Expecter) FindByBenchID(ctx interface{}, benchID interface{}) *PhotoRepository_FindByBenchID_Call {
-	return &PhotoRepository_FindByBenchID_Call{Call: _e.mock.On("FindByBenchID", ctx, benchID)}
+//   - spotID uint
+func (_e *PhotoRepository_Expecter) FindBySpotID(ctx interface{}, spotID interface{}) *PhotoRepository_FindBySpotID_Call {
+	return &PhotoRepository_FindBySpotID_Call{Call: _e.mock.On("FindBySpotID", ctx, spotID)}
 }
 
-func (_c *PhotoRepository_FindByBenchID_Call) Run(run func(ctx context.Context, benchID uint)) *PhotoRepository_FindByBenchID_Call {
+func (_c *PhotoRepository_FindBySpotID_Call) Run(run func(ctx context.Context, spotID uint)) *PhotoRepository_FindBySpotID_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(uint))
 	})
 	return _c
 }
 
-func (_c *PhotoRepository_FindByBenchID_Call) Return(_a0 []domain.Photo, _a1 error) *PhotoRepository_FindByBenchID_Call {
+func (_c *PhotoRepository_FindBySpotID_Call) Return(_a0 []domain.Photo, _a1 error) *PhotoRepository_FindBySpotID_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *PhotoRepository_FindByBenchID_Call) RunAndReturn(run func(context.Context, uint) ([]domain.Photo, error)) *PhotoRepository_FindByBenchID_Call {
+func (_c *PhotoRepository_FindBySpotID_Call) RunAndReturn(run func(context.Context, uint) ([]domain.Photo, error)) *PhotoRepository_FindBySpotID_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -292,9 +292,9 @@ func (_c *PhotoRepository_FindByID_Call) RunAndReturn(run func(context.Context, 
 	return _c
 }
 
-// GetMainPhoto provides a mock function with given fields: ctx, benchID
-func (_m *PhotoRepository) GetMainPhoto(ctx context.Context, benchID uint) (*domain.Photo, error) {
-	ret := _m.Called(ctx, benchID)
+// GetMainPhoto provides a mock function with given fields: ctx, spotID
+func (_m *PhotoRepository) GetMainPhoto(ctx context.Context, spotID uint) (*domain.Photo, error) {
+	ret := _m.Called(ctx, spotID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetMainPhoto")
@@ -303,10 +303,10 @@ func (_m *PhotoRepository) GetMainPhoto(ctx context.Context, benchID uint) (*dom
 	var r0 *domain.Photo
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, uint) (*domain.Photo, error)); ok {
-		return rf(ctx, benchID)
+		return rf(ctx, spotID)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, uint) *domain.Photo); ok {
-		r0 = rf(ctx, benchID)
+		r0 = rf(ctx, spotID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*domain.Photo)
@@ -314,7 +314,7 @@ func (_m *PhotoRepository) GetMainPhoto(ctx context.Context, benchID uint) (*dom
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, uint) error); ok {
-		r1 = rf(ctx, benchID)
+		r1 = rf(ctx, spotID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -329,12 +329,12 @@ type PhotoRepository_GetMainPhoto_Call struct {
 
 // GetMainPhoto is a helper method to define mock.On call
 //   - ctx context.Context
-//   - benchID uint
-func (_e *PhotoRepository_Expecter) GetMainPhoto(ctx interface{}, benchID interface{}) *PhotoRepository_GetMainPhoto_Call {
-	return &PhotoRepository_GetMainPhoto_Call{Call: _e.mock.On("GetMainPhoto", ctx, benchID)}
+//   - spotID uint
+func (_e *PhotoRepository_Expecter) GetMainPhoto(ctx interface{}, spotID interface{}) *PhotoRepository_GetMainPhoto_Call {
+	return &PhotoRepository_GetMainPhoto_Call{Call: _e.mock.On("GetMainPhoto", ctx, spotID)}
 }
 
-func (_c *PhotoRepository_GetMainPhoto_Call) Run(run func(ctx context.Context, benchID uint)) *PhotoRepository_GetMainPhoto_Call {
+func (_c *PhotoRepository_GetMainPhoto_Call) Run(run func(ctx context.Context, spotID uint)) *PhotoRepository_GetMainPhoto_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(uint))
 	})
@@ -351,9 +351,9 @@ func (_c *PhotoRepository_GetMainPhoto_Call) RunAndReturn(run func(context.Conte
 	return _c
 }
 
-// SetMainPhoto provides a mock function with given fields: ctx, photoID, benchID
-func (_m *PhotoRepository) SetMainPhoto(ctx context.Context, photoID uint, benchID uint) error {
-	ret := _m.Called(ctx, photoID, benchID)
+// SetMainPhoto provides a mock function with given fields: ctx, photoID, spotID
+func (_m *PhotoRepository) SetMainPhoto(ctx context.Context, photoID uint, spotID uint) error {
+	ret := _m.Called(ctx, photoID, spotID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SetMainPhoto")
@@ -361,7 +361,7 @@ func (_m *PhotoRepository) SetMainPhoto(ctx context.Context, photoID uint, bench
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, uint, uint) error); ok {
-		r0 = rf(ctx, photoID, benchID)
+		r0 = rf(ctx, photoID, spotID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -377,12 +377,12 @@ type PhotoRepository_SetMainPhoto_Call struct {
 // SetMainPhoto is a helper method to define mock.On call
 //   - ctx context.Context
 //   - photoID uint
-//   - benchID uint
-func (_e *PhotoRepository_Expecter) SetMainPhoto(ctx interface{}, photoID interface{}, benchID interface{}) *PhotoRepository_SetMainPhoto_Call {
-	return &PhotoRepository_SetMainPhoto_Call{Call: _e.mock.On("SetMainPhoto", ctx, photoID, benchID)}
+//   - spotID uint
+func (_e *PhotoRepository_Expecter) SetMainPhoto(ctx interface{}, photoID interface{}, spotID interface{}) *PhotoRepository_SetMainPhoto_Call {
+	return &PhotoRepository_SetMainPhoto_Call{Call: _e.mock.On("SetMainPhoto", ctx, photoID, spotID)}
 }
 
-func (_c *PhotoRepository_SetMainPhoto_Call) Run(run func(ctx context.Context, photoID uint, benchID uint)) *PhotoRepository_SetMainPhoto_Call {
+func (_c *PhotoRepository_SetMainPhoto_Call) Run(run func(ctx context.Context, photoID uint, spotID uint)) *PhotoRepository_SetMainPhoto_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(uint), args[2].(uint))
 	})

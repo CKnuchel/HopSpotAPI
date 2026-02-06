@@ -21,32 +21,32 @@ func NewVisitHandler(visitService service.VisitService) *VisitHandler {
 	return &VisitHandler{visitService: visitService}
 }
 
-// GET /api/v1/benches/:id/visits/count
-// GetVisitCountByBenchID godoc
+// GET /api/v1/spots/:id/visits/count
+// GetVisitCountBySpotID godoc
 //
-//	@Summary		Get visit count by bench ID
-//	@Description	Retrieve the total number of visits for a specific bench
+//	@Summary		Get visit count by spot ID
+//	@Description	Retrieve the total number of visits for a specific spot
 //	@Tags			Visits
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path		int	true	"Bench ID"
+//	@Param			id	path		int	true	"Spot ID"
 //	@Success		200	{object}	responses.VisitCountResponse
 //	@Failure		400	{object}	apperror.ErrorResponse
-//	@Router			/api/v1/benches/{id}/visits/count [get]
-func (h *VisitHandler) GetVisitCountByBenchID(c *gin.Context) {
+//	@Router			/api/v1/spots/{id}/visits/count [get]
+func (h *VisitHandler) GetVisitCountBySpotID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		apperror.RespondWithError(c, apperror.AppErrValidationInvalidID)
 		return
 	}
 
-	count, err := h.visitService.GetCountByBenchID(c.Request.Context(), uint(id))
+	count, err := h.visitService.GetCountBySpotID(c.Request.Context(), uint(id))
 	if err != nil {
 		apperror.RespondWithMappedError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, responses.VisitCountResponse{BenchID: uint(id), Count: count})
+	c.JSON(http.StatusOK, responses.VisitCountResponse{SpotID: uint(id), Count: count})
 }
 
 // GET /api/v1/visits
@@ -96,7 +96,7 @@ func (h *VisitHandler) ListVisits(c *gin.Context) {
 // CreateVisit godoc
 //
 //	@Summary		Create a new visit
-//	@Description	Record a new visit to a bench
+//	@Description	Record a new visit to a spot
 //	@Tags			Visits
 //	@Accept			json
 //	@Produce		json

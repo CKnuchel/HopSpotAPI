@@ -6,11 +6,11 @@ import (
 
 type Favorite struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
-	UserID    uint      `gorm:"uniqueIndex:idx_user_bench,priority:1" json:"userId"`
-	BenchID   uint      `gorm:"uniqueIndex:idx_user_bench,priority:2" json:"benchId"`
+	UserID    uint      `gorm:"uniqueIndex:idx_user_spot,priority:1" json:"userId"`
+	SpotID    uint      `gorm:"uniqueIndex:idx_user_spot,priority:2" json:"spotId"`
 	CreatedAt time.Time `json:"createdAt"`
 
 	// Relations - loaded with Preload
-	Bench Bench `gorm:"foreignKey:BenchID;references:ID" json:"bench,omitempty"`
-	User  User  `gorm:"foreignKey:UserID;references:ID" json:"user,omitempty"`
+	Spot Spot `gorm:"foreignKey:SpotID;references:ID" json:"spot,omitempty"`
+	User User `gorm:"foreignKey:UserID;references:ID" json:"user,omitempty"`
 }

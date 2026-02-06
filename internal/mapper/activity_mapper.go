@@ -17,10 +17,10 @@ func ActivityToResponse(activity *domain.Activity) responses.ActivityResponse {
 		},
 	}
 
-	if activity.Bench != nil {
-		response.Bench = &responses.ActivityBenchResponse{
-			ID:   activity.Bench.ID,
-			Name: activity.Bench.Name,
+	if activity.Spot != nil {
+		response.Spot = &responses.ActivitySpotResponse{
+			ID:   activity.Spot.ID,
+			Name: activity.Spot.Name,
 		}
 	}
 
@@ -36,18 +36,18 @@ func ActivitiesToListResponse(activities []domain.Activity) []responses.Activity
 }
 
 func generateActivityDescription(activity *domain.Activity) string {
-	benchName := ""
-	if activity.Bench != nil {
-		benchName = activity.Bench.Name
+	spotName := ""
+	if activity.Spot != nil {
+		spotName = activity.Spot.Name
 	}
 
 	switch activity.ActionType {
-	case domain.ActionBenchCreated:
-		return "hat " + benchName + " hinzugefügt"
+	case domain.ActionSpotCreated:
+		return "hat " + spotName + " hinzugefügt"
 	case domain.ActionVisitAdded:
-		return "hat " + benchName + " besucht"
+		return "hat " + spotName + " besucht"
 	case domain.ActionFavoriteAdded:
-		return "hat " + benchName + " als Favorit markiert"
+		return "hat " + spotName + " als Favorit markiert"
 	default:
 		return ""
 	}

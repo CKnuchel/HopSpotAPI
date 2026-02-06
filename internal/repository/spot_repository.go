@@ -10,24 +10,24 @@ import (
 	"hopSpotAPI/internal/domain"
 )
 
-type benchRepository struct {
+type spotRepository struct {
 	db *gorm.DB
 }
 
-// NewBenchRepository Constructor for BenchRepository
-func NewBenchRepository(db *gorm.DB) BenchRepository {
-	return &benchRepository{db: db}
+// NewSpotRepository Constructor for SpotRepository
+func NewSpotRepository(db *gorm.DB) SpotRepository {
+	return &spotRepository{db: db}
 }
 
-func (r benchRepository) Create(ctx context.Context, bench *domain.Bench) error {
-	return r.db.WithContext(ctx).Create(bench).Error
+func (r spotRepository) Create(ctx context.Context, spot *domain.Spot) error {
+	return r.db.WithContext(ctx).Create(spot).Error
 }
 
-func (r benchRepository) FindByID(ctx context.Context, id uint) (*domain.Bench, error) {
-	var bench domain.Bench
+func (r spotRepository) FindByID(ctx context.Context, id uint) (*domain.Spot, error) {
+	var spot domain.Spot
 	err := r.db.WithContext(ctx).
 		Preload("Creator").
-		First(&bench, id).Error
+		First(&spot, id).Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -35,22 +35,22 @@ func (r benchRepository) FindByID(ctx context.Context, id uint) (*domain.Bench, 
 		}
 		return nil, err
 	}
-	return &bench, nil
+	return &spot, nil
 }
 
-func (r benchRepository) Update(ctx context.Context, bench *domain.Bench) error {
-	return r.db.WithContext(ctx).Save(bench).Error
+func (r spotRepository) Update(ctx context.Context, spot *domain.Spot) error {
+	return r.db.WithContext(ctx).Save(spot).Error
 }
 
-func (r benchRepository) Delete(ctx context.Context, id uint) error {
-	return r.db.WithContext(ctx).Delete(&domain.Bench{}, id).Error
+func (r spotRepository) Delete(ctx context.Context, id uint) error {
+	return r.db.WithContext(ctx).Delete(&domain.Spot{}, id).Error
 }
 
-func (r benchRepository) FindAll(ctx context.Context, filter BenchFilter) ([]domain.Bench, int64, error) {
-	var benches []domain.Bench
+func (r spotRepository) FindAll(ctx context.Context, filter SpotFilter) ([]domain.Spot, int64, error) {
+	var spots []domain.Spot
 	var total int64
 
-	query := r.db.WithContext(ctx).Model(&domain.Bench{})
+	query := r.db.WithContext(ctx).Model(&domain.Spot{})
 
 	// Apply filters
 	if filter.HasToilet != nil {
@@ -133,19 +133,19 @@ func (r benchRepository) FindAll(ctx context.Context, filter BenchFilter) ([]dom
 	}
 
 	// Execute query
-	if err := query.Find(&benches).Error; err != nil {
+	if err := query.Find(&spots).Error; err != nil {
 		return nil, 0, err
 	}
 
-	return benches, total, nil
+	return spots, total, nil
 }
 
-func (r benchRepository) FindRandom(ctx context.Context) (*domain.Bench, error) {
-	var bench domain.Bench
+func (r spotRepository) FindRandom(ctx context.Context) (*domain.Spot, error) {
+	var spot domain.Spot
 	err := r.db.WithContext(ctx).
 		Preload("Creator").
 		Order("RANDOM()").
-		First(&bench).Error
+		First(&spot).Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -153,9 +153,9 @@ func (r benchRepository) FindRandom(ctx context.Context) (*domain.Bench, error) 
 		}
 		return nil, err
 	}
-	return &bench, nil
+	return &spot, nil
 }
 
-func (r benchRepository) UpdateFields(ctx context.Context, id uint, fields map[string]interface{}) error {
-	return r.db.WithContext(ctx).Model(&domain.Bench{}).Where("id = ?", id).Updates(fields).Error
+func (r spotRepository) UpdateFields(ctx context.Context, id uint, fields map[string]interface{}) error {
+	return r.db.WithContext(ctx).Model(&domain.Spot{}).Where("id = ?", id).Updates(fields).Error
 }

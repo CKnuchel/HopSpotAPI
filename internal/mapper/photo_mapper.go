@@ -8,7 +8,7 @@ import (
 func PhotoToResponse(photo *domain.Photo) *responses.PhotoResponse {
 	return &responses.PhotoResponse{
 		ID:           photo.ID,
-		BenchID:      photo.BenchID,
+		SpotID:       photo.SpotID,
 		IsMain:       photo.IsMain,
 		URLOriginal:  photo.FilePathOriginal,
 		URLMedium:    photo.FilePathMedium,

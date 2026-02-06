@@ -29,16 +29,16 @@ var (
 	ErrInvalidRefreshToken = errors.New("invalid or expired refresh token")
 )
 
-// Bench-related errors
+// Spot-related errors
 var (
-	ErrBenchNotFound  = errors.New("bench not found")
-	ErrBenchForbidden = errors.New("no permission for this bench")
+	ErrSpotNotFound  = errors.New("spot not found")
+	ErrSpotForbidden = errors.New("no permission for this spot")
 )
 
 // Photo Errors
 var (
 	ErrPhotoNotFound    = errors.New("photo not found")
-	ErrMaxPhotosReached = errors.New("maximum photos per bench reached")
+	ErrMaxPhotosReached = errors.New("maximum photos per spot reached")
 	ErrFileTooLarge     = errors.New("file size exceeds limit")
 	ErrInvalidFileType  = errors.New("invalid file type")
 	ErrPhotoForbidden   = errors.New("no permission for this photo")
@@ -52,7 +52,7 @@ var (
 
 // Favorite Errors
 var (
-	ErrFavoriteNotFound     = errors.New("favorite not found")
+	ErrFavoriteNotFound      = errors.New("favorite not found")
 	ErrFavoriteAlreadyExists = errors.New("already in favorites")
 )
 
@@ -94,11 +94,11 @@ func MapToAppError(err error) *AppError {
 	case errors.Is(err, ErrCannotDeleteRedeemedCode):
 		return AppErrInvitationCannotDeleteRedeemed
 
-	// Bench errors
-	case errors.Is(err, ErrBenchNotFound):
-		return AppErrBenchNotFound
-	case errors.Is(err, ErrBenchForbidden):
-		return AppErrBenchForbidden
+	// Spot errors
+	case errors.Is(err, ErrSpotNotFound):
+		return AppErrSpotNotFound
+	case errors.Is(err, ErrSpotForbidden):
+		return AppErrSpotForbidden
 
 	// Photo errors
 	case errors.Is(err, ErrPhotoNotFound):

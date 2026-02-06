@@ -15,17 +15,17 @@ import (
 	"gorm.io/gorm"
 )
 
-func TestBenchService_Create_Success(t *testing.T) {
+func TestSpotService_Create_Success(t *testing.T) {
 	// Arrange
-	benchRepo := mocks.NewBenchRepository(t)
+	spotRepo := mocks.NewSpotRepository(t)
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
+	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
 
-	description := "A nice bench"
-	req := &requests.CreateBenchRequest{
-		Name:        "Park Bench",
+	description := "A nice spot"
+	req := &requests.CreateSpotRequest{
+		Name:        "Park Spot",
 		Latitude:    47.3769,
 		Longitude:   8.5417,
 		Description: &description,
@@ -41,31 +41,31 @@ func TestBenchService_Create_Success(t *testing.T) {
 	}
 
 	// Mock Create - set ID
-	benchRepo.EXPECT().
-		Create(mock.Anything, mock.AnythingOfType("*domain.Bench")).
-		Run(func(ctx context.Context, b *domain.Bench) {
-			b.ID = 1
+	spotRepo.EXPECT().
+		Create(mock.Anything, mock.AnythingOfType("*domain.Spot")).
+		Run(func(ctx context.Context, s *domain.Spot) {
+			s.ID = 1
 		}).
 		Return(nil)
 
 	// Mock FindByID after create (to reload with Creator)
-	benchRepo.EXPECT().
+	spotRepo.EXPECT().
 		FindByID(mock.Anything, uint(1)).
-		Return(&domain.Bench{
+		Return(&domain.Spot{
 			ID:          1,
-			Name:        "Park Bench",
+			Name:        "Park Spot",
 			Latitude:    47.3769,
 			Longitude:   8.5417,
-			Description: "A nice bench",
+			Description: "A nice spot",
 			HasToilet:   true,
 			HasTrashBin: false,
 			CreatedBy:   1,
 			Creator:     creator,
 		}, nil)
 
-	// NotifyNewBench is called async, but we mock it anyway
+	// NotifyNewSpot is called async, but we mock it anyway
 	notificationSvc.EXPECT().
-		NotifyNewBench(mock.Anything, mock.AnythingOfType("*domain.Bench"), uint(1)).
+		NotifyNewSpot(mock.Anything, mock.AnythingOfType("*domain.Spot"), uint(1)).
 		Return(nil).
 		Maybe() // async call
 
@@ -75,20 +75,20 @@ func TestBenchService_Create_Success(t *testing.T) {
 	// Assert
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
-	assert.Equal(t, "Park Bench", result.Name)
+	assert.Equal(t, "Park Spot", result.Name)
 	assert.Equal(t, 47.3769, result.Latitude)
 	assert.Equal(t, 8.5417, result.Longitude)
 	assert.True(t, result.HasToilet)
 	assert.False(t, result.HasTrashBin)
 }
 
-func TestBenchService_GetByID_Success(t *testing.T) {
+func TestSpotService_GetByID_Success(t *testing.T) {
 	// Arrange
-	benchRepo := mocks.NewBenchRepository(t)
+	spotRepo := mocks.NewSpotRepository(t)
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
+	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
 
 	creator := domain.User{
 		Model:       &gorm.Model{ID: 1},
@@ -96,9 +96,9 @@ func TestBenchService_GetByID_Success(t *testing.T) {
 		DisplayName: "Creator",
 	}
 
-	bench := &domain.Bench{
+	spot := &domain.Spot{
 		ID:          1,
-		Name:        "Test Bench",
+		Name:        "Test Spot",
 		Latitude:    47.0,
 		Longitude:   8.0,
 		Description: "Description",
@@ -106,14 +106,14 @@ func TestBenchService_GetByID_Success(t *testing.T) {
 		Creator:     creator,
 	}
 
-	benchRepo.EXPECT().
+	spotRepo.EXPECT().
 		FindByID(mock.Anything, uint(1)).
-		Return(bench, nil)
+		Return(spot, nil)
 
 	photoRepo.EXPECT().
 		GetMainPhoto(mock.Anything, uint(1)).
 		Return(&domain.Photo{
-			FilePathThumbnail: "benches/1/photos/1_thumbnail.jpg",
+			FilePathThumbnail: "spots/1/photos/1_thumbnail.jpg",
 		}, nil)
 
 	// Act
@@ -122,18 +122,18 @@ func TestBenchService_GetByID_Success(t *testing.T) {
 	// Assert
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
-	assert.Equal(t, "Test Bench", result.Name)
+	assert.Equal(t, "Test Spot", result.Name)
 }
 
-func TestBenchService_GetByID_NotFound(t *testing.T) {
+func TestSpotService_GetByID_NotFound(t *testing.T) {
 	// Arrange
-	benchRepo := mocks.NewBenchRepository(t)
+	spotRepo := mocks.NewSpotRepository(t)
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
+	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
 
-	benchRepo.EXPECT().
+	spotRepo.EXPECT().
 		FindByID(mock.Anything, uint(999)).
 		Return(nil, nil)
 
@@ -143,40 +143,40 @@ func TestBenchService_GetByID_NotFound(t *testing.T) {
 	// Assert
 	assert.Error(t, err)
 	assert.Nil(t, result)
-	assert.Contains(t, err.Error(), "bench not found")
+	assert.Contains(t, err.Error(), "spot not found")
 }
 
-func TestBenchService_List_Success(t *testing.T) {
+func TestSpotService_List_Success(t *testing.T) {
 	// Arrange
-	benchRepo := mocks.NewBenchRepository(t)
+	spotRepo := mocks.NewSpotRepository(t)
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
+	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
 
-	benches := []domain.Bench{
+	spots := []domain.Spot{
 		{
 			ID:        1,
-			Name:      "Bench 1",
+			Name:      "Spot 1",
 			Latitude:  47.0,
 			Longitude: 8.0,
 		},
 		{
 			ID:        2,
-			Name:      "Bench 2",
+			Name:      "Spot 2",
 			Latitude:  47.1,
 			Longitude: 8.1,
 		},
 	}
 
-	req := &requests.ListBenchesRequest{
+	req := &requests.ListSpotsRequest{
 		Page:  1,
 		Limit: 50,
 	}
 
-	benchRepo.EXPECT().
-		FindAll(mock.Anything, mock.AnythingOfType("repository.BenchFilter")).
-		Return(benches, int64(2), nil)
+	spotRepo.EXPECT().
+		FindAll(mock.Anything, mock.AnythingOfType("repository.SpotFilter")).
+		Return(spots, int64(2), nil)
 
 	photoRepo.EXPECT().
 		GetMainPhoto(mock.Anything, uint(1)).
@@ -192,30 +192,30 @@ func TestBenchService_List_Success(t *testing.T) {
 	// Assert
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
-	assert.Len(t, result.Benches, 2)
+	assert.Len(t, result.Spots, 2)
 	assert.Equal(t, int64(2), result.Pagination.Total)
 }
 
-func TestBenchService_List_WithCoordinatesAndRadius(t *testing.T) {
+func TestSpotService_List_WithCoordinatesAndRadius(t *testing.T) {
 	// Arrange
-	benchRepo := mocks.NewBenchRepository(t)
+	spotRepo := mocks.NewSpotRepository(t)
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
+	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
 
-	// Bench 1: very close (should be included)
-	// Bench 2: far away (should be excluded by radius)
-	benches := []domain.Bench{
+	// Spot 1: very close (should be included)
+	// Spot 2: far away (should be excluded by radius)
+	spots := []domain.Spot{
 		{
 			ID:        1,
-			Name:      "Close Bench",
+			Name:      "Close Spot",
 			Latitude:  47.3770, // Very close to search point
 			Longitude: 8.5418,
 		},
 		{
 			ID:        2,
-			Name:      "Far Bench",
+			Name:      "Far Spot",
 			Latitude:  48.0, // Far from search point
 			Longitude: 9.0,
 		},
@@ -225,7 +225,7 @@ func TestBenchService_List_WithCoordinatesAndRadius(t *testing.T) {
 	lon := 8.5417
 	radius := 1000 // 1km radius
 
-	req := &requests.ListBenchesRequest{
+	req := &requests.ListSpotsRequest{
 		Page:   1,
 		Limit:  50,
 		Lat:    &lat,
@@ -233,9 +233,9 @@ func TestBenchService_List_WithCoordinatesAndRadius(t *testing.T) {
 		Radius: &radius,
 	}
 
-	benchRepo.EXPECT().
-		FindAll(mock.Anything, mock.AnythingOfType("repository.BenchFilter")).
-		Return(benches, int64(2), nil)
+	spotRepo.EXPECT().
+		FindAll(mock.Anything, mock.AnythingOfType("repository.SpotFilter")).
+		Return(spots, int64(2), nil)
 
 	photoRepo.EXPECT().
 		GetMainPhoto(mock.Anything, uint(1)).
@@ -251,26 +251,26 @@ func TestBenchService_List_WithCoordinatesAndRadius(t *testing.T) {
 	// Assert
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
-	// Only close bench should be included (far bench is outside 1km)
-	assert.Len(t, result.Benches, 1)
-	assert.Equal(t, "Close Bench", result.Benches[0].Name)
-	assert.NotNil(t, result.Benches[0].Distance)
+	// Only close spot should be included (far spot is outside 1km)
+	assert.Len(t, result.Spots, 1)
+	assert.Equal(t, "Close Spot", result.Spots[0].Name)
+	assert.NotNil(t, result.Spots[0].Distance)
 }
 
-func TestBenchService_Update_Success_AsOwner(t *testing.T) {
+func TestSpotService_Update_Success_AsOwner(t *testing.T) {
 	// Arrange
-	benchRepo := mocks.NewBenchRepository(t)
+	spotRepo := mocks.NewSpotRepository(t)
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
+	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
 
 	creator := domain.User{
 		Model:       &gorm.Model{ID: 1},
 		DisplayName: "Creator",
 	}
 
-	bench := &domain.Bench{
+	spot := &domain.Spot{
 		ID:          1,
 		Name:        "Old Name",
 		Description: "Old Description",
@@ -279,18 +279,18 @@ func TestBenchService_Update_Success_AsOwner(t *testing.T) {
 	}
 
 	newName := "New Name"
-	req := &requests.UpdateBenchRequest{
+	req := &requests.UpdateSpotRequest{
 		Name: &newName,
 	}
 
-	benchRepo.EXPECT().
+	spotRepo.EXPECT().
 		FindByID(mock.Anything, uint(1)).
-		Return(bench, nil)
+		Return(spot, nil)
 
-	benchRepo.EXPECT().
-		Update(mock.Anything, mock.AnythingOfType("*domain.Bench")).
-		Run(func(ctx context.Context, b *domain.Bench) {
-			assert.Equal(t, "New Name", b.Name)
+	spotRepo.EXPECT().
+		Update(mock.Anything, mock.AnythingOfType("*domain.Spot")).
+		Run(func(ctx context.Context, s *domain.Spot) {
+			assert.Equal(t, "New Name", s.Name)
 		}).
 		Return(nil)
 
@@ -307,20 +307,20 @@ func TestBenchService_Update_Success_AsOwner(t *testing.T) {
 	assert.Equal(t, "New Name", result.Name)
 }
 
-func TestBenchService_Update_Success_AsAdmin(t *testing.T) {
+func TestSpotService_Update_Success_AsAdmin(t *testing.T) {
 	// Arrange
-	benchRepo := mocks.NewBenchRepository(t)
+	spotRepo := mocks.NewSpotRepository(t)
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
+	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
 
 	creator := domain.User{
 		Model:       &gorm.Model{ID: 1},
 		DisplayName: "Creator",
 	}
 
-	bench := &domain.Bench{
+	spot := &domain.Spot{
 		ID:        1,
 		Name:      "Old Name",
 		CreatedBy: 1, // Created by user 1
@@ -328,16 +328,16 @@ func TestBenchService_Update_Success_AsAdmin(t *testing.T) {
 	}
 
 	newName := "Admin Updated Name"
-	req := &requests.UpdateBenchRequest{
+	req := &requests.UpdateSpotRequest{
 		Name: &newName,
 	}
 
-	benchRepo.EXPECT().
+	spotRepo.EXPECT().
 		FindByID(mock.Anything, uint(1)).
-		Return(bench, nil)
+		Return(spot, nil)
 
-	benchRepo.EXPECT().
-		Update(mock.Anything, mock.AnythingOfType("*domain.Bench")).
+	spotRepo.EXPECT().
+		Update(mock.Anything, mock.AnythingOfType("*domain.Spot")).
 		Return(nil)
 
 	photoRepo.EXPECT().
@@ -353,34 +353,34 @@ func TestBenchService_Update_Success_AsAdmin(t *testing.T) {
 	assert.Equal(t, "Admin Updated Name", result.Name)
 }
 
-func TestBenchService_Update_Forbidden(t *testing.T) {
+func TestSpotService_Update_Forbidden(t *testing.T) {
 	// Arrange
-	benchRepo := mocks.NewBenchRepository(t)
+	spotRepo := mocks.NewSpotRepository(t)
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
+	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
 
 	creator := domain.User{
 		Model:       &gorm.Model{ID: 1},
 		DisplayName: "Creator",
 	}
 
-	bench := &domain.Bench{
+	spot := &domain.Spot{
 		ID:        1,
-		Name:      "Test Bench",
+		Name:      "Test Spot",
 		CreatedBy: 1, // Created by user 1
 		Creator:   creator,
 	}
 
 	newName := "Hacked Name"
-	req := &requests.UpdateBenchRequest{
+	req := &requests.UpdateSpotRequest{
 		Name: &newName,
 	}
 
-	benchRepo.EXPECT().
+	spotRepo.EXPECT().
 		FindByID(mock.Anything, uint(1)).
-		Return(bench, nil)
+		Return(spot, nil)
 
 	// Act - user 2 is NOT admin and NOT owner
 	result, err := svc.Update(context.Background(), uint(1), req, uint(2), false)
@@ -391,20 +391,20 @@ func TestBenchService_Update_Forbidden(t *testing.T) {
 	assert.Contains(t, err.Error(), "forbidden")
 }
 
-func TestBenchService_Update_NotFound(t *testing.T) {
+func TestSpotService_Update_NotFound(t *testing.T) {
 	// Arrange
-	benchRepo := mocks.NewBenchRepository(t)
+	spotRepo := mocks.NewSpotRepository(t)
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
+	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
 
 	newName := "Name"
-	req := &requests.UpdateBenchRequest{
+	req := &requests.UpdateSpotRequest{
 		Name: &newName,
 	}
 
-	benchRepo.EXPECT().
+	spotRepo.EXPECT().
 		FindByID(mock.Anything, uint(999)).
 		Return(nil, nil)
 
@@ -414,28 +414,28 @@ func TestBenchService_Update_NotFound(t *testing.T) {
 	// Assert
 	assert.Error(t, err)
 	assert.Nil(t, result)
-	assert.Contains(t, err.Error(), "bench not found")
+	assert.Contains(t, err.Error(), "spot not found")
 }
 
-func TestBenchService_Delete_Success_AsOwner(t *testing.T) {
+func TestSpotService_Delete_Success_AsOwner(t *testing.T) {
 	// Arrange
-	benchRepo := mocks.NewBenchRepository(t)
+	spotRepo := mocks.NewSpotRepository(t)
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
+	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
 
-	bench := &domain.Bench{
+	spot := &domain.Spot{
 		ID:        1,
-		Name:      "Test Bench",
+		Name:      "Test Spot",
 		CreatedBy: 1,
 	}
 
-	benchRepo.EXPECT().
+	spotRepo.EXPECT().
 		FindByID(mock.Anything, uint(1)).
-		Return(bench, nil)
+		Return(spot, nil)
 
-	benchRepo.EXPECT().
+	spotRepo.EXPECT().
 		Delete(mock.Anything, uint(1)).
 		Return(nil)
 
@@ -446,25 +446,25 @@ func TestBenchService_Delete_Success_AsOwner(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestBenchService_Delete_Success_AsAdmin(t *testing.T) {
+func TestSpotService_Delete_Success_AsAdmin(t *testing.T) {
 	// Arrange
-	benchRepo := mocks.NewBenchRepository(t)
+	spotRepo := mocks.NewSpotRepository(t)
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
+	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
 
-	bench := &domain.Bench{
+	spot := &domain.Spot{
 		ID:        1,
-		Name:      "Test Bench",
+		Name:      "Test Spot",
 		CreatedBy: 1, // Owner is user 1
 	}
 
-	benchRepo.EXPECT().
+	spotRepo.EXPECT().
 		FindByID(mock.Anything, uint(1)).
-		Return(bench, nil)
+		Return(spot, nil)
 
-	benchRepo.EXPECT().
+	spotRepo.EXPECT().
 		Delete(mock.Anything, uint(1)).
 		Return(nil)
 
@@ -475,23 +475,23 @@ func TestBenchService_Delete_Success_AsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestBenchService_Delete_Forbidden(t *testing.T) {
+func TestSpotService_Delete_Forbidden(t *testing.T) {
 	// Arrange
-	benchRepo := mocks.NewBenchRepository(t)
+	spotRepo := mocks.NewSpotRepository(t)
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
+	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
 
-	bench := &domain.Bench{
+	spot := &domain.Spot{
 		ID:        1,
-		Name:      "Test Bench",
+		Name:      "Test Spot",
 		CreatedBy: 1, // Owner is user 1
 	}
 
-	benchRepo.EXPECT().
+	spotRepo.EXPECT().
 		FindByID(mock.Anything, uint(1)).
-		Return(bench, nil)
+		Return(spot, nil)
 
 	// Act - user 2 is NOT admin and NOT owner
 	err := svc.Delete(context.Background(), uint(1), uint(2), false)
@@ -501,15 +501,15 @@ func TestBenchService_Delete_Forbidden(t *testing.T) {
 	assert.Contains(t, err.Error(), "forbidden")
 }
 
-func TestBenchService_Delete_NotFound(t *testing.T) {
+func TestSpotService_Delete_NotFound(t *testing.T) {
 	// Arrange
-	benchRepo := mocks.NewBenchRepository(t)
+	spotRepo := mocks.NewSpotRepository(t)
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
+	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
 
-	benchRepo.EXPECT().
+	spotRepo.EXPECT().
 		FindByID(mock.Anything, uint(999)).
 		Return(nil, nil)
 
@@ -518,28 +518,28 @@ func TestBenchService_Delete_NotFound(t *testing.T) {
 
 	// Assert
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "bench not found")
+	assert.Contains(t, err.Error(), "spot not found")
 }
 
-func TestBenchService_List_SortByDistance(t *testing.T) {
+func TestSpotService_List_SortByDistance(t *testing.T) {
 	// Arrange
-	benchRepo := mocks.NewBenchRepository(t)
+	spotRepo := mocks.NewSpotRepository(t)
 	photoRepo := mocks.NewPhotoRepository(t)
 	minioClient := &storage.MinioClient{}
 	notificationSvc := mocks.NewNotificationService(t)
-	svc := NewBenchService(benchRepo, photoRepo, minioClient, notificationSvc)
+	svc := NewSpotService(spotRepo, photoRepo, minioClient, notificationSvc, nil)
 
-	// Benches at different distances
-	benches := []domain.Bench{
+	// Spots at different distances
+	spots := []domain.Spot{
 		{
 			ID:        1,
-			Name:      "Far Bench",
+			Name:      "Far Spot",
 			Latitude:  47.38,
 			Longitude: 8.55,
 		},
 		{
 			ID:        2,
-			Name:      "Close Bench",
+			Name:      "Close Spot",
 			Latitude:  47.377,
 			Longitude: 8.542,
 		},
@@ -548,7 +548,7 @@ func TestBenchService_List_SortByDistance(t *testing.T) {
 	lat := 47.3769
 	lon := 8.5417
 
-	req := &requests.ListBenchesRequest{
+	req := &requests.ListSpotsRequest{
 		Page:      1,
 		Limit:     50,
 		Lat:       &lat,
@@ -557,11 +557,11 @@ func TestBenchService_List_SortByDistance(t *testing.T) {
 		SortOrder: "asc",
 	}
 
-	benchRepo.EXPECT().
-		FindAll(mock.Anything, mock.MatchedBy(func(f repository.BenchFilter) bool {
+	spotRepo.EXPECT().
+		FindAll(mock.Anything, mock.MatchedBy(func(f repository.SpotFilter) bool {
 			return f.Lat != nil && f.Lon != nil
 		})).
-		Return(benches, int64(2), nil)
+		Return(spots, int64(2), nil)
 
 	photoRepo.EXPECT().
 		GetMainPhoto(mock.Anything, uint(1)).
@@ -577,8 +577,8 @@ func TestBenchService_List_SortByDistance(t *testing.T) {
 	// Assert
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
-	assert.Len(t, result.Benches, 2)
-	// Should be sorted by distance ascending - Close Bench first
-	assert.Equal(t, "Close Bench", result.Benches[0].Name)
-	assert.Equal(t, "Far Bench", result.Benches[1].Name)
+	assert.Len(t, result.Spots, 2)
+	// Should be sorted by distance ascending - Close Spot first
+	assert.Equal(t, "Close Spot", result.Spots[0].Name)
+	assert.Equal(t, "Far Spot", result.Spots[1].Name)
 }

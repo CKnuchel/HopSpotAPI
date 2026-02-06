@@ -97,7 +97,7 @@ func main() {
 
 	// Repositories
 	userRepo := repository.NewUserRepository(db)
-	benchRepo := repository.NewBenchRepository(db)
+	spotRepo := repository.NewSpotRepository(db)
 	visitRepo := repository.NewVisitRepository(db)
 	invitationRepo := repository.NewInvitationRepository(db)
 	photoRepo := repository.NewPhotoRepository(db)
@@ -133,17 +133,17 @@ func main() {
 	userService := service.NewUserService(userRepo, *cfg)
 	notificationService := service.NewNotificationService(fcmClient, userRepo)
 	activityService := service.NewActivityService(activityRepo, photoRepo, minioClient)
-	benchService := service.NewBenchService(benchRepo, photoRepo, minioClient, notificationService, activityService)
+	spotService := service.NewSpotService(spotRepo, photoRepo, minioClient, notificationService, activityService)
 	visitService := service.NewVisitService(visitRepo, photoRepo, minioClient, activityService)
 	adminService := service.NewAdminService(userRepo, invitationRepo)
-	photoService := service.NewPhotoService(photoRepo, benchRepo, minioClient)
+	photoService := service.NewPhotoService(photoRepo, spotRepo, minioClient)
 	weatherService := service.NewWeatherService(weatherClient, redisClient, cfg.WeatherCacheTTL)
-	favoriteService := service.NewFavoriteService(favoriteRepo, benchRepo, photoRepo, minioClient, activityService)
+	favoriteService := service.NewFavoriteService(favoriteRepo, spotRepo, photoRepo, minioClient, activityService)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService)
 	userHandler := handler.NewUserHandler(userService)
-	benchHandler := handler.NewBenchHandler(benchService)
+	spotHandler := handler.NewSpotHandler(spotService)
 	visitHandler := handler.NewVisitHandler(visitService)
 	adminHandler := handler.NewAdminHandler(adminService)
 	photoHandler := handler.NewPhotoHandler(photoService)
@@ -157,7 +157,7 @@ func main() {
 	loginRateLimiter := middleware.NewRateLimitMiddleware(redisClient, cfg.RateLimitLogin)
 
 	// Router
-	r := router.Setup(authHandler, userHandler, benchHandler,
+	r := router.Setup(authHandler, userHandler, spotHandler,
 		visitHandler, adminHandler, photoHandler, weatherHandler,
 		favoriteHandler, activityHandler, authMiddleware, globalRateLimiter, loginRateLimiter)
 

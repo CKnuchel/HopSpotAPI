@@ -16,7 +16,7 @@ import (
 type VisitService interface {
 	Create(ctx context.Context, req *requests.CreateVisitRequest, userID uint) (*responses.VisitResponse, error)
 	List(ctx context.Context, req *requests.ListVisitsRequest, userID uint) (*responses.PaginatedVisitsResponse, error)
-	GetCountByBenchID(ctx context.Context, benchID uint) (int64, error)
+	GetCountBySpotID(ctx context.Context, spotID uint) (int64, error)
 	Delete(ctx context.Context, visitID uint, userID uint) error
 }
 
@@ -36,8 +36,8 @@ func NewVisitService(visitRepo repository.VisitRepository, photoRepo repository.
 	}
 }
 
-func (v *visitService) GetCountByBenchID(ctx context.Context, benchID uint) (int64, error) {
-	count, err := v.visitRepo.CountByBenchID(ctx, benchID)
+func (v *visitService) GetCountBySpotID(ctx context.Context, spotID uint) (int64, error) {
+	count, err := v.visitRepo.CountBySpotID(ctx, spotID)
 	if err != nil {
 		return 0, err
 	}
@@ -50,7 +50,7 @@ func (v *visitService) List(ctx context.Context, req *requests.ListVisitsRequest
 		Page:      req.Page,
 		Limit:     req.Limit,
 		SortOrder: req.SortOrder,
-		BenchID:   req.BenchID,
+		SpotID:    req.SpotID,
 	}
 
 	visits, total, err := v.visitRepo.FindByUserID(ctx, userID, filter)
@@ -68,9 +68,9 @@ func (v *visitService) List(ctx context.Context, req *requests.ListVisitsRequest
 	visitResponses := make([]responses.VisitResponse, len(visits))
 	for i, visit := range visits {
 		visitResponses[i] = mapper.VisitToResponse(&visit)
-		// Get main photo URL for each bench
-		photoURL := v.getMainPhotoURL(ctx, visit.BenchID)
-		visitResponses[i].Bench.MainPhotoURL = photoURL
+		// Get main photo URL for each spot
+		photoURL := v.getMainPhotoURL(ctx, visit.SpotID)
+		visitResponses[i].Spot.MainPhotoURL = photoURL
 	}
 
 	return &responses.PaginatedVisitsResponse{
@@ -92,30 +92,30 @@ func (v *visitService) Create(ctx context.Context, req *requests.CreateVisitRequ
 		return nil, err
 	}
 
-	// Reload visit with bench data
+	// Reload visit with spot data
 	visit, err := v.visitRepo.FindByID(ctx, visit.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	response := mapper.VisitToResponse(visit)
-	// Get main photo URL for the bench
-	response.Bench.MainPhotoURL = v.getMainPhotoURL(ctx, visit.BenchID)
+	// Get main photo URL for the spot
+	response.Spot.MainPhotoURL = v.getMainPhotoURL(ctx, visit.SpotID)
 
 	// Create activity for visit (async)
 	go func() {
-		benchID := visit.BenchID
-		if err := v.activityService.Create(context.Background(), userID, domain.ActionVisitAdded, &benchID); err != nil {
-			logger.Warn().Err(err).Uint("benchID", visit.BenchID).Msg("failed to create visit_added activity")
+		spotID := visit.SpotID
+		if err := v.activityService.Create(context.Background(), userID, domain.ActionVisitAdded, &spotID); err != nil {
+			logger.Warn().Err(err).Uint("spotID", visit.SpotID).Msg("failed to create visit_added activity")
 		}
 	}()
 
 	return &response, nil
 }
 
-// getMainPhotoURL fetches the main photo URL for a bench
-func (v *visitService) getMainPhotoURL(ctx context.Context, benchID uint) *string {
-	mainPhoto, err := v.photoRepo.GetMainPhoto(ctx, benchID)
+// getMainPhotoURL fetches the main photo URL for a spot
+func (v *visitService) getMainPhotoURL(ctx context.Context, spotID uint) *string {
+	mainPhoto, err := v.photoRepo.GetMainPhoto(ctx, spotID)
 	if err != nil || mainPhoto == nil {
 		return nil
 	}

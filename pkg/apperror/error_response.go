@@ -36,10 +36,10 @@ const (
 	ErrCodeInvitationCannotDeleteRedeemed ErrorCode = "INVITATION_CANNOT_DELETE_REDEEMED"
 )
 
-// Error codes - Bench
+// Error codes - Spot
 const (
-	ErrCodeBenchNotFound  ErrorCode = "BENCH_NOT_FOUND"
-	ErrCodeBenchForbidden ErrorCode = "BENCH_FORBIDDEN"
+	ErrCodeSpotNotFound  ErrorCode = "SPOT_NOT_FOUND"
+	ErrCodeSpotForbidden ErrorCode = "SPOT_FORBIDDEN"
 )
 
 // Error codes - Photo
@@ -162,16 +162,16 @@ var (
 	AppErrInvitationCannotDeleteRedeemed = NewAppError(ErrCodeInvitationCannotDeleteRedeemed, "Cannot delete redeemed invitation code", http.StatusBadRequest)
 )
 
-// Predefined AppErrors - Bench
+// Predefined AppErrors - Spot
 var (
-	AppErrBenchNotFound  = NewAppError(ErrCodeBenchNotFound, "Bench not found", http.StatusNotFound)
-	AppErrBenchForbidden = NewAppError(ErrCodeBenchForbidden, "No permission for this bench", http.StatusForbidden)
+	AppErrSpotNotFound  = NewAppError(ErrCodeSpotNotFound, "Spot not found", http.StatusNotFound)
+	AppErrSpotForbidden = NewAppError(ErrCodeSpotForbidden, "No permission for this spot", http.StatusForbidden)
 )
 
 // Predefined AppErrors - Photo
 var (
 	AppErrPhotoNotFound    = NewAppError(ErrCodePhotoNotFound, "Photo not found", http.StatusNotFound)
-	AppErrPhotoMaxReached  = NewAppError(ErrCodePhotoMaxReached, "Maximum 10 photos per bench reached", http.StatusBadRequest)
+	AppErrPhotoMaxReached  = NewAppError(ErrCodePhotoMaxReached, "Maximum 10 photos per spot reached", http.StatusBadRequest)
 	AppErrPhotoTooLarge    = NewAppError(ErrCodePhotoTooLarge, "File size exceeds 10 MB limit", http.StatusBadRequest)
 	AppErrPhotoInvalidType = NewAppError(ErrCodePhotoInvalidType, "Only JPEG, PNG, and WebP files allowed", http.StatusBadRequest)
 	AppErrPhotoForbidden   = NewAppError(ErrCodePhotoForbidden, "No permission for this photo", http.StatusForbidden)

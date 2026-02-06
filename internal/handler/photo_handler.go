@@ -21,15 +21,15 @@ func NewPhotoHandler(photoService service.PhotoService) *PhotoHandler {
 	return &PhotoHandler{photoService: photoService}
 }
 
-// POST /api/v1/benches/:id/photos
+// POST /api/v1/spots/:id/photos
 // godoc
 //
-//	@Summary		Upload a photo for a bench
-//	@Description	Uploads a photo to the specified bench
+//	@Summary		Upload a photo for a spot
+//	@Description	Uploads a photo to the specified spot
 //	@Tags			Photos
 //	@Accept			multipart/form-data
 //	@Produce		json
-//	@Param			id		path		int		true	"Bench ID"
+//	@Param			id		path		int		true	"Spot ID"
 //
 //	@Param			photo	formData	file	true	"Photo file"
 //	@Param			is_main	formData	bool	false	"Als Hauptbild setzen"
@@ -39,7 +39,7 @@ func NewPhotoHandler(photoService service.PhotoService) *PhotoHandler {
 //	@Failure		401		{object}	apperror.ErrorResponse
 //	@Failure		404		{object}	apperror.ErrorResponse
 //	@Failure		500		{object}	apperror.ErrorResponse
-//	@Router			/api/v1/benches/{id}/photos [post]
+//	@Router			/api/v1/spots/{id}/photos [post]
 func (h *PhotoHandler) Upload(c *gin.Context) {
 	// JWT Claims
 	userID, ok := c.MustGet(middleware.ContextKeyUserID).(uint)
@@ -48,7 +48,7 @@ func (h *PhotoHandler) Upload(c *gin.Context) {
 		return
 	}
 
-	// Bench ID from URL
+	// Spot ID from URL
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		apperror.RespondWithError(c, apperror.AppErrValidationInvalidID)
@@ -123,7 +123,7 @@ func (h *PhotoHandler) Delete(c *gin.Context) {
 // godoc
 //
 //	@Summary		Set main photo
-//	@Description	Sets a photo as the main photo for its bench
+//	@Description	Sets a photo as the main photo for its spot
 //	@Tags			Photos
 //	@Param			id	path	int	true	"Photo ID"
 //
@@ -162,25 +162,25 @@ func (h *PhotoHandler) SetMainPhoto(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-// GET /api/v1/benches/:id/photos
+// GET /api/v1/spots/:id/photos
 // godoc
 //
-//	@Summary		Get photos by bench ID
-//	@Description	Retrieves all photos for a specific bench
+//	@Summary		Get photos by spot ID
+//	@Description	Retrieves all photos for a specific spot
 //	@Tags			Photos
-//	@Param			id	path	int	true	"Bench ID"
+//	@Param			id	path	int	true	"Spot ID"
 //
 //	@Success		200	{array}		responses.PhotoResponse
 //	@Failure		400	{object}	apperror.ErrorResponse
 //	@Failure		500	{object}	apperror.ErrorResponse
-//	@Router			/api/v1/benches/{id}/photos [get]
-func (h *PhotoHandler) GetByBenchID(c *gin.Context) {
-	benchID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+//	@Router			/api/v1/spots/{id}/photos [get]
+func (h *PhotoHandler) GetBySpotID(c *gin.Context) {
+	spotID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		apperror.RespondWithError(c, apperror.AppErrValidationInvalidID)
 		return
 	}
-	resp, err := h.photoService.GetByBenchID(c.Request.Context(), uint(benchID))
+	resp, err := h.photoService.GetBySpotID(c.Request.Context(), uint(spotID))
 	if err != nil {
 		apperror.RespondWithMappedError(c, err)
 		return

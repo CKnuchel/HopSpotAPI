@@ -22,7 +22,7 @@ func (r *visitRepository) Create(ctx context.Context, visit *domain.Visit) error
 
 func (r *visitRepository) FindByID(ctx context.Context, id uint) (*domain.Visit, error) {
 	var visit domain.Visit
-	if err := r.db.WithContext(ctx).Preload("Bench").Preload("User").First(&visit, id).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Spot").Preload("User").First(&visit, id).Error; err != nil {
 		return nil, err
 	}
 	return &visit, nil
@@ -39,8 +39,8 @@ func (r *visitRepository) FindByUserID(ctx context.Context, userID uint, filter 
 	query := r.db.WithContext(ctx).Model(&domain.Visit{}).Where("user_id = ?", userID)
 
 	// Apply filters
-	if filter.BenchID != nil && *filter.BenchID > 0 {
-		query = query.Where("bench_id = ?", filter.BenchID)
+	if filter.SpotID != nil && *filter.SpotID > 0 {
+		query = query.Where("spot_id = ?", filter.SpotID)
 	}
 
 	// Count total records
@@ -57,16 +57,16 @@ func (r *visitRepository) FindByUserID(ctx context.Context, userID uint, filter 
 		query = query.Offset(offset)
 	}
 
-	if err := query.Preload("Bench").Find(&visits).Error; err != nil {
+	if err := query.Preload("Spot").Find(&visits).Error; err != nil {
 		return nil, 0, err
 	}
 
 	return visits, count, nil
 }
 
-func (r *visitRepository) CountByBenchID(ctx context.Context, benchID uint) (int64, error) {
+func (r *visitRepository) CountBySpotID(ctx context.Context, spotID uint) (int64, error) {
 	var count int64
-	if err := r.db.WithContext(ctx).Model(&domain.Visit{}).Where("bench_id = ?", benchID).Count(&count).Error; err != nil {
+	if err := r.db.WithContext(ctx).Model(&domain.Visit{}).Where("spot_id = ?", spotID).Count(&count).Error; err != nil {
 		return 0, err
 	}
 	return count, nil

@@ -3,12 +3,12 @@ package responses
 import "time"
 
 type FavoriteResponse struct {
-	ID        uint                  `json:"id"`
-	Bench     FavoriteBenchResponse `json:"bench"`
-	CreatedAt time.Time             `json:"created_at"`
+	ID        uint                 `json:"id"`
+	Spot      FavoriteSpotResponse `json:"spot"`
+	CreatedAt time.Time            `json:"created_at"`
 }
 
-type FavoriteBenchResponse struct {
+type FavoriteSpotResponse struct {
 	ID           uint    `json:"id"`
 	Name         string  `json:"name"`
 	Latitude     float64 `json:"latitude"`

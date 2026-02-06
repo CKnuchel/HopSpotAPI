@@ -25,27 +25,27 @@ func (_m *VisitRepository) EXPECT() *VisitRepository_Expecter {
 	return &VisitRepository_Expecter{mock: &_m.Mock}
 }
 
-// CountByBenchID provides a mock function with given fields: ctx, benchID
-func (_m *VisitRepository) CountByBenchID(ctx context.Context, benchID uint) (int64, error) {
-	ret := _m.Called(ctx, benchID)
+// CountBySpotID provides a mock function with given fields: ctx, spotID
+func (_m *VisitRepository) CountBySpotID(ctx context.Context, spotID uint) (int64, error) {
+	ret := _m.Called(ctx, spotID)
 
 	if len(ret) == 0 {
-		panic("no return value specified for CountByBenchID")
+		panic("no return value specified for CountBySpotID")
 	}
 
 	var r0 int64
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, uint) (int64, error)); ok {
-		return rf(ctx, benchID)
+		return rf(ctx, spotID)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, uint) int64); ok {
-		r0 = rf(ctx, benchID)
+		r0 = rf(ctx, spotID)
 	} else {
 		r0 = ret.Get(0).(int64)
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, uint) error); ok {
-		r1 = rf(ctx, benchID)
+		r1 = rf(ctx, spotID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -53,31 +53,31 @@ func (_m *VisitRepository) CountByBenchID(ctx context.Context, benchID uint) (in
 	return r0, r1
 }
 
-// VisitRepository_CountByBenchID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CountByBenchID'
-type VisitRepository_CountByBenchID_Call struct {
+// VisitRepository_CountBySpotID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CountBySpotID'
+type VisitRepository_CountBySpotID_Call struct {
 	*mock.Call
 }
 
-// CountByBenchID is a helper method to define mock.On call
+// CountBySpotID is a helper method to define mock.On call
 //   - ctx context.Context
-//   - benchID uint
-func (_e *VisitRepository_Expecter) CountByBenchID(ctx interface{}, benchID interface{}) *VisitRepository_CountByBenchID_Call {
-	return &VisitRepository_CountByBenchID_Call{Call: _e.mock.On("CountByBenchID", ctx, benchID)}
+//   - spotID uint
+func (_e *VisitRepository_Expecter) CountBySpotID(ctx interface{}, spotID interface{}) *VisitRepository_CountBySpotID_Call {
+	return &VisitRepository_CountBySpotID_Call{Call: _e.mock.On("CountBySpotID", ctx, spotID)}
 }
 
-func (_c *VisitRepository_CountByBenchID_Call) Run(run func(ctx context.Context, benchID uint)) *VisitRepository_CountByBenchID_Call {
+func (_c *VisitRepository_CountBySpotID_Call) Run(run func(ctx context.Context, spotID uint)) *VisitRepository_CountBySpotID_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(uint))
 	})
 	return _c
 }
 
-func (_c *VisitRepository_CountByBenchID_Call) Return(_a0 int64, _a1 error) *VisitRepository_CountByBenchID_Call {
+func (_c *VisitRepository_CountBySpotID_Call) Return(_a0 int64, _a1 error) *VisitRepository_CountBySpotID_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *VisitRepository_CountByBenchID_Call) RunAndReturn(run func(context.Context, uint) (int64, error)) *VisitRepository_CountByBenchID_Call {
+func (_c *VisitRepository_CountBySpotID_Call) RunAndReturn(run func(context.Context, uint) (int64, error)) *VisitRepository_CountBySpotID_Call {
 	_c.Call.Return(run)
 	return _c
 }

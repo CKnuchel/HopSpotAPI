@@ -15,7 +15,7 @@ func CreateVisitRequestToDomain(req *requests.CreateVisitRequest, userID uint) *
 	}
 
 	return &domain.Visit{
-		BenchID:   req.BenchID,
+		SpotID:    req.SpotID,
 		UserID:    userID,
 		VisitedAt: visitedAt,
 		Comment:   req.Comment,
@@ -25,9 +25,9 @@ func CreateVisitRequestToDomain(req *requests.CreateVisitRequest, userID uint) *
 func VisitToResponse(visit *domain.Visit) responses.VisitResponse {
 	return responses.VisitResponse{
 		ID: visit.ID,
-		Bench: responses.VisitBenchResponse{
-			ID:   visit.Bench.ID,
-			Name: visit.Bench.Name,
+		Spot: responses.VisitSpotResponse{
+			ID:   visit.Spot.ID,
+			Name: visit.Spot.Name,
 		},
 		VisitedAt: visit.VisitedAt,
 		Comment:   visit.Comment,

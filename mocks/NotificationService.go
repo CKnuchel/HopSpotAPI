@@ -23,17 +23,17 @@ func (_m *NotificationService) EXPECT() *NotificationService_Expecter {
 	return &NotificationService_Expecter{mock: &_m.Mock}
 }
 
-// NotifyNewBench provides a mock function with given fields: ctx, bench, creatorID
-func (_m *NotificationService) NotifyNewBench(ctx context.Context, bench *domain.Bench, creatorID uint) error {
-	ret := _m.Called(ctx, bench, creatorID)
+// NotifyNewSpot provides a mock function with given fields: ctx, spot, creatorID
+func (_m *NotificationService) NotifyNewSpot(ctx context.Context, spot *domain.Spot, creatorID uint) error {
+	ret := _m.Called(ctx, spot, creatorID)
 
 	if len(ret) == 0 {
-		panic("no return value specified for NotifyNewBench")
+		panic("no return value specified for NotifyNewSpot")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *domain.Bench, uint) error); ok {
-		r0 = rf(ctx, bench, creatorID)
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.Spot, uint) error); ok {
+		r0 = rf(ctx, spot, creatorID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -41,32 +41,32 @@ func (_m *NotificationService) NotifyNewBench(ctx context.Context, bench *domain
 	return r0
 }
 
-// NotificationService_NotifyNewBench_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'NotifyNewBench'
-type NotificationService_NotifyNewBench_Call struct {
+// NotificationService_NotifyNewSpot_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'NotifyNewSpot'
+type NotificationService_NotifyNewSpot_Call struct {
 	*mock.Call
 }
 
-// NotifyNewBench is a helper method to define mock.On call
+// NotifyNewSpot is a helper method to define mock.On call
 //   - ctx context.Context
-//   - bench *domain.Bench
+//   - spot *domain.Spot
 //   - creatorID uint
-func (_e *NotificationService_Expecter) NotifyNewBench(ctx interface{}, bench interface{}, creatorID interface{}) *NotificationService_NotifyNewBench_Call {
-	return &NotificationService_NotifyNewBench_Call{Call: _e.mock.On("NotifyNewBench", ctx, bench, creatorID)}
+func (_e *NotificationService_Expecter) NotifyNewSpot(ctx interface{}, spot interface{}, creatorID interface{}) *NotificationService_NotifyNewSpot_Call {
+	return &NotificationService_NotifyNewSpot_Call{Call: _e.mock.On("NotifyNewSpot", ctx, spot, creatorID)}
 }
 
-func (_c *NotificationService_NotifyNewBench_Call) Run(run func(ctx context.Context, bench *domain.Bench, creatorID uint)) *NotificationService_NotifyNewBench_Call {
+func (_c *NotificationService_NotifyNewSpot_Call) Run(run func(ctx context.Context, spot *domain.Spot, creatorID uint)) *NotificationService_NotifyNewSpot_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*domain.Bench), args[2].(uint))
+		run(args[0].(context.Context), args[1].(*domain.Spot), args[2].(uint))
 	})
 	return _c
 }
 
-func (_c *NotificationService_NotifyNewBench_Call) Return(_a0 error) *NotificationService_NotifyNewBench_Call {
+func (_c *NotificationService_NotifyNewSpot_Call) Return(_a0 error) *NotificationService_NotifyNewSpot_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *NotificationService_NotifyNewBench_Call) RunAndReturn(run func(context.Context, *domain.Bench, uint) error) *NotificationService_NotifyNewBench_Call {
+func (_c *NotificationService_NotifyNewSpot_Call) RunAndReturn(run func(context.Context, *domain.Spot, uint) error) *NotificationService_NotifyNewSpot_Call {
 	_c.Call.Return(run)
 	return _c
 }

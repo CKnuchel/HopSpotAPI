@@ -13,7 +13,7 @@ import (
 )
 
 type ActivityService interface {
-	Create(ctx context.Context, userID uint, actionType string, benchID *uint) error
+	Create(ctx context.Context, userID uint, actionType string, spotID *uint) error
 	List(ctx context.Context, req *requests.ListActivitiesRequest) (*responses.PaginatedActivitiesResponse, error)
 }
 
@@ -31,11 +31,11 @@ func NewActivityService(activityRepo repository.ActivityRepository, photoRepo re
 	}
 }
 
-func (s *activityService) Create(ctx context.Context, userID uint, actionType string, benchID *uint) error {
+func (s *activityService) Create(ctx context.Context, userID uint, actionType string, spotID *uint) error {
 	activity := &domain.Activity{
 		UserID:     userID,
 		ActionType: actionType,
-		BenchID:    benchID,
+		SpotID:     spotID,
 		CreatedAt:  time.Now(),
 	}
 
@@ -64,11 +64,11 @@ func (s *activityService) List(ctx context.Context, req *requests.ListActivities
 	activityResponses := make([]responses.ActivityResponse, len(activities))
 	for i, activity := range activities {
 		activityResponses[i] = mapper.ActivityToResponse(&activity)
-		// Get main photo URL for each bench
-		if activity.BenchID != nil {
-			photoURL := s.getMainPhotoURL(ctx, *activity.BenchID)
-			if activityResponses[i].Bench != nil {
-				activityResponses[i].Bench.MainPhotoURL = photoURL
+		// Get main photo URL for each spot
+		if activity.SpotID != nil {
+			photoURL := s.getMainPhotoURL(ctx, *activity.SpotID)
+			if activityResponses[i].Spot != nil {
+				activityResponses[i].Spot.MainPhotoURL = photoURL
 			}
 		}
 	}
@@ -84,9 +84,9 @@ func (s *activityService) List(ctx context.Context, req *requests.ListActivities
 	}, nil
 }
 
-// getMainPhotoURL fetches the main photo URL for a bench
-func (s *activityService) getMainPhotoURL(ctx context.Context, benchID uint) *string {
-	mainPhoto, err := s.photoRepo.GetMainPhoto(ctx, benchID)
+// getMainPhotoURL fetches the main photo URL for a spot
+func (s *activityService) getMainPhotoURL(ctx context.Context, spotID uint) *string {
+	mainPhoto, err := s.photoRepo.GetMainPhoto(ctx, spotID)
 	if err != nil || mainPhoto == nil {
 		return nil
 	}

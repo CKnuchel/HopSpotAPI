@@ -21,9 +21,9 @@ func (r *favoriteRepository) Create(ctx context.Context, favorite *domain.Favori
 	return r.db.WithContext(ctx).Create(favorite).Error
 }
 
-func (r *favoriteRepository) Delete(ctx context.Context, userID, benchID uint) error {
+func (r *favoriteRepository) Delete(ctx context.Context, userID, spotID uint) error {
 	result := r.db.WithContext(ctx).
-		Where("user_id = ? AND bench_id = ?", userID, benchID).
+		Where("user_id = ? AND spot_id = ?", userID, spotID).
 		Delete(&domain.Favorite{})
 
 	if result.Error != nil {
@@ -35,11 +35,11 @@ func (r *favoriteRepository) Delete(ctx context.Context, userID, benchID uint) e
 	return nil
 }
 
-func (r *favoriteRepository) Exists(ctx context.Context, userID, benchID uint) (bool, error) {
+func (r *favoriteRepository) Exists(ctx context.Context, userID, spotID uint) (bool, error) {
 	var count int64
 	err := r.db.WithContext(ctx).
 		Model(&domain.Favorite{}).
-		Where("user_id = ? AND bench_id = ?", userID, benchID).
+		Where("user_id = ? AND spot_id = ?", userID, spotID).
 		Count(&count).Error
 
 	if err != nil {
@@ -69,8 +69,8 @@ func (r *favoriteRepository) FindByUserID(ctx context.Context, userID uint, filt
 
 	// Execute query with preload
 	err := query.
-		Preload("Bench").
-		Preload("Bench.Creator").
+		Preload("Spot").
+		Preload("Spot.Creator").
 		Order("created_at DESC").
 		Find(&favorites).Error
 
@@ -81,15 +81,15 @@ func (r *favoriteRepository) FindByUserID(ctx context.Context, userID uint, filt
 	return favorites, total, nil
 }
 
-func (r *favoriteRepository) GetBenchIDsByUserID(ctx context.Context, userID uint) ([]uint, error) {
-	var benchIDs []uint
+func (r *favoriteRepository) GetSpotIDsByUserID(ctx context.Context, userID uint) ([]uint, error) {
+	var spotIDs []uint
 	err := r.db.WithContext(ctx).
 		Model(&domain.Favorite{}).
 		Where("user_id = ?", userID).
-		Pluck("bench_id", &benchIDs).Error
+		Pluck("spot_id", &spotIDs).Error
 
 	if err != nil {
 		return nil, err
 	}
-	return benchIDs, nil
+	return spotIDs, nil
 }

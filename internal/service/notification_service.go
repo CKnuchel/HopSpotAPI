@@ -11,7 +11,7 @@ import (
 )
 
 type NotificationService interface {
-	NotifyNewBench(ctx context.Context, bench *domain.Bench, creatorID uint) error
+	NotifyNewSpot(ctx context.Context, spot *domain.Spot, creatorID uint) error
 }
 
 type notificationService struct {
@@ -26,8 +26,8 @@ func NewNotificationService(fcmClient *notification.FCMClient, userRepo reposito
 	}
 }
 
-// NotifyNewBench implements NotificationService.
-func (s *notificationService) NotifyNewBench(ctx context.Context, bench *domain.Bench, creatorID uint) error {
+// NotifyNewSpot implements NotificationService.
+func (s *notificationService) NotifyNewSpot(ctx context.Context, spot *domain.Spot, creatorID uint) error {
 	// Skip if FCM not configured
 	if s.fcmClient == nil {
 		return nil
@@ -51,12 +51,12 @@ func (s *notificationService) NotifyNewBench(ctx context.Context, bench *domain.
 	}
 
 	data := map[string]string{
-		"bench_id": fmt.Sprintf("%d", bench.ID),
-		"type":     "new_bench",
+		"spot_id": fmt.Sprintf("%d", spot.ID),
+		"type":    "new_spot",
 	}
 
-	title := "Neue Bank 🎉"
-	body := fmt.Sprintf("%s hat eine neue Bank hinzugefügt: %s", user.DisplayName, bench.Name)
+	title := "Neuer HopSpot"
+	body := fmt.Sprintf("%s hat einen neuen HopSpot hinzugefügt: %s", user.DisplayName, spot.Name)
 
 	err = s.fcmClient.SendToMultiple(ctx, tokens, title, body, data)
 	if err != nil {
