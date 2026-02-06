@@ -119,3 +119,14 @@ type FavoriteFilter struct {
 	Page  int
 	Limit int
 }
+
+type ActivityRepository interface {
+	Create(ctx context.Context, activity *domain.Activity) error
+	FindAll(ctx context.Context, filter ActivityFilter) ([]domain.Activity, int64, error)
+}
+
+type ActivityFilter struct {
+	Page       int
+	Limit      int
+	ActionType *string
+}

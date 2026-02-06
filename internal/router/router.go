@@ -20,6 +20,7 @@ func Setup(
 	photoHandler *handler.PhotoHandler,
 	weatherHandler *handler.WeatherHandler,
 	favoriteHandler *handler.FavoriteHandler,
+	activityHandler *handler.ActivityHandler,
 	authMiddleware *middleware.AuthMiddleware,
 	globalRateLimiter *middleware.RateLimitMiddleware,
 	loginRateLimiter *middleware.RateLimitMiddleware,
@@ -122,6 +123,12 @@ func Setup(
 			weather := protected.Group("/weather")
 			{
 				weather.GET("", weatherHandler.GetCurrentWeather)
+			}
+
+			// Activity routes
+			activities := protected.Group("/activities")
+			{
+				activities.GET("", activityHandler.List)
 			}
 		}
 	}

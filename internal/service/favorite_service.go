@@ -7,6 +7,7 @@ import (
 	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/dto/responses"
 	"hopSpotAPI/internal/repository"
+	"hopSpotAPI/pkg/logger"
 	"hopSpotAPI/pkg/storage"
 )
 
@@ -19,10 +20,11 @@ type FavoriteService interface {
 }
 
 type favoriteService struct {
-	favoriteRepo repository.FavoriteRepository
-	benchRepo    repository.BenchRepository
-	photoRepo    repository.PhotoRepository
-	minioClient  *storage.MinioClient
+	favoriteRepo    repository.FavoriteRepository
+	benchRepo       repository.BenchRepository
+	photoRepo       repository.PhotoRepository
+	minioClient     *storage.MinioClient
+	activityService ActivityService
 }
 
 func NewFavoriteService(
@@ -30,12 +32,14 @@ func NewFavoriteService(
 	benchRepo repository.BenchRepository,
 	photoRepo repository.PhotoRepository,
 	minioClient *storage.MinioClient,
+	activityService ActivityService,
 ) FavoriteService {
 	return &favoriteService{
-		favoriteRepo: favoriteRepo,
-		benchRepo:    benchRepo,
-		photoRepo:    photoRepo,
-		minioClient:  minioClient,
+		favoriteRepo:    favoriteRepo,
+		benchRepo:       benchRepo,
+		photoRepo:       photoRepo,
+		minioClient:     minioClient,
+		activityService: activityService,
 	}
 }
 
@@ -54,7 +58,19 @@ func (s *favoriteService) Add(ctx context.Context, userID, benchID uint) error {
 		BenchID: benchID,
 	}
 
-	return s.favoriteRepo.Create(ctx, favorite)
+	if err := s.favoriteRepo.Create(ctx, favorite); err != nil {
+		return err
+	}
+
+	// Create activity for favorite (async)
+	go func() {
+		bid := benchID
+		if err := s.activityService.Create(context.Background(), userID, domain.ActionFavoriteAdded, &bid); err != nil {
+			logger.Warn().Err(err).Uint("benchID", benchID).Msg("failed to create favorite_added activity")
+		}
+	}()
+
+	return nil
 }
 
 func (s *favoriteService) Remove(ctx context.Context, userID, benchID uint) error {

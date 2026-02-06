@@ -21,6 +21,7 @@ func Migrate(db *gorm.DB) error {
 		&domain.Visit{},
 		&domain.RefreshToken{},
 		&domain.Favorite{},
+		&domain.Activity{},
 	)
 
 	if err != nil {

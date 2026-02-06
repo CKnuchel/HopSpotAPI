@@ -5,6 +5,7 @@ import (
 	"math"
 	"sort"
 
+	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/dto/responses"
 	"hopSpotAPI/internal/mapper"
@@ -29,14 +30,16 @@ type benchService struct {
 	photoRepo           repository.PhotoRepository
 	minioClient         *storage.MinioClient
 	notificationService NotificationService
+	activityService     ActivityService
 }
 
-func NewBenchService(benchRepo repository.BenchRepository, photoRepo repository.PhotoRepository, minioClient *storage.MinioClient, notificationService NotificationService) BenchService {
+func NewBenchService(benchRepo repository.BenchRepository, photoRepo repository.PhotoRepository, minioClient *storage.MinioClient, notificationService NotificationService, activityService ActivityService) BenchService {
 	return &benchService{
 		benchRepo:           benchRepo,
 		photoRepo:           photoRepo,
 		minioClient:         minioClient,
 		notificationService: notificationService,
+		activityService:     activityService,
 	}
 }
 
@@ -59,6 +62,14 @@ func (s *benchService) Create(ctx context.Context, req *requests.CreateBenchRequ
 	go func() {
 		if err := s.notificationService.NotifyNewBench(ctx, bench, userID); err != nil {
 			logger.Warn().Err(err).Uint("benchID", bench.ID).Msg("failed to send new bench notification")
+		}
+	}()
+
+	// Create activity for bench creation (async)
+	go func() {
+		benchID := bench.ID
+		if err := s.activityService.Create(context.Background(), userID, domain.ActionBenchCreated, &benchID); err != nil {
+			logger.Warn().Err(err).Uint("benchID", bench.ID).Msg("failed to create bench_created activity")
 		}
 	}()
 

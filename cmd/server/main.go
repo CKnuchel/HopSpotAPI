@@ -103,6 +103,7 @@ func main() {
 	photoRepo := repository.NewPhotoRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 	favoriteRepo := repository.NewFavoriteRepository(db)
+	activityRepo := repository.NewActivityRepository(db)
 
 	// Bootstrap: Create initial invitation code if no users exist
 	userCount, err := userRepo.Count(context.Background())
@@ -131,12 +132,13 @@ func main() {
 	authService := service.NewAuthService(userRepo, invitationRepo, refreshTokenRepo, *cfg)
 	userService := service.NewUserService(userRepo, *cfg)
 	notificationService := service.NewNotificationService(fcmClient, userRepo)
-	benchService := service.NewBenchService(benchRepo, photoRepo, minioClient, notificationService)
-	visitService := service.NewVisitService(visitRepo, photoRepo, minioClient)
+	activityService := service.NewActivityService(activityRepo, photoRepo, minioClient)
+	benchService := service.NewBenchService(benchRepo, photoRepo, minioClient, notificationService, activityService)
+	visitService := service.NewVisitService(visitRepo, photoRepo, minioClient, activityService)
 	adminService := service.NewAdminService(userRepo, invitationRepo)
 	photoService := service.NewPhotoService(photoRepo, benchRepo, minioClient)
 	weatherService := service.NewWeatherService(weatherClient, redisClient, cfg.WeatherCacheTTL)
-	favoriteService := service.NewFavoriteService(favoriteRepo, benchRepo, photoRepo, minioClient)
+	favoriteService := service.NewFavoriteService(favoriteRepo, benchRepo, photoRepo, minioClient, activityService)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService)
@@ -147,6 +149,7 @@ func main() {
 	photoHandler := handler.NewPhotoHandler(photoService)
 	weatherHandler := handler.NewWeatherHandler(weatherService)
 	favoriteHandler := handler.NewFavoriteHandler(favoriteService)
+	activityHandler := handler.NewActivityHandler(activityService)
 
 	// Middlewares
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
@@ -156,7 +159,7 @@ func main() {
 	// Router
 	r := router.Setup(authHandler, userHandler, benchHandler,
 		visitHandler, adminHandler, photoHandler, weatherHandler,
-		favoriteHandler, authMiddleware, globalRateLimiter, loginRateLimiter)
+		favoriteHandler, activityHandler, authMiddleware, globalRateLimiter, loginRateLimiter)
 
 	// Server mit Graceful Shutdown
 	srv := &http.Server{

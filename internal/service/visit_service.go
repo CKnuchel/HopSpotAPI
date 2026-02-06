@@ -3,11 +3,13 @@ package service
 import (
 	"context"
 
-	"hopSpotAPI/pkg/apperror"
+	"hopSpotAPI/internal/domain"
 	"hopSpotAPI/internal/dto/requests"
 	"hopSpotAPI/internal/dto/responses"
 	"hopSpotAPI/internal/mapper"
 	"hopSpotAPI/internal/repository"
+	"hopSpotAPI/pkg/apperror"
+	"hopSpotAPI/pkg/logger"
 	"hopSpotAPI/pkg/storage"
 )
 
@@ -19,16 +21,18 @@ type VisitService interface {
 }
 
 type visitService struct {
-	visitRepo   repository.VisitRepository
-	photoRepo   repository.PhotoRepository
-	minioClient *storage.MinioClient
+	visitRepo       repository.VisitRepository
+	photoRepo       repository.PhotoRepository
+	minioClient     *storage.MinioClient
+	activityService ActivityService
 }
 
-func NewVisitService(visitRepo repository.VisitRepository, photoRepo repository.PhotoRepository, minioClient *storage.MinioClient) VisitService {
+func NewVisitService(visitRepo repository.VisitRepository, photoRepo repository.PhotoRepository, minioClient *storage.MinioClient, activityService ActivityService) VisitService {
 	return &visitService{
-		visitRepo:   visitRepo,
-		photoRepo:   photoRepo,
-		minioClient: minioClient,
+		visitRepo:       visitRepo,
+		photoRepo:       photoRepo,
+		minioClient:     minioClient,
+		activityService: activityService,
 	}
 }
 
@@ -97,6 +101,15 @@ func (v *visitService) Create(ctx context.Context, req *requests.CreateVisitRequ
 	response := mapper.VisitToResponse(visit)
 	// Get main photo URL for the bench
 	response.Bench.MainPhotoURL = v.getMainPhotoURL(ctx, visit.BenchID)
+
+	// Create activity for visit (async)
+	go func() {
+		benchID := visit.BenchID
+		if err := v.activityService.Create(context.Background(), userID, domain.ActionVisitAdded, &benchID); err != nil {
+			logger.Warn().Err(err).Uint("benchID", visit.BenchID).Msg("failed to create visit_added activity")
+		}
+	}()
+
 	return &response, nil
 }
 
