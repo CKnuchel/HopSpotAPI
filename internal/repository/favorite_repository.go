@@ -35,6 +35,10 @@ func (r *favoriteRepository) Delete(ctx context.Context, userID, spotID uint) er
 	return nil
 }
 
+func (r *favoriteRepository) DeleteBySpotID(ctx context.Context, spotID uint) error {
+	return r.db.WithContext(ctx).Where("spot_id = ?", spotID).Delete(&domain.Favorite{}).Error
+}
+
 func (r *favoriteRepository) Exists(ctx context.Context, userID, spotID uint) (bool, error) {
 	var count int64
 	err := r.db.WithContext(ctx).

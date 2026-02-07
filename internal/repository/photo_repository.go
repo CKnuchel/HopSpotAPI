@@ -54,6 +54,15 @@ func (r *photoRepository) FindBySpotID(ctx context.Context, spotID uint) ([]doma
 	return photos, nil
 }
 
+// FindBySpotIDUnscoped returns all photos for a spot, including soft-deleted ones
+func (r *photoRepository) FindBySpotIDUnscoped(ctx context.Context, spotID uint) ([]domain.Photo, error) {
+	var photos []domain.Photo
+	if err := r.db.WithContext(ctx).Unscoped().Where("spot_id = ?", spotID).Find(&photos).Error; err != nil {
+		return nil, err
+	}
+	return photos, nil
+}
+
 func (r *photoRepository) CountBySpotID(ctx context.Context, spotID uint) (int64, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&domain.Photo{}).Where("spot_id = ?", spotID).Count(&count).Error; err != nil {

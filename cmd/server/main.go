@@ -104,6 +104,7 @@ func main() {
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 	favoriteRepo := repository.NewFavoriteRepository(db)
 	activityRepo := repository.NewActivityRepository(db)
+	notificationRepo := repository.NewNotificationRepository(db)
 
 	// Bootstrap: Create initial invitation code if no users exist
 	userCount, err := userRepo.Count(context.Background())
@@ -133,7 +134,7 @@ func main() {
 	userService := service.NewUserService(userRepo, *cfg)
 	notificationService := service.NewNotificationService(fcmClient, userRepo)
 	activityService := service.NewActivityService(activityRepo, photoRepo, minioClient)
-	spotService := service.NewSpotService(spotRepo, photoRepo, minioClient, notificationService, activityService)
+	spotService := service.NewSpotService(spotRepo, photoRepo, visitRepo, favoriteRepo, activityRepo, notificationRepo, minioClient, notificationService, activityService)
 	visitService := service.NewVisitService(visitRepo, photoRepo, minioClient, activityService)
 	adminService := service.NewAdminService(userRepo, invitationRepo)
 	photoService := service.NewPhotoService(photoRepo, spotRepo, minioClient)

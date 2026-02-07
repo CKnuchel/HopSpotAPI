@@ -28,15 +28,33 @@ type SpotService interface {
 type spotService struct {
 	spotRepo            repository.SpotRepository
 	photoRepo           repository.PhotoRepository
+	visitRepo           repository.VisitRepository
+	favoriteRepo        repository.FavoriteRepository
+	activityRepo        repository.ActivityRepository
+	notificationRepo    repository.NotificationRepository
 	minioClient         *storage.MinioClient
 	notificationService NotificationService
 	activityService     ActivityService
 }
 
-func NewSpotService(spotRepo repository.SpotRepository, photoRepo repository.PhotoRepository, minioClient *storage.MinioClient, notificationService NotificationService, activityService ActivityService) SpotService {
+func NewSpotService(
+	spotRepo repository.SpotRepository,
+	photoRepo repository.PhotoRepository,
+	visitRepo repository.VisitRepository,
+	favoriteRepo repository.FavoriteRepository,
+	activityRepo repository.ActivityRepository,
+	notificationRepo repository.NotificationRepository,
+	minioClient *storage.MinioClient,
+	notificationService NotificationService,
+	activityService ActivityService,
+) SpotService {
 	return &spotService{
 		spotRepo:            spotRepo,
 		photoRepo:           photoRepo,
+		visitRepo:           visitRepo,
+		favoriteRepo:        favoriteRepo,
+		activityRepo:        activityRepo,
+		notificationRepo:    notificationRepo,
 		minioClient:         minioClient,
 		notificationService: notificationService,
 		activityService:     activityService,
@@ -273,8 +291,53 @@ func (s *spotService) Delete(ctx context.Context, id uint, userID uint, isAdmin 
 		return apperror.ErrForbidden
 	}
 
-	// Get all photos for this spot
-	photos, err := s.photoRepo.FindBySpotID(ctx, id)
+	// Delete dependent records in order: notifications, favorites, visits, activities, photos
+	// Errors are logged but don't stop the deletion process
+
+	// 1. Delete notifications with related_spot_id
+	if s.notificationRepo != nil {
+		notifications, err := s.notificationRepo.FindByRelatedSpotIDUnscoped(ctx, id)
+		if err != nil {
+			logger.Warn().Err(err).Uint("spotID", id).Msg("failed to get notifications for deletion")
+		} else {
+			for _, notification := range notifications {
+				if err := s.notificationRepo.HardDelete(ctx, notification.ID); err != nil {
+					logger.Warn().Err(err).Uint("notificationID", notification.ID).Msg("failed to delete notification record")
+				}
+			}
+		}
+	}
+
+	// 2. Delete favorites
+	if s.favoriteRepo != nil {
+		if err := s.favoriteRepo.DeleteBySpotID(ctx, id); err != nil {
+			logger.Warn().Err(err).Uint("spotID", id).Msg("failed to delete favorites")
+		}
+	}
+
+	// 3. Delete visits (including soft-deleted ones)
+	if s.visitRepo != nil {
+		visits, err := s.visitRepo.FindBySpotIDUnscoped(ctx, id)
+		if err != nil {
+			logger.Warn().Err(err).Uint("spotID", id).Msg("failed to get visits for deletion")
+		} else {
+			for _, visit := range visits {
+				if err := s.visitRepo.HardDelete(ctx, visit.ID); err != nil {
+					logger.Warn().Err(err).Uint("visitID", visit.ID).Msg("failed to delete visit record")
+				}
+			}
+		}
+	}
+
+	// 4. Delete activities
+	if s.activityRepo != nil {
+		if err := s.activityRepo.DeleteBySpotID(ctx, id); err != nil {
+			logger.Warn().Err(err).Uint("spotID", id).Msg("failed to delete activities")
+		}
+	}
+
+	// 5. Get all photos for this spot (including soft-deleted ones)
+	photos, err := s.photoRepo.FindBySpotIDUnscoped(ctx, id)
 	if err != nil {
 		logger.Warn().Err(err).Uint("spotID", id).Msg("failed to get photos for deletion")
 		// Continue anyway - try to delete what we can

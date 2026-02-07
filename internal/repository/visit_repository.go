@@ -32,6 +32,10 @@ func (r *visitRepository) Delete(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).Delete(&domain.Visit{}, id).Error
 }
 
+func (r *visitRepository) HardDelete(ctx context.Context, id uint) error {
+	return r.db.WithContext(ctx).Unscoped().Delete(&domain.Visit{}, id).Error
+}
+
 func (r *visitRepository) FindByUserID(ctx context.Context, userID uint, filter VisitFilter) ([]domain.Visit, int64, error) {
 	var visits []domain.Visit
 	var count int64
@@ -62,6 +66,15 @@ func (r *visitRepository) FindByUserID(ctx context.Context, userID uint, filter 
 	}
 
 	return visits, count, nil
+}
+
+// FindBySpotIDUnscoped returns all visits for a spot, including soft-deleted ones
+func (r *visitRepository) FindBySpotIDUnscoped(ctx context.Context, spotID uint) ([]domain.Visit, error) {
+	var visits []domain.Visit
+	if err := r.db.WithContext(ctx).Unscoped().Where("spot_id = ?", spotID).Find(&visits).Error; err != nil {
+		return nil, err
+	}
+	return visits, nil
 }
 
 func (r *visitRepository) CountBySpotID(ctx context.Context, spotID uint) (int64, error) {

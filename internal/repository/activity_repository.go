@@ -20,6 +20,10 @@ func (r *activityRepository) Create(ctx context.Context, activity *domain.Activi
 	return r.db.WithContext(ctx).Create(activity).Error
 }
 
+func (r *activityRepository) DeleteBySpotID(ctx context.Context, spotID uint) error {
+	return r.db.WithContext(ctx).Where("spot_id = ?", spotID).Delete(&domain.Activity{}).Error
+}
+
 func (r *activityRepository) FindAll(ctx context.Context, filter ActivityFilter) ([]domain.Activity, int64, error) {
 	var activities []domain.Activity
 	var count int64
